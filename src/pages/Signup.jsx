@@ -5,33 +5,40 @@ const Signup = () => {
     const [showPassword, setShowPassword] = useState(false);
 
     return (
-        <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100  py-6 font-montserrat">
-            <img src="/logo.webp" alt="DICT Logo" className="w-64 mx-auto mb-4" />
+        <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 py-6 font-montserrat">
+            <img
+                src="/logo.webp"
+                alt="DICT Logo"
+                className="w-64 mx-auto mb-4 fixed top-6"
+            />
 
-            <div className="w-full max-w-md p-8 bg-white shadow-xl">
+            <div className="w-full max-w-md p-8  bg-white shadow-md mt-24 rounded-lg">
                 <h2 className="text-2xl font-bold text-center text-gray-900">Sign up</h2>
 
                 <form className="mt-6">
                     <input
                         type="text"
+                        name="name"
                         placeholder="Name"
-                        className="w-full p-3 mb-4 border border-gray-300 rounded-lg shadow-sm "
+                        className="w-full p-3 mb-4 border border-gray-300 rounded-lg shadow-sm"
                     />
                     <input
                         type="email"
+                        name="email"
                         placeholder="Email"
-                        className="w-full p-3 mb-4 border border-gray-300 rounded-lg shadow-sm  "
+                        className="w-full p-3 mb-4 border border-gray-300 rounded-lg shadow-sm"
                     />
 
                     <div className="relative">
                         <input
                             type={showPassword ? "text" : "password"}
+                            name="password"
                             placeholder="Password"
-                            className="w-full p-3 pr-10 border border-gray-300 rounded-lg shadow-sm "
+                            className="w-full p-3 pr-10 border border-gray-300 rounded-lg shadow-sm"
                         />
                         <button
                             type="button"
-                            className="absolute inset-y-0 right-3 flex items-center "
+                            className="absolute inset-y-0 right-3 flex items-center"
                             onClick={() => setShowPassword(!showPassword)}
                         >
                         </button>
@@ -52,17 +59,15 @@ const Signup = () => {
                 </p>
             </div>
 
-            <footer className="w-full  text-gray-600 text-sm mt-10 py-4">
-                <div className="max-w-6xl mx-auto">
-
-                    <div className=" border-gray-700 mt-6 pt-4 text-center text-gray-600 text-xs">
-                        <p>This website is for official use only. Unauthorized access is prohibited.</p>
-                    </div>
-                </div>
-            </footer>
+            <footer className="w-full text-gray-600 text-sm py-4 fixed bottom-0 bg-gray-100">
+        <div className="max-w-6xl mx-auto">
+          <div className="border-gray-700 pt-4 text-center text-gray-600 text-xs">
+            <p>This website is for official use only. Unauthorized access is prohibited.</p>
+          </div>
+        </div>
+      </footer>
         </div>
     );
 };
-
 
 export default Signup;
