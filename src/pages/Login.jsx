@@ -2,10 +2,14 @@ import { Link } from "react-router-dom";
 
 const Login = () => {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 py-6 font-montserrat">
-    <img src="/logo.webp" alt="DICT Logo" className="w-64 mx-auto mb-4" />
-    
-    <div className="w-full max-w-md p-8 bg-white shadow-xl">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 font-montserrat">
+      <img
+        src="/logo.webp"
+        alt="DICT Logo"
+        className="w-64 mx-auto mb-4 fixed top-6"
+      />
+      
+      <div className="w-full max-w-md p-8 bg-white shadow-md mt-20">
         <h2 className="text-2xl font-bold text-center text-gray-900">Log In</h2>
         <form className="mt-4">
           <input type="email" placeholder="Email" className="w-full p-3 border border-gray-300 rounded-lg" />
@@ -17,14 +21,13 @@ const Login = () => {
         </p>
       </div>
       
-      <footer className="w-full  text-gray-600 text-sm mt-10 py-4">
-        <div className="max-w-6xl mx-auto">
-          
-          <div className=" border-gray-700 mt-6 pt-4 text-center text-gray-600 text-xs">
-            <p>This website is for official use only. Unauthorized access is prohibited.</p>
-          </div>
-        </div>
-      </footer>
+      <footer className="w-full fixed bottom-6 bg-gray-100 text-gray-600 text-sm">
+            <div className="max-w-6xl mx-auto">
+                <div className="border-gray-700 mt-6 pt-6 text-center text-gray-600 text-xs">
+                    <p>This website is for official use only. Unauthorized access is prohibited.</p>
+                </div>
+            </div>
+        </footer>
     </div>
   );
 };
