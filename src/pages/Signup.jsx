@@ -22,7 +22,6 @@ const Signup = () => {
                         placeholder="Name"
                         className="w-full p-3 mb-4 border border-gray-300 rounded-lg shadow-sm"
                     />
-                    
                     <input
                         type="email"
                         name="email"
