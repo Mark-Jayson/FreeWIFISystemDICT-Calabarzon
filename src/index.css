@@ -1,24 +1,19 @@
 @import "tailwindcss";
 
-@layer utilities {
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 6px; 
-    }
-  
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.1); 
-      border-radius: 6px;
-    }
-  
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #5063EE; 
-      border-radius: 6px;
-    }
-  
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-      background: #3548C2; 
-    }
-  }
-  
+.mapboxgl-ctrl-geocoder {
+  min-width: 100%;
+  font-family: inherit;
+}
 
-  
+.mapboxgl-ctrl-geocoder--input {
+  padding: 6px 35px;
+  font-size: 14px;
+}
+
+.mapboxgl-ctrl-geocoder--icon {
+  top: 8px;
+}
+
+.mapboxgl-ctrl-geocoder--button {
+  top: 5px;
+}
