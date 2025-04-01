@@ -9,8 +9,8 @@ import './App.css'
 const INITIAL_CENTER = [121.2, 14.1]
 const INITIAL_ZOOM = 8.8
 const PHILIPPINES_BOUNDS = [
-  [114.0952145, 4.5873032], // Southwest coordinates
-  [126.8039607, 21.1217806], // Northeast coordinates
+  [114.0952145, 4.5873032], 
+  [126.8039607, 21.1217806], 
 ];
 
 const Sidebar = () => {
