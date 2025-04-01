@@ -12,6 +12,7 @@ const PHILIPPINES_BOUNDS = [
   [114.0952145, 4.5873032], // Southwest coordinates
   [126.8039607, 21.1217806], // Northeast coordinates
 ];
+
 const Sidebar = () => {
   const [filters, setFilters] = useState({
     District: { checked: false, options: ["Option 1", "Option 2", "Option 3"] },
@@ -29,6 +30,7 @@ const Sidebar = () => {
 
   const [openDropdown, setOpenDropdown] = useState(null);
   const [selectedOptions, setSelectedOptions] = useState({});
+  const searchInputRef = useRef(null); // Added missing reference
 
   const toggleCheckbox = (filterKey) => {
     setFilters((prev) => ({
@@ -51,8 +53,16 @@ const Sidebar = () => {
     });
   };
 
+  // Added missing handleSearch function
+  const handleSearch = (e) => {
+    // Implement search functionality
+    if (e.key === 'Enter') {
+      console.log('Search query:', searchInputRef.current.value);
+    }
+  };
+
   return (
-<div className="absolute w-[262px] bg-[#17319E] text-white p-4 flex flex-col 
+    <div className="absolute w-[262px] bg-[#17319E] text-white p-4 flex flex-col 
         font-montserrat max-h-screen overflow-y-auto overflow-x-hidden custom-scrollbar z-10">
       <div className="flex items-center space-x-2">
         <img src="/logo.webp" alt="DICT Logo" className="w-30" />
@@ -61,9 +71,11 @@ const Sidebar = () => {
 
       <div className="relative mt-4">
         <input
+          ref={searchInputRef}
           type="text"
           placeholder="Search province, district, or city"
           className="w-[228px] h-[30px] p-2 pl-8 rounded bg-white text-gray-700"
+          onKeyDown={handleSearch}
         />
         <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500">
           <svg
@@ -81,7 +93,7 @@ const Sidebar = () => {
             />
           </svg>
         </span>
-      </div>
+      </div> 
 
       <div className="mt-6 space-y-4">
         <label className="block text-white font-bold mb-2 text-lg">Filters</label>
@@ -129,9 +141,11 @@ const Sidebar = () => {
   );
 };
 
+//________________________________________________________________________________________________________________________________________
 function App() {
   const mapRef = useRef(null)
   const mapContainerRef = useRef(null)
+  const geocoderRef = useRef(null)
   const [error, setError] = useState(null)
   const [center, setCenter] = useState(INITIAL_CENTER)
   const [zoom, setZoom] = useState(INITIAL_ZOOM)
@@ -201,9 +215,43 @@ function App() {
         PHILIPPINES_BOUNDS[1][0],
         PHILIPPINES_BOUNDS[1][1]
       ],
-      placeholder: 'Search places in the Philippines',
+      maker: false,
+      placeholder: 'Search places in the Philippines'
     });
-    mapRef.current.addControl(geocoder, 'top-right');
+    geocoderRef.current = geocoder;
+    
+    // Add geocoder to map but hide its UI
+    // You could skip this if you only want to use your custom search
+    const geocoderContainer = document.createElement('div');
+    geocoderContainer.style.display = 'none';
+    document.body.appendChild(geocoderContainer);
+    geocoderContainer.appendChild(geocoder.onAdd(mapRef.current));
+
+    // Handle geocoder results
+    geocoder.on('result', (e) => {
+      console.log('Geocoder result:', e.result);
+      
+      // Create a standard marker - no custom element
+      new mapboxgl.Marker({
+        color: '#FF0000',
+        scale: 1.5
+      })
+      .setLngLat(e.result.center)
+      .setPopup(
+        new mapboxgl.Popup({ offset: 25 })
+          .setHTML(
+            `<h3>${e.result.place_name}</h3>`
+          )
+      )
+      .addTo(mapRef.current);
+      
+      // Fly to the location
+      mapRef.current.flyTo({
+        center: e.result.center,
+        zoom: 12,
+        essential: true
+      });
+    });
 
     // Only add markers after map is loaded
     mapRef.current.on('load', () => {
@@ -213,16 +261,7 @@ function App() {
       geojson.features.forEach(feature => {
         console.log("Adding marker at:", feature.geometry.coordinates);
         
-        // For debugging - fly to the first marker to verify it exists
-        if (feature === geojson.features[0]) {
-          mapRef.current.flyTo({
-            center: feature.geometry.coordinates,
-            zoom: 10,
-            essential: true
-          });
-        }
-        
-        // Create a standard marker - no custom element
+        // Create a marker for each feature
         new mapboxgl.Marker({
           color: '#FF0000',
           scale: 1.5
@@ -239,26 +278,13 @@ function App() {
       });
     });
 
-    mapRef.current.on('error', (e) => {
-      console.error('Mapbox error:', e);
-      setError('Failed to load map. Please check your Mapbox configuration.');
-    });
-    
-    mapRef.current.on('move', () => {
-      const mapCenter = mapRef.current.getCenter();
-      const mapZoom = mapRef.current.getZoom();
-
-      setCenter([mapCenter.lng, mapCenter.lat]);
-      setZoom(mapZoom);
-    });
-
     // Cleanup function
     return () => {
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
       }
-    }
+    };
   }, []); // Empty dependency array
 
   const handleButtonClick = () => {
@@ -288,26 +314,25 @@ function App() {
   
   return (
     <>
-    <div className="relative">
-    <Sidebar />
-    
-    {/* <div className="coordinates-display">
-      Longitude: {center[0].toFixed(4)} | Latitude: {center[1].toFixed(4)} | Zoom: {zoom.toFixed(2)}
-    </div> */}
-      <button className='reset-button' onClick={handleButtonClick}>
-        Reset 
-      </button>
-      
-      {error && <div className="error-message">{error}</div>}
-      
-      <div id='map-container' ref={mapContainerRef} />
-      <button className='sorsogon-button' onClick={goToSorsogon}>
-        Sorsogon
-      </button>
+      <div className="relative">
+        <Sidebar geocoder={geocoderRef.current} />
+        
+        {/* <div className="coordinates-display">
+          Longitude: {center[0].toFixed(4)} | Latitude: {center[1].toFixed(4)} | Zoom: {zoom.toFixed(2)}
+        </div> */}
+        <button className='reset-button' onClick={handleButtonClick}>
+          Reset 
+        </button>
+        
+        {error && <div className="error-message">{error}</div>}
+        
+        <div id='map-container' ref={mapContainerRef} />
+        <button className='sorsogon-button' onClick={goToSorsogon}>
+          Sorsogon
+        </button>
       </div>
     </>
-  )
+  );
 }
 
-export default App
-export { Sidebar }
+export default App;

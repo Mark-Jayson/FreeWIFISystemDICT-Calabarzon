@@ -7,6 +7,12 @@
   z-index: 1;
 }
 
+.sidebar {
+  /* Keep your existing styles */
+  z-index: 10; /* Make sure this is higher than the map's z-index */
+}
+
+
 /* Sidebar styles */
 .coordinates-display {
   background-color: rgba(35, 55, 75, 0.9);
