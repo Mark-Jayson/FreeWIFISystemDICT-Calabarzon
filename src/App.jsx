@@ -13,7 +13,7 @@ const PHILIPPINES_BOUNDS = [
   [126.8039607, 21.1217806], 
 ];
 
-const Sidebar = () => {
+const Sidebar = ({ mapInstance }) => {
   const [filters, setFilters] = useState({
     District: { checked: false, options: ["Option 1", "Option 2", "Option 3"] },
     Gida: { checked: false, options: ["Option 1", "Option 2"] },
@@ -30,7 +30,10 @@ const Sidebar = () => {
 
   const [openDropdown, setOpenDropdown] = useState(null);
   const [selectedOptions, setSelectedOptions] = useState({});
-  const searchInputRef = useRef(null); // Added missing reference
+  const [searchValue, setSearchValue] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchTimeoutRef = useRef(null);
 
   const toggleCheckbox = (filterKey) => {
     setFilters((prev) => ({
@@ -53,11 +56,103 @@ const Sidebar = () => {
     });
   };
 
-  // Added missing handleSearch function
+  // Perform a direct search using Mapbox Geocoding API
+  const performSearch = async (query) => {
+    if (!query || query.length < 3) {
+      setSearchResults([]);
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+
+    try {
+      // Access token is already set in the mapboxgl instance
+      const accessToken = mapboxgl.accessToken;
+      
+      // Construct the API URL with Philippines filter
+      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?country=ph&limit=5&access_token=${accessToken}`;
+      
+      const response = await fetch(url);
+      const data = await response.json();
+      
+      // Update search results
+      setSearchResults(data.features || []);
+    } catch (error) {
+      console.error('Search error:', error);
+      setSearchResults([]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Handle search input changes with debounce
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchValue(value);
+    
+    // Clear any existing timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+    
+    // Only search if there's a value and it's at least 3 characters
+    if (value && value.length >= 3) {
+      setIsSearching(true);
+      
+      // Debounce the search to avoid too many API calls
+      searchTimeoutRef.current = setTimeout(() => {
+        performSearch(value);
+      }, 300);
+    } else {
+      setSearchResults([]);
+      setIsSearching(false);
+    }
+  };
+
+  // Handle Enter key press
   const handleSearch = (e) => {
-    // Implement search functionality
-    if (e.key === 'Enter') {
-      console.log('Search query:', searchInputRef.current.value);
+    if (e.key === 'Enter' && searchValue.trim().length >= 3) {
+      performSearch(searchValue);
+    }
+  };
+
+  // Select a search result
+  const handleSelectResult = (result) => {
+    // Clear search UI
+    setSearchResults([]);
+    setSearchValue("");
+    
+    // Check if mapInstance exists and has necessary methods
+    if (!mapInstance || !result.center) {
+      console.error("Map instance not available or result has no center coordinates");
+      return;
+    }
+    
+    console.log("Flying to:", result.center);
+    console.log("Map instance:", mapInstance);
+    
+    try {
+      // Add a marker at the selected location
+      const marker = new mapboxgl.Marker({
+        color: '#FF0000',
+        scale: 1.5
+      })
+      .setLngLat(result.center)
+      .setPopup(
+        new mapboxgl.Popup({ offset: 25 })
+          .setHTML(`<h3>${result.place_name}</h3>`)
+      )
+      .addTo(mapInstance);
+      
+      // Fly to the selected location
+      mapInstance.flyTo({
+        center: result.center,
+        zoom: 12,
+        essential: true
+      });
+    } catch (error) {
+      console.error("Error flying to location:", error);
     }
   };
 
@@ -71,11 +166,12 @@ const Sidebar = () => {
 
       <div className="relative mt-4">
         <input
-          ref={searchInputRef}
           type="text"
           placeholder="Search province, district, or city"
           className="w-[228px] h-[30px] p-2 pl-8 rounded bg-white text-gray-700"
           onKeyDown={handleSearch}
+          onChange={handleSearchChange}
+          value={searchValue}
         />
         <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500">
           <svg
@@ -93,6 +189,28 @@ const Sidebar = () => {
             />
           </svg>
         </span>
+        
+        {/* Search Results Dropdown */}
+        {searchResults.length > 0 && (
+          <div className="absolute z-20 mt-1 w-[228px] max-h-60 overflow-y-auto bg-white rounded shadow-lg">
+            {searchResults.map((result) => (
+              <div 
+                key={result.id}
+                className="p-2 hover:bg-gray-100 cursor-pointer text-gray-700 text-sm"
+                onClick={() => handleSelectResult(result)}
+              >
+                {result.place_name}
+              </div>
+            ))}
+          </div>
+        )}
+        
+        {/* Loading indicator */}
+        {isSearching && searchResults.length === 0 && (
+          <div className="absolute z-20 mt-1 w-[228px] bg-white rounded shadow-lg p-2 text-gray-700 text-sm">
+            Searching...
+          </div>
+        )}
       </div> 
 
       <div className="mt-6 space-y-4">
@@ -145,10 +263,10 @@ const Sidebar = () => {
 function App() {
   const mapRef = useRef(null)
   const mapContainerRef = useRef(null)
-  const geocoderRef = useRef(null)
   const [error, setError] = useState(null)
   const [center, setCenter] = useState(INITIAL_CENTER)
   const [zoom, setZoom] = useState(INITIAL_ZOOM)
+  const [mapInitialized, setMapInitialized] = useState(false)
   
   useEffect(() => {
     // Use access token
@@ -203,55 +321,6 @@ function App() {
 
     // Add navigation controls
     mapRef.current.addControl(new mapboxgl.NavigationControl(), 'bottom-left');
-    
-    // Add geocoder
-    const geocoder = new MapboxGeocoder({
-      accessToken: mapboxgl.accessToken,
-      mapboxgl: mapboxgl,
-      countries: 'ph',
-      bbox: [
-        PHILIPPINES_BOUNDS[0][0],
-        PHILIPPINES_BOUNDS[0][1],
-        PHILIPPINES_BOUNDS[1][0],
-        PHILIPPINES_BOUNDS[1][1]
-      ],
-      maker: false,
-      placeholder: 'Search places in the Philippines'
-    });
-    geocoderRef.current = geocoder;
-    
-    // Add geocoder to map but hide its UI
-    // You could skip this if you only want to use your custom search
-    const geocoderContainer = document.createElement('div');
-    geocoderContainer.style.display = 'none';
-    document.body.appendChild(geocoderContainer);
-    geocoderContainer.appendChild(geocoder.onAdd(mapRef.current));
-
-    // Handle geocoder results
-    geocoder.on('result', (e) => {
-      console.log('Geocoder result:', e.result);
-      
-      // Create a standard marker - no custom element
-      new mapboxgl.Marker({
-        color: '#FF0000',
-        scale: 1.5
-      })
-      .setLngLat(e.result.center)
-      .setPopup(
-        new mapboxgl.Popup({ offset: 25 })
-          .setHTML(
-            `<h3>${e.result.place_name}</h3>`
-          )
-      )
-      .addTo(mapRef.current);
-      
-      // Fly to the location
-      mapRef.current.flyTo({
-        center: e.result.center,
-        zoom: 12,
-        essential: true
-      });
-    });
 
     // Only add markers after map is loaded
     mapRef.current.on('load', () => {
@@ -276,7 +345,11 @@ function App() {
         )
         .addTo(mapRef.current);
       });
+      
+      // Set map as initialized after it's fully loaded
+      setMapInitialized(true);
     });
+    
 
     // Cleanup function
     return () => {
@@ -315,7 +388,8 @@ function App() {
   return (
     <>
       <div className="relative">
-        <Sidebar geocoder={geocoderRef.current} />
+        {/* Only pass mapRef.current to Sidebar after map is initialized */}
+        {mapInitialized ? <Sidebar mapInstance={mapRef.current} /> : <Sidebar mapInstance={null} />}
         
         {/* <div className="coordinates-display">
           Longitude: {center[0].toFixed(4)} | Latitude: {center[1].toFixed(4)} | Zoom: {zoom.toFixed(2)}
