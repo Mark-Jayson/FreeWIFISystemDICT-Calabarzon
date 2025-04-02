@@ -399,6 +399,7 @@ const SiteDetailsPanel = ({ site, cityName, onBack, onAPSiteClick, isActive }) =
           </div>
         ))}
       </div>
+      
     </PanelWrapper>
   );
 };
