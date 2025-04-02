@@ -21,4 +21,7 @@
   }
   
 
-  
+  .text-xxs {
+    font-size: 0.65rem;
+    line-height: 0.85rem;
+  }
