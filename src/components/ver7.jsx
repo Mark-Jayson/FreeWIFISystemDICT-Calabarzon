@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
 const citiesData = [
   { 
@@ -18,7 +18,7 @@ const citiesData = [
         flcacArea: true,
         notCIDA: true,
         apSites: [
-           {//2nd panel na from here
+          {//2nd panel na from here
             name: "BatStateU - College of Science Building",
             status: "active",
             led: "LED",
@@ -65,7 +65,7 @@ const citiesData = [
             contractStatus: "Active",
             activationDate: "January 3, 2022",
             endOfContract: "March 30, 2028"
-          }
+          },
         ]
       },
       { 
@@ -191,117 +191,102 @@ const citiesData = [
   },
 ];
 
-const PanelWrapper = ({ children, className = "", isActive }) => (
-  <div className={`
-    bg-white shadow-lg p-4 w-full h-full max-w-md mx-auto rounded-lg border border-gray-300 
-    flex flex-col transition-all duration-300 ease-in-out
-    ${isActive ? 'opacity-100 z-10' : 'opacity-0 pointer-events-none z-0 absolute top-0 left-0 right-0'}
-    ${className}
-  `}>
-    {children}
-  </div>
-);
-// AP Site Info Panel (4th panel)
-const APSiteInfoPanel = ({ apSite, onBack, isActive }) => {
+// AP Site Details Modal - Full Screen Panel
+const APSiteDetailsPanel = ({ apSite, onBack }) => {
+  if (!apSite) return null;
+  
   return (
-    <PanelWrapper isActive={isActive}>
-      <div className="flex items-center justify-between p-4 border-b border-gray-200 " >
+    <div className="bg-white shadow-lg p-4 w-full max-w-md mx-auto rounded-lg border border-gray-300 h-full flex flex-col">
+      <div className="flex justify-between items-start mb-4">
+        <button 
+          onClick={onBack} 
+          className="text-blue-500 text-xs hover:text-blue-700 flex items-center"
+        >
+          ← Back
+        </button>
         <div className="flex items-center">
-          <div className="h-3 w-3 rounded-full bg-green-500 mr-2"></div>
-          <h3 className="text-lg font-bold">{apSite?.name || "AP Site Name"}</h3>
-        </div>
-        <div className="bg-purple-100 p-1 rounded">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-purple-600">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-          </svg>
+          <div className={`h-3 w-3 rounded-full mr-2 ${apSite.status === 'active' ? 'bg-green-500' : 'bg-red-500'}`}></div>
+          <h3 className="text-lg font-bold">AP Site Details</h3>
         </div>
       </div>
       
-      <div className="p-4 overflow-y-auto max-h-96">
-        <div className="grid grid-cols-1 gap-3">
+      <div className="flex-grow overflow-y-auto pr-1">
+        <div className="space-y-3">
           <div>
-            <p className="text-xs text-gray-500">Status</p>
-            <p className="text-sm font-medium">{apSite?.status || "Unknown"}</p>
+            <p className="text-xs text-gray-500">Site Name</p>
+            <p className="text-sm font-medium">{apSite.name || 'N/A'}</p>
           </div>
-          <div>
-            <p className="text-xs text-gray-500">Technology</p>
-            <p className="text-sm font-medium">{apSite?.technology || apSite?.led || "N/A"}</p>
-          </div>
-          <div>
-            <p className="text-xs text-gray-500">Bandwidth</p>
-            <p className="text-sm font-medium">{apSite?.bandwidth || `${apSite?.mbps} Mbps` || "N/A"}</p>
-          </div>
+          
           <div>
             <p className="text-xs text-gray-500">Location</p>
-            <p className="text-sm font-medium">{apSite?.location || "N/A"}</p>
+            <p className="text-sm font-medium">{apSite.location || 'N/A'}</p>
           </div>
-          {apSite?.procurement && (
-            <div>
-              <p className="text-xs text-gray-500">Procurement</p>
-              <p className="text-sm font-medium">{apSite.procurement}</p>
-            </div>
-          )}
-          {apSite?.cmsProvider && (
-            <div>
-              <p className="text-xs text-gray-500">CMS Provider</p>
-              <p className="text-sm font-medium">{apSite.cmsProvider}</p>
-            </div>
-          )}
-          {apSite?.linkProvider && (
-            <div>
-              <p className="text-xs text-gray-500">Link Provider</p>
-              <p className="text-sm font-medium">{apSite.linkProvider}</p>
-            </div>
-          )}
-          {apSite?.project && (
-            <div>
-              <p className="text-xs text-gray-500">Project</p>
-              <p className="text-sm font-medium">{apSite.project}</p>
-            </div>
-          )}
-          {apSite?.contractStatus && (
-            <div>
-              <p className="text-xs text-gray-500">Contract Status</p>
-              <p className="text-sm font-medium">{apSite.contractStatus}</p>
-            </div>
-          )}
-          {apSite?.activationDate && (
-            <div>
-              <p className="text-xs text-gray-500">Activation Date</p>
-              <p className="text-sm font-medium">{apSite.activationDate}</p>
-            </div>
-          )}
-          {apSite?.endOfContract && (
-            <div>
-              <p className="text-xs text-gray-500">End of Contract</p>
-              <p className="text-sm font-medium">{apSite.endOfContract}</p>
-            </div>
-          )}
+          
+          <div>
+            <p className="text-xs text-gray-500">Technology</p>
+            <p className="text-sm font-medium">{apSite.technology || 'N/A'}</p>
+          </div>
+          
+          <div>
+            <p className="text-xs text-gray-500">Bandwidth</p>
+            <p className="text-sm font-medium">{apSite.bandwidth || `${apSite.mbps} Mbps` || 'N/A'}</p>
+          </div>
+          
+          <div>
+            <p className="text-xs text-gray-500">CMS Provider</p>
+            <p className="text-sm font-medium">{apSite.cmsProvider || 'N/A'}</p>
+          </div>
+          
+          <div>
+            <p className="text-xs text-gray-500">Link Provider</p>
+            <p className="text-sm font-medium">{apSite.linkProvider || 'N/A'}</p>
+          </div>
+          
+          <div>
+            <p className="text-xs text-gray-500">Project</p>
+            <p className="text-sm font-medium">{apSite.project || 'N/A'}</p>
+          </div>
+          
+          <div>
+            <p className="text-xs text-gray-500">Contract Status</p>
+            <p className="text-sm font-medium">{apSite.contractStatus || 'N/A'}</p>
+          </div>
+          
+          <div>
+            <p className="text-xs text-gray-500">Activation Date</p>
+            <p className="text-sm font-medium">{apSite.activationDate || 'N/A'}</p>
+          </div>
+          
+          <div>
+            <p className="text-xs text-gray-500">End of Contract</p>
+            <p className="text-sm font-medium">{apSite.endOfContract || 'N/A'}</p>
+          </div>
         </div>
       </div>
-      
-      <div className="p-4 border-t border-gray-200 flex justify-end">
-        <button onClick={onBack} className="px-4 py-2 bg-blue-500 text-white rounded-md text-sm hover:bg-blue-600">
-          Close
-        </button>
-      </div>
-    </PanelWrapper>
+    </div>
   );
 };
 
+// Panel Wrapper Component for consistent styling
+const PanelWrapper = ({ children, className = "" }) => (
+  <div className={`bg-white shadow-lg p-4 w-full max-w-md mx-auto rounded-lg border border-gray-300 h-full flex flex-col ${className}`}>
+    {children}
+  </div>
+);
+
 // Site Details Panel (3rd panel)
-const SiteDetailsPanel = ({ site, cityName, onBack, onAPSiteClick, isActive }) => {
+const SiteDetailsPanel = ({ site, cityName, onBack, onAPSiteClick }) => {
   const [expandedDetails, setExpandedDetails] = useState(false);
   
   return (
-    <PanelWrapper isActive={isActive}>
+    <PanelWrapper>
       <button 
         onClick={onBack} 
-        className="text-blue-500 text-xs mb-2 hover:text-blue-700 flex items-center"
+        className="text-blue-500 text-xs mb-2 hover:text-blue-700"
       >
-        ← Back to {cityName || "City"}
+        ← Back to {cityName}
       </button>
-      
+
       <div className="mt-2 flex justify-between items-start">
         <div>
           <p className="text-xs text-gray-500">Site Location</p>
@@ -363,7 +348,7 @@ const SiteDetailsPanel = ({ site, cityName, onBack, onAPSiteClick, isActive }) =
       <div className="flex-grow overflow-y-auto pr-1">
         <p className="text-base font-semibold text-gray-900 mb-2">{site.sites} WIFI Sites</p>
         
-        {site.apSites && site.apSites.map((apSite, index) => (
+        {site.apSites.map((apSite, index) => (
           <div 
             key={index} 
             className="border border-gray-200 rounded-lg p-3 mb-2 cursor-pointer hover:bg-gray-50"
@@ -403,29 +388,119 @@ const SiteDetailsPanel = ({ site, cityName, onBack, onAPSiteClick, isActive }) =
   );
 };
 
-// Detailedd City Panel (2nd panel)
-const DetailedCityPanel = ({ city, onBack, onSiteClick, isActive }) => {
+// Detailed City Panel (2nd panel)
+const DetailedCityPanel = ({ city, onBack, onSiteClick }) => {
   return (
-    <PanelWrapper isActive={isActive}>
-      <div className="flex items-center mb-2">
-        <button 
-          onClick={onBack} 
-          className="text-blue-500 text-xs hover:text-blue-700 flex items-center"
-        >
-          ← Back
-        </button>
-        <div className="flex-grow"></div>
-      </div>
+    <PanelWrapper>
+      <button 
+        onClick={onBack} 
+        className="text-blue-500 text-xs mb-2 hover:text-blue-700"
+      >
+        ← Back
+      </button>
 
       <div className="mt-2">
-        <div className="flex justify-between items-start">
-          <div>
-            <p className="text-xs text-gray-500">City</p>
-            <h2 className="text-xl font-bold text-gray-900">{city.city}</h2>
+        <p className="text-xs text-gray-500">Province of</p>
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-bold text-gray-900">{city.city}</h2>
+          <p className="text-xs text-gray-500">
+            Mayor <span className="text-gray-700 font-medium">{city.mayor || 'N/A'}</span>
+          </p>
+        </div>
+      </div>
+
+      <div className="border-t border-gray-200 my-2"></div>
+
+      <div className="flex justify-between items-center">
+        <div>
+          <p className="text-xs text-gray-500">No. of Free WIFI sites</p>
+          <p className="text-xl font-semibold text-gray-900">{city.freeWifiSites || 0}</p>
+        </div>
+
+        <div className="w-px h-10 bg-gray-200"></div>
+
+        <div>
+          <p className="text-xs text-gray-500">Location types</p>
+          <div className="flex gap-2">
+            <img src="/icons/terminal.svg" alt="Terminal" className="w-5 h-5" />
+            <img src="/icons/hospital.svg" alt="Hospital" className="w-5 h-5" />
+            <img src="/icons/fire-station.svg" alt="Fire Station" className="w-5 h-5" />
           </div>
-          <div>
-            <p className="text-xs text-gray-500">Province of</p>
-            <p className="text-xs text-gray-700 text-right">Batangas</p>
+        </div>
+      </div>
+
+      <div className="mt-4">
+        <p className="text-xs text-gray-500">WiFi sites per type</p>
+        <div className="grid grid-cols-3 gap-2 mt-2">
+          <div className="flex flex-col items-center">
+            <img src="/icons/terminal.svg" alt="Terminal" className="w-6 h-6" />
+            <p className="font-bold text-xs">20</p>
+            <p className="text-gray-500 text-xs text-center">Terminals</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4">
+        <p className="text-xs text-gray-500">Digitization Rate</p>
+        <p className="text-xs text-gray-400">(Brgys with WIFI / Total Brgys)</p>
+        <div className="flex items-center gap-2 mt-1">
+          <p className="text-xl font-bold text-gray-900">{city.digitizationRate || 0}%</p>
+          <div className="w-full bg-gray-300 rounded-full h-3 relative">
+            <div 
+              className="bg-blue-500 h-3 rounded-full" 
+              style={{ width: `${city.digitizationRate || 0}%` }}
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <div className="border-t border-gray-200 my-3"></div>
+
+      {city.siteLocations && (
+        <div className="flex-grow overflow-y-auto pr-1">
+          <p className="text-xs text-gray-500">Locations with Free WIFI sites</p>
+          <div className="space-y-2 mt-2">
+            {city.siteLocations.map((location, index) => (
+              <div 
+                key={index} 
+                className="p-3 border border-gray-300 rounded-lg shadow-sm bg-white cursor-pointer hover:bg-gray-50 transition-colors"
+                onClick={() => onSiteClick(location)}
+              >
+                <div className="flex justify-between items-center">
+                  <div className="flex-1">
+                    <p className="text-xs text-gray-500">Site Location</p>
+                    <p className="text-sm font-bold text-gray-900 break-words">{location.name}</p>
+                  </div>
+                  <div className="text-center shrink-0 ml-2">
+                    <p className="text-base font-semibold text-gray-900">{location.sites}</p>
+                    <p className="text-xs text-gray-500">Sites</p>
+                  </div>
+                </div>
+                <div className="flex items-center justify-end mt-1">
+                  <span className="text-xs text-blue-500">View details</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </PanelWrapper>
+  );
+};
+
+// Province Information Panel (1st panel)
+const ProvincePanel = ({ onCityClick }) => {
+  return (
+    <PanelWrapper className="bg-white rounded-2xl shadow-lg">
+      <div className="pt-1">
+        <p className="text-xs text-gray-500">Province of</p>
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-bold text-gray-900">Batangas</h2>
+          <div className="text-xs text-gray-500">
+            Provincial ID <span className="text-gray-700 font-medium">L3-4335</span>
           </div>
         </div>
       </div>
@@ -436,19 +511,19 @@ const DetailedCityPanel = ({ city, onBack, onSiteClick, isActive }) => {
         <div>
           <p className="text-xs text-gray-500">No. of location with</p>
           <p className="text-xs text-gray-500">Free WiFi sites</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">41</p>
+          <p className="text-3xl font-bold text-gray-900 mt-1">20</p>
         </div>
 
         <div className="text-right">
-          <p className="text-xs text-gray-500">Mayor</p>
-          <p className="text-sm font-medium text-gray-900">Art Jun Malapitan</p>
+          <p className="text-xs text-gray-500">Governor</p>
+          <p className="text-sm font-medium text-gray-900">Dodo Mandanas</p>
         </div>
       </div>
 
-      <div className="mt-4">
+      <div className="mt-2">
         <p className="text-xs text-gray-500 mb-1">Free WiFi sites location per location types in Batangas</p>
-        
-        <div className="flex justify-between mt-1 gap-1">
+
+        <div className="flex justify-between mt-1 px-1">
           <div className="flex flex-col items-center">
             <div className="bg-gray-100 rounded-md p-1 mb-1 w-8 h-8 flex items-center justify-center">
               <img src="/icons/terminal.svg" alt="Terminal" className="w-5 h-5" />
@@ -456,9 +531,12 @@ const DetailedCityPanel = ({ city, onBack, onSiteClick, isActive }) => {
             <p className="font-bold text-xs">20</p>
             <p className="text-gray-500 text-xxs text-center">Terminals</p>
           </div>
-
+          
           <div className="flex flex-col items-center">
-            <div className="bg-red-100 rounded-md p-1 mb-1 w-8 h-8 flex items-center justify-center"></div>
+            <div className="bg-red-100 rounded-md p-1 mb-1 w-8 h-8 flex items-center justify-center">
+              <img src="/icons/hospital.svg" alt="Hospital" className="w-5 h-5" />
+            </div>
+            <p className="font-bold text-xs">12</p>
             <p className="text-gray-500 text-xxs text-center">Hospital</p>
           </div>
           
@@ -505,170 +583,9 @@ const DetailedCityPanel = ({ city, onBack, onSiteClick, isActive }) => {
       </div>
 
       <div className="mt-4">
-        <div className="flex justify-between items-center">
-          <div>
-            <p className="text-xs text-gray-500">Total no. of AP sites</p>
-            <p className="text-xs text-gray-500">in {city.city}</p>
-          </div>
-          <p className="text-xl font-bold text-gray-900">{city.freeWifiSites || 0}</p>
-        </div>
-      </div>
-
-      <div className="mt-4">
-        <p className="text-xs text-gray-500">Digitization Rate</p>
-        <p className="text-xs text-gray-400">(No. of Brgys with WIFI Location / Total no. of Brgy)</p>
-        <div className="flex items-center gap-2 mt-1">
-          <p className="text-xl font-bold text-gray-900">{city.digitizationRate || 0}%</p>
-          <div className="w-full bg-gray-200 rounded-full h-3 relative">
-            <div 
-              className="bg-blue-500 h-3 rounded-full" 
-              style={{ width: `${city.digitizationRate || 0}%` }}
-            ></div>
-          </div>
-        </div>
-      </div>
-
-      <div className="border-t border-gray-200 my-3"></div>
-
-      <div className="flex-grow overflow-y-auto pr-1">
-        <p className="text-xs text-gray-500">Some locations with Free WiFi sites</p>
-        <div className="space-y-2 mt-2">
-          {city.siteLocations && city.siteLocations.map((location, index) => (
-            <div 
-              key={index} 
-              className="p-3 border border-gray-300 rounded-lg shadow-sm bg-white cursor-pointer hover:bg-gray-50 transition-colors"
-              onClick={() => onSiteClick(location)}
-            >
-              <div className="flex justify-between">
-                <div>
-                  <p className="text-xs text-gray-500">Site Location</p>
-                  <p className="text-sm font-medium text-gray-900">{location.name}</p>
-                </div>
-                <div className="flex flex-col items-center">
-                  <div className="bg-orange-100 rounded-full w-6 h-6 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-orange-500" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="mt-1 flex items-center">
-                    <span className="font-bold text-lg">{location.sites}</span>
-                    <span className="text-xs text-gray-500 ml-1">Sites</span>
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-end mt-2">
-                <span className="text-xs text-blue-500 flex items-center">
-                  View details 
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-500 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </PanelWrapper>
-  );
-};
-
-// Province Info Panel (1st panel)
-const ProvincePanel = ({ onCityClick, isActive }) => {
-  return (
-    <PanelWrapper isActive={isActive} className="bg-white rounded-lg shadow-lg w-full">
-      <div className="pt-1">
-        <p className="text-xs text-gray-500">Province of</p>
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold text-gray-900">Batangas</h2>
-          <div className="text-xs text-gray-500">
-            Provincial ID <span className="text-gray-700 font-medium">L3-4335</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="border-t border-gray-200 my-3"></div>
-
-      <div className="flex justify-between items-start">
-        <div>
-          <p className="text-xs text-gray-500">No. of location with</p>
-          <p className="text-xs text-gray-500">Free WiFi sites</p>
-          <p className="text-3xl font-bold text-gray-900 mt-1">20</p>
-        </div>
-
-        <div className="text-right">
-          <p className="text-xs text-gray-500">Governor</p>
-          <p className="text-sm font-medium text-gray-900">Dodo Mandanas</p>
-        </div>
-      </div>
-
-      <div className="mt-2">
-        <p className="text-xs text-gray-500 mb-1">Free WiFi sites location per location types in Batangas</p>
-      </div>
-
-      <div className="flex justify-between mt-1 px-1">
-        <div className="flex flex-col items-center">
-          <div className="bg-gray-100 rounded-md p-1 mb-1 w-8 h-8 flex items-center justify-center">
-            <img src="/icons/terminal.svg" alt="Terminal" className="w-5 h-5" />
-          </div>
-          <p className="font-bold text-xs">20</p>
-          <p className="text-gray-500 text-xxs text-center">Terminals</p>
-        </div>
-
-        <div className="flex flex-col items-center">
-          <div className="bg-red-100 rounded-md p-1 mb-1 w-8 h-8 flex items-center justify-center">
-            <img src="/icons/hospital.svg" alt="Hospital" className="w-5 h-5" />
-          </div>
-          <p className="font-bold text-xs">12</p>
-          <p className="text-gray-500 text-xxs text-center">Hospital</p>
-        </div>
-        
-        <div className="flex flex-col items-center">
-          <div className="bg-red-100 rounded-md p-1 mb-1 w-8 h-8 flex items-center justify-center">
-            <img src="/icons/fire-station.svg" alt="Fire Station" className="w-5 h-5" />
-          </div>
-          <p className="font-bold text-xs">3</p>
-          <p className="text-gray-500 text-xxs text-center">Fire</p>
-        </div>
-        
-        <div className="flex flex-col items-center">
-          <div className="bg-orange-100 rounded-md p-1 mb-1 w-8 h-8 flex items-center justify-center">
-            <img src="/icons/police.svg" alt="Police" className="w-5 h-5" />
-          </div>
-          <p className="font-bold text-xs">3</p>
-          <p className="text-gray-500 text-xxs text-center">Police</p>
-        </div>
-        
-        <div className="flex flex-col items-center">
-          <div className="bg-blue-100 rounded-md p-1 mb-1 w-8 h-8 flex items-center justify-center">
-            <img src="/icons/school.svg" alt="School" className="w-5 h-5" />
-          </div>
-          <p className="font-bold text-xs">3</p>
-          <p className="text-gray-500 text-xxs text-center">Schools</p>
-        </div>
-        
-        <div className="flex flex-col items-center">
-          <div className="bg-orange-100 rounded-md p-1 mb-1 w-8 h-8 flex items-center justify-center">
-            <img src="/icons/library.svg" alt="Library" className="w-5 h-5" />
-          </div>
-          <p className="font-bold text-xs">3</p>
-          <p className="text-gray-500 text-xxs text-center">Library</p>
-        </div>
-        
-        <div className="flex flex-col items-center">
-          <div className="bg-green-100 rounded-md p-1 mb-1 w-8 h-8 flex items-center justify-center">
-            <img src="/icons/park.svg" alt="Park" className="w-5 h-5" />
-          </div>
-          <p className="font-bold text-xs">3</p>
-          <p className="text-gray-500 text-xxs text-center">Parks</p>
-        </div>
-      </div>
-
-      <div className="mt-4 flex justify-between items-center">
-        <div>
-          <p className="text-xs text-gray-500">Total no. of AP sites</p>
-          <p className="text-xs text-gray-500">in Batangas</p>
-        </div>
-        <p className="text-xl font-bold text-gray-900">125</p>
+        <p className="text-xs text-gray-500">Total no. of AP sites</p>
+        <p className="text-xs text-gray-500">in Batangas</p>
+        <p className="text-3xl font-bold text-gray-900">125</p>
       </div>
 
       <div className="mt-3">
@@ -720,81 +637,81 @@ const InfoPanel = () => {
   const [selectedCity, setSelectedCity] = useState(null);
   const [selectedSite, setSelectedSite] = useState(null);
   const [selectedAPSite, setSelectedAPSite] = useState(null);
-  const [panelHistory, setPanelHistory] = useState(["province"]);
 
-  // city selection
+  // Handle city selection
   const handleCityClick = (city) => {
     setSelectedCity(city);
     setActivePanel("city");
-    setPanelHistory([...panelHistory, "city"]);
   };
 
-  // site selection
+  // Handle site selection
   const handleSiteClick = (site) => {
     setSelectedSite(site);
     setActivePanel("site");
-    setPanelHistory([...panelHistory, "site"]);
   };
 
-  // AP site selection
+  // Handle AP site selection
   const handleAPSiteClick = (apSite) => {
     setSelectedAPSite(apSite);
     setActivePanel("apSite");
-    setPanelHistory([...panelHistory, "apSite"]);
   };
 
-  //back button from city panel
+  // Handle back button from city panel
   const handleCityBack = () => {
     setActivePanel("province");
-    setPanelHistory(panelHistory.slice(0, -1));
+    setSelectedCity(null);
   };
 
-  //back button from site panel
+  // Handle back button from site panel
   const handleSiteBack = () => {
     setActivePanel("city");
-    setPanelHistory(panelHistory.slice(0, -1));
+    setSelectedSite(null);
   };
 
-  //back button from AP site panel
+  // Handle back button from AP site panel
   const handleAPSiteBack = () => {
     setActivePanel("site");
-    setPanelHistory(panelHistory.slice(0, -1));
+    setSelectedAPSite(null);
   };
 
-  return (
-    <div className="w-full h-screen bg-gray-100 flex justify-center">
-      <div className="w-full max-w-md h-full p-4 relative">
-        <ProvincePanel 
-          onCityClick={handleCityClick} 
-          isActive={activePanel === "province"} 
-        />
-        
-        {selectedCity && (
+  // Render the appropriate panel based on the active panel state
+  const renderPanel = () => {
+    switch (activePanel) {
+      case "province":
+        return <ProvincePanel onCityClick={handleCityClick} />;
+      case "city":
+        return (
           <DetailedCityPanel 
             city={selectedCity} 
             onBack={handleCityBack}
             onSiteClick={handleSiteClick}
-            isActive={activePanel === "city"}
           />
-        )}
-        
-        {selectedSite && (
+        );
+      case "site":
+        return (
           <SiteDetailsPanel 
             site={selectedSite} 
-            cityName={selectedCity?.city}
+            cityName={selectedCity.city}
             onBack={handleSiteBack}
             onAPSiteClick={handleAPSiteClick}
-            isActive={activePanel === "site"}
           />
-        )}
-        
-        {selectedAPSite && (
-          <APSiteInfoPanel 
+        );
+      case "apSite":
+        return (
+          <APSiteDetailsPanel 
             apSite={selectedAPSite}
             onBack={handleAPSiteBack}
-            isActive={activePanel === "apSite"}
           />
-        )}
+        );
+      default:
+        return <ProvincePanel onCityClick={handleCityClick} />;
+    }
+  };
+
+  return (
+    <div className="w-full h-screen bg-gray-100 flex justify-center">
+      <div className="w-full max-w-md h-full p-4">
+        {renderPanel()}
       </div>
     </div>
   );
