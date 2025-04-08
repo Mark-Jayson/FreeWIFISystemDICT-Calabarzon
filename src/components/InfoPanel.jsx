@@ -151,7 +151,8 @@ const DetailsPanel = ({ detailsPanel, handleClose }) => {
           ))}
         </ul>
       </div>
-    </div>
+      
+    </PanelWrapper>
   );
 };
 
