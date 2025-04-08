@@ -1,4 +1,4 @@
-// Sample data structure (placeholder)
+//  (placeholder lungs)
 const locationData = {
     'CALABARZON': {
       title: 'Region 4-A CALABARZON',

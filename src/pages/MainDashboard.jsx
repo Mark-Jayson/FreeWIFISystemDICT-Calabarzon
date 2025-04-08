@@ -1,19 +1,16 @@
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
-import Sidebar from './Sidebar';
-import { InfoPanel, DetailsPanel, DefaultCard, WifiSitesCard } from './InfoPanels';
-import locationData from './locationData';
+import Sidebar from '../components/Sidebar';
+import { InfoPanels, DetailsPanel, DefaultCard, WifiSitesCard } from '../components/InfoPanels';
+import locationData from '../data/locationData';
 
 const MainDashboard = () => {
-  // State for panels and search
   const [panelStack, setPanelStack] = useState([]);
   const [detailsPanel, setDetailsPanel] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Handle location selection from sidebar
   const handleLocationSelect = (location) => {
-    // Reset details panel when selecting a new main location
     setDetailsPanel(null);
     
     if (location === 'CALABARZON') {
@@ -32,7 +29,6 @@ const MainDashboard = () => {
     }
   };
 
-  // Handle municipality selection
   const handleMunicipalitySelect = (province, municipality) => {
     setDetailsPanel(null);
     setPanelStack([
@@ -42,12 +38,10 @@ const MainDashboard = () => {
     ]);
   };
 
-  // Handle WiFi site selection
   const handleWifiSiteSelect = (siteId) => {
     setDetailsPanel({ id: siteId, data: locationData[siteId] });
   };
 
-  // Handle back button
   const handleBack = () => {
     if (detailsPanel) {
       setDetailsPanel(null);
@@ -56,7 +50,6 @@ const MainDashboard = () => {
     }
   };
 
-  // Handle close button
   const handleClose = () => {
     if (detailsPanel) {
       setDetailsPanel(null);
@@ -67,16 +60,13 @@ const MainDashboard = () => {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      {/* Sidebar Component */}
       <Sidebar 
         onLocationSelect={handleLocationSelect}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
       />
 
-      {/* Main Content - Map Area */}
       <div className="flex-1 flex flex-col">
-        {/* Top Filter Bar */}
         <div className="bg-white p-2 shadow-md flex gap-2 items-center overflow-x-auto">
           <button className="text-gray-700 bg-gray-100 rounded-full px-3 py-1 text-sm font-medium flex items-center">
             District <FontAwesomeIcon icon={faChevronDown} className="ml-2 text-xs" />
@@ -101,20 +91,15 @@ const MainDashboard = () => {
           </button>
         </div>
 
-        {/* Map Content Area */}
         <div className="flex-1 relative overflow-hidden">
-          {/* Map Background */}
           <div className="absolute inset-0 bg-blue-50 bg-opacity-70">
-            {/* This would be where your actual map goes */}
             <div 
               className="p-4 h-full w-full" 
               style={{ backgroundImage: "url('/api/placeholder/600/400')", backgroundSize: "cover" }}
             ></div>
           </div>
 
-          {/* Info Panels Container */}
           <div className="absolute inset-y-4 right-4 w-72 flex flex-col gap-4 overflow-auto max-h-full">
-            {/* Panels from the panel stack */}
             {panelStack.length > 0 && (
               <InfoPanel
                 panelStack={panelStack}
@@ -126,7 +111,6 @@ const MainDashboard = () => {
               />
             )}
             
-            {/* Details panel */}
             {detailsPanel && (
               <DetailsPanel
                 detailsPanel={detailsPanel}
@@ -134,10 +118,8 @@ const MainDashboard = () => {
               />
             )}
             
-            {/* Default card when no panels are active */}
             {panelStack.length === 0 && !detailsPanel && <DefaultCard />}
             
-            {/* WiFi Sites Card (Always show this card) */}
             <WifiSitesCard />
           </div>
         </div>

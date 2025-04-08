@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 
 const Login = () => {
+  <h1 className="text-2xl font-bold text-center text-red-600">Login Page</h1>
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 font-montserrat">
       <img

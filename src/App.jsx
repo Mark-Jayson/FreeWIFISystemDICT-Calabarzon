@@ -1,24 +1,15 @@
-// App.jsx
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import Login from "./Login";
-import Signup from "./Signup";
-import MainDashboard from "./MainDashboard";
+import { Routes, Route } from 'react-router-dom';
+import Login from "./pages/Login.jsx";
+import Signup from "./pages/Signup.jsx";
+import MainDashboard from "./pages/MainDashboard.jsx";
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        {/* Authentication Routes */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-
-        {/* Main Dashboard */}
-        <Route path="/" element={<MainDashboard />} />
-
-        {/* Redirect unknown routes */}
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
-    </Router>
+    <Routes>
+      <Route path="/" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
+      <Route path="/dashboard" element={<MainDashboard />} />
+    </Routes>
   );
 }
 
