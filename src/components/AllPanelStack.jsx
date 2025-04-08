@@ -191,7 +191,6 @@ const citiesData = [
   },
 ];
 
-// Panel Wrapper Component for consistent styling and transitions
 const PanelWrapper = ({ children, className = "", isActive }) => (
   <div className={`
     bg-white shadow-lg p-4 w-full h-full max-w-md mx-auto rounded-lg border border-gray-300 
@@ -202,12 +201,11 @@ const PanelWrapper = ({ children, className = "", isActive }) => (
     {children}
   </div>
 );
-
-
+// AP Site Info Panel (4th panel)
 const APSiteInfoPanel = ({ apSite, onBack, isActive }) => {
   return (
     <PanelWrapper isActive={isActive}>
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 " >
         <div className="flex items-center">
           <div className="h-3 w-3 rounded-full bg-green-500 mr-2"></div>
           <h3 className="text-lg font-bold">{apSite?.name || "AP Site Name"}</h3>
@@ -222,59 +220,63 @@ const APSiteInfoPanel = ({ apSite, onBack, isActive }) => {
       <div className="p-4 overflow-y-auto max-h-96">
         <div className="grid grid-cols-1 gap-3">
           <div>
-            <p className="text-xs text-gray-500">AP Site Name</p>
-            <p className="text-sm font-medium">BatStateU - College of Science Building</p>
+            <p className="text-xs text-gray-500">Status</p>
+            <p className="text-sm font-medium">{apSite?.status || "Unknown"}</p>
           </div>
-          
-          <div>
-            <p className="text-xs text-gray-500">Location</p>
-            <p className="text-sm font-medium">Batangas State University - Alangilan</p>
-          </div>
-          
           <div>
             <p className="text-xs text-gray-500">Technology</p>
-            <p className="text-sm font-medium">LED</p>
+            <p className="text-sm font-medium">{apSite?.technology || apSite?.led || "N/A"}</p>
           </div>
-          
-          <div>
-            <p className="text-xs text-gray-500">Procurement</p>
-            <p className="text-sm font-medium">Central</p>
-          </div>
-          
-          <div>
-            <p className="text-xs text-gray-500">CMS Provider</p>
-            <p className="text-sm font-medium">HTECH Inc.</p>
-          </div>
-          
-          <div>
-            <p className="text-xs text-gray-500">Link Provider</p>
-            <p className="text-sm font-medium">Converge Technologies</p>
-          </div>
-          
           <div>
             <p className="text-xs text-gray-500">Bandwidth</p>
-            <p className="text-sm font-medium">30 MB/S</p>
+            <p className="text-sm font-medium">{apSite?.bandwidth || `${apSite?.mbps} Mbps` || "N/A"}</p>
           </div>
-          
           <div>
-            <p className="text-xs text-gray-500">Project</p>
-            <p className="text-sm font-medium">DICT Calabarzon</p>
+            <p className="text-xs text-gray-500">Location</p>
+            <p className="text-sm font-medium">{apSite?.location || "N/A"}</p>
           </div>
-          
-          <div>
-            <p className="text-xs text-gray-500">Contract Status</p>
-            <p className="text-sm font-medium">Active</p>
-          </div>
-          
-          <div>
-            <p className="text-xs text-gray-500">Activation Date</p>
-            <p className="text-sm font-medium">January 3, 2022</p>
-          </div>
-          
-          <div>
-            <p className="text-xs text-gray-500">End of Contract</p>
-            <p className="text-sm font-medium">March 30, 2028</p>
-          </div>
+          {apSite?.procurement && (
+            <div>
+              <p className="text-xs text-gray-500">Procurement</p>
+              <p className="text-sm font-medium">{apSite.procurement}</p>
+            </div>
+          )}
+          {apSite?.cmsProvider && (
+            <div>
+              <p className="text-xs text-gray-500">CMS Provider</p>
+              <p className="text-sm font-medium">{apSite.cmsProvider}</p>
+            </div>
+          )}
+          {apSite?.linkProvider && (
+            <div>
+              <p className="text-xs text-gray-500">Link Provider</p>
+              <p className="text-sm font-medium">{apSite.linkProvider}</p>
+            </div>
+          )}
+          {apSite?.project && (
+            <div>
+              <p className="text-xs text-gray-500">Project</p>
+              <p className="text-sm font-medium">{apSite.project}</p>
+            </div>
+          )}
+          {apSite?.contractStatus && (
+            <div>
+              <p className="text-xs text-gray-500">Contract Status</p>
+              <p className="text-sm font-medium">{apSite.contractStatus}</p>
+            </div>
+          )}
+          {apSite?.activationDate && (
+            <div>
+              <p className="text-xs text-gray-500">Activation Date</p>
+              <p className="text-sm font-medium">{apSite.activationDate}</p>
+            </div>
+          )}
+          {apSite?.endOfContract && (
+            <div>
+              <p className="text-xs text-gray-500">End of Contract</p>
+              <p className="text-sm font-medium">{apSite.endOfContract}</p>
+            </div>
+          )}
         </div>
       </div>
       
@@ -287,49 +289,17 @@ const APSiteInfoPanel = ({ apSite, onBack, isActive }) => {
   );
 };
 
-
 // Site Details Panel (3rd panel)
-const SiteDetailsPanel = () => {
+const SiteDetailsPanel = ({ site, cityName, onBack, onAPSiteClick, isActive }) => {
   const [expandedDetails, setExpandedDetails] = useState(false);
   
-  const site = {
-    name: "Batangas State University - Alangilan",
-    type: "SUC Main",
-    locID: "L3-4335",
-    address: "Kumintang Ilaya, Brgy. Alangilan, Batangas City, BATANGAS",
-    flcacArea: true,
-    notCIDA: true,
-    sites: 4,
-    apSites: [
-      {
-        name: "BatStateU - College of Science Building",
-        status: "active",
-        mbps: 30
-      },
-      {
-        name: "BatStateU - College of Engineering Building",
-        status: "active",
-        mbps: 30
-      },
-      {
-        name: "BatStateU - College of English Building",
-        status: "active",
-        mbps: 30
-      },
-      {
-        name: "Home Grown Burgers 🍔",
-        status: "active",
-        mbps: 30
-      }
-    ]
-  };
-
   return (
-    <div className="bg-white shadow-lg p-4 w-full h-full max-w-md mx-auto rounded-lg border border-gray-300 flex flex-col">
+    <PanelWrapper isActive={isActive}>
       <button 
+        onClick={onBack} 
         className="text-blue-500 text-xs mb-2 hover:text-blue-700 flex items-center"
       >
-        ← Back to Batangas City
+        ← Back to {cityName || "City"}
       </button>
       
       <div className="mt-2 flex justify-between items-start">
@@ -393,12 +363,12 @@ const SiteDetailsPanel = () => {
       <div className="flex-grow overflow-y-auto pr-1">
         <p className="text-base font-semibold text-gray-900 mb-2">{site.sites} WIFI Sites</p>
         
-        {site.apSites.map((apSite, index) => (
-        <div 
-          key={index} 
-          className="border border-gray-200 rounded-lg p-3 mb-2 cursor-pointer hover:bg-gray-50"
-          onClick={() => onAPSiteClick(apSite)}  // This function isn't defined in scope
-        >
+        {site.apSites && site.apSites.map((apSite, index) => (
+          <div 
+            key={index} 
+            className="border border-gray-200 rounded-lg p-3 mb-2 cursor-pointer hover:bg-gray-50"
+            onClick={() => onAPSiteClick(apSite)}
+          >
             <div className="flex justify-between">
               <div>
                 <p className="text-xs text-gray-500">AP Site Name</p>
@@ -429,20 +399,24 @@ const SiteDetailsPanel = () => {
           </div>
         ))}
       </div>
-    </div>
+      
+    </PanelWrapper>
   );
 };
 
-// Detailed City Panel (2nd panel)
+// Detailedd City Panel (2nd panel)
 const DetailedCityPanel = ({ city, onBack, onSiteClick, isActive }) => {
   return (
     <PanelWrapper isActive={isActive}>
-      <button 
-        onClick={onBack} 
-        className="text-blue-500 text-xs mb-2 hover:text-blue-700"
-      >
-        ← Back
-      </button>
+      <div className="flex items-center mb-2">
+        <button 
+          onClick={onBack} 
+          className="text-blue-500 text-xs hover:text-blue-700 flex items-center"
+        >
+          ← Back
+        </button>
+        <div className="flex-grow"></div>
+      </div>
 
       <div className="mt-2">
         <div className="flex justify-between items-start">
@@ -457,19 +431,19 @@ const DetailedCityPanel = ({ city, onBack, onSiteClick, isActive }) => {
         </div>
       </div>
 
-      <div className="flex justify-between items-center mt-3">
+      <div className="border-t border-gray-200 my-3"></div>
+
+      <div className="flex justify-between items-start">
         <div>
-          <p className="text-xs text-gray-500">No. of locations with</p>
+          <p className="text-xs text-gray-500">No. of location with</p>
           <p className="text-xs text-gray-500">Free WiFi sites</p>
+          <p className="text-2xl font-bold text-gray-900 mt-1">41</p>
         </div>
-        <div className="flex items-center">
-          <p className="text-3xl font-bold text-gray-900">41</p>
+
+        <div className="text-right">
+          <p className="text-xs text-gray-500">Mayor</p>
+          <p className="text-sm font-medium text-gray-900">Art Jun Malapitan</p>
         </div>
-      </div>
-      
-      <div className="mt-2">
-        <p className="text-xs text-gray-500 mb-1">Mayor</p>
-        <p className="text-sm font-medium text-gray-900">Art Jun Malapitan</p>
       </div>
 
       <div className="mt-4">
@@ -485,10 +459,7 @@ const DetailedCityPanel = ({ city, onBack, onSiteClick, isActive }) => {
           </div>
 
           <div className="flex flex-col items-center">
-            <div className="bg-red-100 rounded-md p-1 mb-1 w-8 h-8 flex items-center justify-center">
-              <img src="/icons/hospital.svg" alt="Hospital" className="w-5 h-5" />
-            </div>
-            <p className="font-bold text-xs">12</p>
+            <div className="bg-red-100 rounded-md p-1 mb-1 w-8 h-8 flex items-center justify-center"></div>
             <p className="text-gray-500 text-xxs text-center">Hospital</p>
           </div>
           
@@ -538,21 +509,21 @@ const DetailedCityPanel = ({ city, onBack, onSiteClick, isActive }) => {
         <div className="flex justify-between items-center">
           <div>
             <p className="text-xs text-gray-500">Total no. of AP sites</p>
-            <p className="text-xs text-gray-500">in Batangas</p>
+            <p className="text-xs text-gray-500">in {city.city}</p>
           </div>
-          <p className="text-xl font-bold text-gray-900">125</p>
+          <p className="text-xl font-bold text-gray-900">{city.freeWifiSites || 0}</p>
         </div>
       </div>
 
       <div className="mt-4">
         <p className="text-xs text-gray-500">Digitization Rate</p>
-        <p className="text-xs text-gray-400">(Brgys with WIFI / Total Brgys)</p>
+        <p className="text-xs text-gray-400">(No. of Brgys with WIFI Location / Total no. of Brgy)</p>
         <div className="flex items-center gap-2 mt-1">
-          <p className="text-xl font-bold text-gray-900">25%</p>
+          <p className="text-xl font-bold text-gray-900">{city.digitizationRate || 0}%</p>
           <div className="w-full bg-gray-200 rounded-full h-3 relative">
             <div 
               className="bg-blue-500 h-3 rounded-full" 
-              style={{ width: `25%` }}
+              style={{ width: `${city.digitizationRate || 0}%` }}
             ></div>
           </div>
         </div>
@@ -581,7 +552,7 @@ const DetailedCityPanel = ({ city, onBack, onSiteClick, isActive }) => {
                     </svg>
                   </div>
                   <div className="mt-1 flex items-center">
-                    <span className="font-bold text-lg">11</span>
+                    <span className="font-bold text-lg">{location.sites}</span>
                     <span className="text-xs text-gray-500 ml-1">Sites</span>
                   </div>
                 </div>
@@ -602,10 +573,10 @@ const DetailedCityPanel = ({ city, onBack, onSiteClick, isActive }) => {
   );
 };
 
-// Province Information Panel (1st panel)
+// Province Info Panel (1st panel)
 const ProvincePanel = ({ onCityClick, isActive }) => {
   return (
-    <PanelWrapper isActive={isActive} className="bg-white rounded-2xl shadow-lg">
+    <PanelWrapper isActive={isActive} className="bg-white rounded-lg shadow-lg w-full">
       <div className="pt-1">
         <p className="text-xs text-gray-500">Province of</p>
         <div className="flex justify-between items-center">
@@ -633,64 +604,63 @@ const ProvincePanel = ({ onCityClick, isActive }) => {
 
       <div className="mt-2">
         <p className="text-xs text-gray-500 mb-1">Free WiFi sites location per location types in Batangas</p>
+      </div>
 
-        <div className="flex justify-between mt-1 px-1">
-          <div className="flex flex-col items-center">
-            <div className="bg-gray-100 rounded-md p-1 mb-1 w-8 h-8 flex items-center justify-center">
-              <img src="/icons/terminal.svg" alt="Terminal" className="w-5 h-5" />
-            </div>
-            <p className="font-bold text-xxs">20</p>
-            <p className="text-gray-500 text-xxs text-center">Terminals</p>
+      <div className="flex justify-between mt-1 px-1">
+        <div className="flex flex-col items-center">
+          <div className="bg-gray-100 rounded-md p-1 mb-1 w-8 h-8 flex items-center justify-center">
+            <img src="/icons/terminal.svg" alt="Terminal" className="w-5 h-5" />
           </div>
+          <p className="font-bold text-xs">20</p>
+          <p className="text-gray-500 text-xxs text-center">Terminals</p>
+        </div>
 
-          <div className="flex flex-col items-center">
-            <div className="bg-red-100 rounded-md p-1 mb-1 w-8 h-8 flex items-center justify-center">
-              <img src="/icons/hospital.svg" alt="Hospital" className="w-5 h-5" />
-            </div>
-            <p className="font-bold text-xs">12</p>
-            <p className="text-gray-500 text-xxs text-center">Hospital</p>
+        <div className="flex flex-col items-center">
+          <div className="bg-red-100 rounded-md p-1 mb-1 w-8 h-8 flex items-center justify-center">
+            <img src="/icons/hospital.svg" alt="Hospital" className="w-5 h-5" />
           </div>
-          
-          <div className="flex flex-col items-center">
-            <div className="bg-red-100 rounded-md p-1 mb-1 w-8 h-8 flex items-center justify-center">
-              <img src="/icons/fire-station.svg" alt="Fire Station" className="w-5 h-5" />
-            </div>
-            <p className="font-bold text-xs">3</p>
-            <p className="text-gray-500 text-xxs text-center">Fire</p>
+          <p className="font-bold text-xs">12</p>
+          <p className="text-gray-500 text-xxs text-center">Hospital</p>
+        </div>
+        
+        <div className="flex flex-col items-center">
+          <div className="bg-red-100 rounded-md p-1 mb-1 w-8 h-8 flex items-center justify-center">
+            <img src="/icons/fire-station.svg" alt="Fire Station" className="w-5 h-5" />
           </div>
-          
-          <div className="flex flex-col items-center">
-            <div className="bg-orange-100 rounded-md p-1 mb-1 w-8 h-8 flex items-center justify-center">
-              <img src="/icons/police.svg" alt="Police" className="w-5 h-5" />
-            </div>
-            <p className="font-bold text-xs">3</p>
-            <p className="text-gray-500 text-xxs text-center">Police</p>
+          <p className="font-bold text-xs">3</p>
+          <p className="text-gray-500 text-xxs text-center">Fire</p>
+        </div>
+        
+        <div className="flex flex-col items-center">
+          <div className="bg-orange-100 rounded-md p-1 mb-1 w-8 h-8 flex items-center justify-center">
+            <img src="/icons/police.svg" alt="Police" className="w-5 h-5" />
           </div>
-          
-          <div className="flex flex-col items-center">
-            <div className="bg-blue-100 rounded-md p-1 mb-1 w-8 h-8 flex items-center justify-center">
-              <img src="/icons/school.svg" alt="School" className="w-5 h-5" />
-            </div>
-            <p className="font-bold text-xs">3</p>
-            <p className="text-gray-500 text-xxs text-center">Schools</p>
+          <p className="font-bold text-xs">3</p>
+          <p className="text-gray-500 text-xxs text-center">Police</p>
+        </div>
+        
+        <div className="flex flex-col items-center">
+          <div className="bg-blue-100 rounded-md p-1 mb-1 w-8 h-8 flex items-center justify-center">
+            <img src="/icons/school.svg" alt="School" className="w-5 h-5" />
           </div>
-          
-          <div className="flex flex-col items-center">
-            <div className="bg-orange-100 rounded-md p-1 mb-1 w-8 h-8 flex items-center justify-center">
-              <img src="/icons/library.svg" alt="Library" className="w-5 h-5" />
-            </div>
-            <p className="font-bold text-xs">3</p>
-            <p className="text-gray-500 text-xxs text-center">Library</p>
+          <p className="font-bold text-xs">3</p>
+          <p className="text-gray-500 text-xxs text-center">Schools</p>
+        </div>
+        
+        <div className="flex flex-col items-center">
+          <div className="bg-orange-100 rounded-md p-1 mb-1 w-8 h-8 flex items-center justify-center">
+            <img src="/icons/library.svg" alt="Library" className="w-5 h-5" />
           </div>
-          
-          <div className="flex flex-col items-center">
-            <div className="bg-green-100 rounded-md p-1 mb-1 w-8 h-8 flex items-center justify-center">
-              <img src="/icons/park.svg" alt="Park" className="w-5 h-5" />
-            </div>
-            <p className="font-bold text-xs">3</p>
-            <p className="text-gray-500 text-xxs text-center">Parks</p>
+          <p className="font-bold text-xs">3</p>
+          <p className="text-gray-500 text-xxs text-center">Library</p>
+        </div>
+        
+        <div className="flex flex-col items-center">
+          <div className="bg-green-100 rounded-md p-1 mb-1 w-8 h-8 flex items-center justify-center">
+            <img src="/icons/park.svg" alt="Park" className="w-5 h-5" />
           </div>
-          
+          <p className="font-bold text-xs">3</p>
+          <p className="text-gray-500 text-xxs text-center">Parks</p>
         </div>
       </div>
 
@@ -753,45 +723,42 @@ const InfoPanel = () => {
   const [selectedAPSite, setSelectedAPSite] = useState(null);
   const [panelHistory, setPanelHistory] = useState(["province"]);
 
-  // Handle city selection
+  // city selection
   const handleCityClick = (city) => {
     setSelectedCity(city);
     setActivePanel("city");
     setPanelHistory([...panelHistory, "city"]);
   };
 
-  // Handle site selection
+  // site selection
   const handleSiteClick = (site) => {
     setSelectedSite(site);
     setActivePanel("site");
     setPanelHistory([...panelHistory, "site"]);
   };
 
-  // Handle AP site selection
+  // AP site selection
   const handleAPSiteClick = (apSite) => {
     setSelectedAPSite(apSite);
     setActivePanel("apSite");
     setPanelHistory([...panelHistory, "apSite"]);
   };
 
-  // Handle back button from city panel
+  //back button from city panel
   const handleCityBack = () => {
     setActivePanel("province");
-    setSelectedCity(null);
     setPanelHistory(panelHistory.slice(0, -1));
   };
 
-  // Handle back button from site panel
+  //back button from site panel
   const handleSiteBack = () => {
     setActivePanel("city");
-    setSelectedSite(null);
     setPanelHistory(panelHistory.slice(0, -1));
   };
 
-  // Handle back button from AP site panel
+  //back button from AP site panel
   const handleAPSiteBack = () => {
     setActivePanel("site");
-    setSelectedAPSite(null);
     setPanelHistory(panelHistory.slice(0, -1));
   };
 
@@ -813,22 +780,22 @@ const InfoPanel = () => {
         )}
         
         {selectedSite && (
-  <SiteDetailsPanel 
-    site={selectedSite} 
-    cityName={selectedCity?.city}
-    onBack={handleSiteBack}
-    onAPSiteClick={handleAPSiteClick}
-    isActive={activePanel === "site"}
-  />
-)}
+          <SiteDetailsPanel 
+            site={selectedSite} 
+            cityName={selectedCity?.city}
+            onBack={handleSiteBack}
+            onAPSiteClick={handleAPSiteClick}
+            isActive={activePanel === "site"}
+          />
+        )}
         
         {selectedAPSite && (
-  <APSiteInfoPanel  // Use the component that actually exists
-    apSite={selectedAPSite}
-    onBack={handleAPSiteBack}
-    isActive={activePanel === "apSite"}
-  />
-)}
+          <APSiteInfoPanel 
+            apSite={selectedAPSite}
+            onBack={handleAPSiteBack}
+            isActive={activePanel === "apSite"}
+          />
+        )}
       </div>
     </div>
   );

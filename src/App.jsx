@@ -1,30 +1,25 @@
-import { useState } from "react";
-import { Routes, Route } from "react-router-dom";
-import Signup from "./pages/Signup";
-import Login from "./pages/Login";
-import Sidebar from "./components/Sidebar";
-
-import LandingPage from "./pages/LandingPage"; // Ensure this file exists
-import InfoPanel from "./components/InfoPanel";
+// App.jsx
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Login from "./Login";
+import Signup from "./Signup";
+import MainDashboard from "./MainDashboard";
 
 function App() {
-  const [selectedLocation, setSelectedLocation] = useState(null);
-
-
   return (
-    <div className="relative">
-      {/* Define Routes for navigation */}
+    <Router>
       <Routes>
-        <Route path="/" element={<LandingPage />} /> {/* Default route */}
-        <Route path="/landingpage" element={<LandingPage />} />
-        <Route path="/signup" element={<Signup />} />
+        {/* Authentication Routes */}
         <Route path="/login" element={<Login />} />
-        <Route path="/sidebar" element={<Sidebar />} />
-      </Routes>
-    </div>
+        <Route path="/signup" element={<Signup />} />
 
+        {/* Main Dashboard */}
+        <Route path="/" element={<MainDashboard />} />
+
+        {/* Redirect unknown routes */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </Router>
   );
 }
 
 export default App;
-

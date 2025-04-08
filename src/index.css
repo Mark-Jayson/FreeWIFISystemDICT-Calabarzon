@@ -1,5 +1,24 @@
 @import "tailwindcss";
 
+
+
+@layer utilities {
+  .text-xxs {
+    font-size: 0.65rem;
+    line-height: 0.85rem;
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+@layer utilities {
+  .animate-fadeIn {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+}
+
 @layer utilities {
     .custom-scrollbar::-webkit-scrollbar {
       width: 6px; 
@@ -20,8 +39,3 @@
     }
   }
   
-
-  .text-xxs {
-    font-size: 0.65rem;
-    line-height: 0.85rem;
-  }
