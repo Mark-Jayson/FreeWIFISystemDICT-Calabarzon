@@ -1,11 +1,16 @@
-# Geospatial Mapping of Free-Wifi Spots in Calabarzon
+# Geospatial Mapping and Data Visualization Platform of Free-Wifi Spots in Calabarzon
 
-### Problem
-##### - The client needs a visualization of all the DICT managed Free-WIFI spots in the whole region of CALABARZON to support decision making 
-##### - Information needed
-##### - Location of FWS in every province, city/municipality, barangay
-##### - Location of FWS that is on school, hospital, plaza, or other kinds of public establishment. 
-##### - Location of FWS 
-##### - The client need to see other geospatial characteristics of the CALABARZON Region like bandwith trend, 
-##### - The client needs to see the number of the barangays with Free-WIFI spots compared to the total number of barangay in the province /	CALABARZON.. 
+## About the System
+#### This project aims to develop and deploy a web-based platform for visualizing the geospatial distribution and information about thousands of Free Wifi Spots around Calabarzon Region managed by the Department of Information and Communications Technology. The geospatial data visualization is handled using a map interface powered by Mapbox. Whilst other information about the free wifi sites, location and the ditribution of sites per LGUs and provinces are presented using dashboard. 
+
+
+### This system is currently being developed by the DICT Calabarzon Interns from PUP Sto. Tomas Campus. /m Team /n Mark Jayson Agao, Dustin Kyle Garcia, Mark Roland Gaiten, Maria Jessica Laurel
+
+
+About the Process
+Table of Contents
+Motivation to create the project
+Limitations
+Challenges
+Problem the system will solve
 
