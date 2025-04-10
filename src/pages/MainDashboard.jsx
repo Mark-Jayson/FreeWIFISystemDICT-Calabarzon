@@ -143,3 +143,4 @@ const InfoPanel = ({
 };
 
 export default MainDashboard;
+

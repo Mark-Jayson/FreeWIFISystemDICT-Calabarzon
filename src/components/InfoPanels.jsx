@@ -231,3 +231,4 @@ const WifiSitesCard = () => {
 };
 
 export { InfoPanels, DetailsPanel, DefaultCard, WifiSitesCard };
+
