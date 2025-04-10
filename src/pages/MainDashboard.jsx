@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import Sidebar from '../components/Sidebar';
+import MapToolbar from '../components/MapToolbar'; 
 import { InfoPanels, DetailsPanel, DefaultCard, WifiSitesCard } from '../components/InfoPanels';
 import locationData from '../data/locationData';
+import Layout from '../components/Layout';
+
 
 const MainDashboard = () => {
   const [panelStack, setPanelStack] = useState([]);
@@ -60,37 +63,10 @@ const MainDashboard = () => {
 
   return (
     <div className="flex h-screen overflow-hidden">
-      <Sidebar 
-        onLocationSelect={handleLocationSelect}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-      />
-
-      <div className="flex-1 flex flex-col">
-        <div className="bg-white p-2 shadow-md flex gap-2 items-center overflow-x-auto">
-          <button className="text-gray-700 bg-gray-100 rounded-full px-3 py-1 text-sm font-medium flex items-center">
-            District <FontAwesomeIcon icon={faChevronDown} className="ml-2 text-xs" />
-          </button>
-          <button className="text-blue-600 bg-blue-50 rounded-full px-3 py-1 text-sm font-medium flex items-center">
-            SOCA <FontAwesomeIcon icon={faChevronDown} className="ml-2 text-xs" />
-          </button>
-          <button className="text-gray-700 bg-gray-100 rounded-full px-3 py-1 text-sm font-medium flex items-center">
-            Technology <FontAwesomeIcon icon={faChevronDown} className="ml-2 text-xs" />
-          </button>
-          <button className="text-gray-700 bg-gray-100 rounded-full px-3 py-1 text-sm font-medium flex items-center">
-            Status <FontAwesomeIcon icon={faChevronDown} className="ml-2 text-xs" />
-          </button>
-          <button className="text-gray-700 bg-gray-100 rounded-full px-3 py-1 text-sm font-medium flex items-center">
-            Type <FontAwesomeIcon icon={faChevronDown} className="ml-2 text-xs" />
-          </button>
-          <button className="text-gray-700 bg-gray-100 rounded-full px-3 py-1 text-sm font-medium flex items-center">
-            Classification <FontAwesomeIcon icon={faChevronDown} className="ml-2 text-xs" />
-          </button>
-          <button className="text-gray-700 bg-gray-100 rounded-full px-3 py-1 text-sm font-medium flex items-center">
-            ELGAC Area <FontAwesomeIcon icon={faChevronDown} className="ml-2 text-xs" />
-          </button>
-        </div>
-
+      <Sidebar />
+      <div className="flex-1 flex flex-col bg-white">
+        <MapToolbar />
+        
         <div className="flex-1 relative overflow-hidden">
           <div className="absolute inset-0 bg-blue-50 bg-opacity-70">
             <div 
@@ -124,6 +100,44 @@ const MainDashboard = () => {
           </div>
         </div>
       </div>
+    </div>
+  );
+};
+
+
+const InfoPanel = ({ 
+  panelStack, 
+  handleBack, 
+  handleClose, 
+  handleLocationSelect, 
+  handleMunicipalitySelect, 
+  handleWifiSiteSelect 
+}) => {
+  return (
+    <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+      {panelStack.map((panel, index) => (
+        <div key={panel.id} className="p-4">
+          <div className="flex justify-between items-center mb-2">
+            <h3 className="font-bold text-lg">{panel.id}</h3>
+            <div className="flex">
+              {index > 0 && (
+                <button 
+                  onClick={handleBack}
+                  className="mr-2 text-blue-600 hover:text-blue-800"
+                >
+                  Back
+                </button>
+              )}
+              <button 
+                onClick={handleClose}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   );
 };

@@ -11,7 +11,6 @@ import {
   faShareAlt,
   faInfoCircle
 } from '@fortawesome/free-solid-svg-icons';
-import locationData from '../data/locationData';
 
 
 const InfoPanels = ({ 
@@ -160,7 +159,6 @@ const DefaultCard = () => {
     <div className="bg-white rounded-lg shadow-lg mb-4 overflow-hidden">
       <div className="p-3 bg-gray-50 border-b flex justify-between items-center">
         <h3 className="font-bold text-gray-700">Sto. Tomas City</h3>
-        <div className="text-xs text-gray-500">Pinned as epicenter</div>
       </div>
       <div className="p-3">
         <div className="flex justify-between mb-2">
@@ -184,23 +182,6 @@ const DefaultCard = () => {
             <FontAwesomeIcon icon={faInfoCircle} className="text-xs text-gray-700" />
           </button>
         </div>
-        
-        <div className="mb-2">
-          <div className="flex justify-between mb-1">
-            <div className="text-xs text-gray-500">Alert Level</div>
-            <div className="font-bold">125</div>
-          </div>
-        </div>
-        
-        <div className="mb-4">
-          <div className="flex justify-between mb-1">
-            <div className="text-xs text-gray-500">Displacement Level</div>
-            <div className="font-bold">25%</div>
-          </div>
-          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-            <div className="h-full bg-blue-500 rounded-full" style={{ width: "25%" }}></div>
-          </div>
-        </div>
       </div>
     </div>
   );
@@ -210,7 +191,7 @@ const WifiSitesCard = () => {
   return (
     <div className="bg-white rounded-lg shadow-lg overflow-hidden">
       <div className="p-3 border-b">
-        <div className="text-xs text-gray-500">Nearby buildings with threat status</div>
+        <div className="text-xs text-gray-500">others</div>
       </div>
       <div className="p-3 border-b">
         <div className="flex justify-between items-center">
