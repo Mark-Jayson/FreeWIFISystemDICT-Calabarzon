@@ -1,24 +1,10 @@
-import { Outlet, Link } from "react-router-dom";
+import { Outlet } from 'react-router-dom';
 
 const Layout = () => {
   return (
-    <>
-      <nav>
-        <ul>
-          <li>
-            <Link to="/">Dashboard</Link>
-          </li>
-          <li>
-            <Link to="/login">Login</Link>
-          </li>
-          <li>
-            <Link to="/signup">Signup</Link>
-          </li>
-        </ul>
-      </nav>
-
+    <div className="h-screen w-screen overflow-hidden">
       <Outlet />
-    </>
+    </div>
   );
 };
 

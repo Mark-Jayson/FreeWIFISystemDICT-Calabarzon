@@ -5,45 +5,36 @@ import axios from "axios";
 const Login = () => {
   const [formData, setFormData] = useState({
     email: "",
-    password: ""
+    password: "",
   });
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [name]: value,
     });
-  }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
     setIsSubmitting(true);
+    setError("");
 
     try {
-      const response = await axios.post("http://localhost:5000/api/login", formData);
-      console.log("Login successful:", response.data);
+      const response = await axios.post("/api/login", formData);
       
-      // Store token in localStorage if your backend returns one
-      if (response.data.token) {
-        localStorage.setItem("token", response.data.token);
-      }
-      
-      // Redirect to landing page
-      navigate("/landingpage");
+      navigate("/dashboard");
     } catch (err) {
-      setError(
-        err.response?.data?.error ||
-        "Login failed. Please try again."
-      );
+      setError(err.response?.data?.message || "Login failed. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
-  }
-  
+  };
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 font-montserrat">
       <img

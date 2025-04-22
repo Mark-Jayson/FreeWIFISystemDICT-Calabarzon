@@ -1,128 +1,60 @@
-import React, { useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronDown } from '@fortawesome/free-solid-svg-icons';
+import { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
-import { InfoPanels, DetailsPanel, DefaultCard, WifiSitesCard } from '../components/InfoPanels';
-import locationData from '../data/locationData';
+import MapToolbar from '../components/MapToolbar';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 const MainDashboard = () => {
-  const [panelStack, setPanelStack] = useState([]);
-  const [detailsPanel, setDetailsPanel] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState('map');
+  const [map, setMap] = useState(null);
 
-  const handleLocationSelect = (location) => {
-    setDetailsPanel(null);
-    
-    if (location === 'CALABARZON') {
-      setPanelStack([{ id: 'CALABARZON', data: locationData['CALABARZON'] }]);
-    } else if (['Batangas', 'Cavite', 'Laguna', 'Rizal', 'Quezon'].includes(location)) {
-      setPanelStack([
-        { id: 'CALABARZON', data: locationData['CALABARZON'] },
-        { id: location, data: locationData[location] }
-      ]);
-    } else if (location === 'Santo Tomas') {
-      setPanelStack([
-        { id: 'CALABARZON', data: locationData['CALABARZON'] },
-        { id: 'Batangas', data: locationData['Batangas'] },
-        { id: 'Santo Tomas', data: locationData['Santo Tomas'] }
-      ]);
+  //Mapbox map
+  useEffect(() => {
+    if (activeTab === 'map') {
+      // actual Mapbox access token
+      mapboxgl.accessToken = 'YOUR_MAPBOX_ACCESS_TOKEN';
+      
+      const initializeMap = new mapboxgl.Map({
+        container: 'map-container',
+        style: 'mapbox://styles/mapbox/streets-v11',
+        center: [121.0244, 14.2546], 
+        zoom: 9
+      });
+      
+      setMap(initializeMap);
+      
+      return () => {
+        initializeMap.remove();
+      };
     }
-  };
-
-  const handleMunicipalitySelect = (province, municipality) => {
-    setDetailsPanel(null);
-    setPanelStack([
-      { id: 'CALABARZON', data: locationData['CALABARZON'] },
-      { id: province, data: locationData[province] },
-      { id: municipality, data: locationData[municipality] }
-    ]);
-  };
-
-  const handleWifiSiteSelect = (siteId) => {
-    setDetailsPanel({ id: siteId, data: locationData[siteId] });
-  };
-
-  const handleBack = () => {
-    if (detailsPanel) {
-      setDetailsPanel(null);
-    } else if (panelStack.length > 1) {
-      setPanelStack(panelStack.slice(0, panelStack.length - 1));
-    }
-  };
-
-  const handleClose = () => {
-    if (detailsPanel) {
-      setDetailsPanel(null);
-    } else {
-      setPanelStack([]);
-    }
-  };
+  }, [activeTab]);
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar 
-        onLocationSelect={handleLocationSelect}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-      />
+    <div className="flex h-screen bg-gray-100">
+      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <div className="flex-1 flex flex-col">
-        <div className="bg-white p-2 shadow-md flex gap-2 items-center overflow-x-auto">
-          <button className="text-gray-700 bg-gray-100 rounded-full px-3 py-1 text-sm font-medium flex items-center">
-            District <FontAwesomeIcon icon={faChevronDown} className="ml-2 text-xs" />
-          </button>
-          <button className="text-blue-600 bg-blue-50 rounded-full px-3 py-1 text-sm font-medium flex items-center">
-            SOCA <FontAwesomeIcon icon={faChevronDown} className="ml-2 text-xs" />
-          </button>
-          <button className="text-gray-700 bg-gray-100 rounded-full px-3 py-1 text-sm font-medium flex items-center">
-            Technology <FontAwesomeIcon icon={faChevronDown} className="ml-2 text-xs" />
-          </button>
-          <button className="text-gray-700 bg-gray-100 rounded-full px-3 py-1 text-sm font-medium flex items-center">
-            Status <FontAwesomeIcon icon={faChevronDown} className="ml-2 text-xs" />
-          </button>
-          <button className="text-gray-700 bg-gray-100 rounded-full px-3 py-1 text-sm font-medium flex items-center">
-            Type <FontAwesomeIcon icon={faChevronDown} className="ml-2 text-xs" />
-          </button>
-          <button className="text-gray-700 bg-gray-100 rounded-full px-3 py-1 text-sm font-medium flex items-center">
-            Classification <FontAwesomeIcon icon={faChevronDown} className="ml-2 text-xs" />
-          </button>
-          <button className="text-gray-700 bg-gray-100 rounded-full px-3 py-1 text-sm font-medium flex items-center">
-            ELGAC Area <FontAwesomeIcon icon={faChevronDown} className="ml-2 text-xs" />
-          </button>
-        </div>
-
-        <div className="flex-1 relative overflow-hidden">
-          <div className="absolute inset-0 bg-blue-50 bg-opacity-70">
-            <div 
-              className="p-4 h-full w-full" 
-              style={{ backgroundImage: "url('/api/placeholder/600/400')", backgroundSize: "cover" }}
-            ></div>
+        <MapToolbar />
+        
+        {activeTab === 'map' && (
+          <div className="flex-1 relative">
+            <div id="map-container" className="w-full h-full"></div>
           </div>
-
-          <div className="absolute inset-y-4 right-4 w-72 flex flex-col gap-4 overflow-auto max-h-full">
-            {panelStack.length > 0 && (
-              <InfoPanel
-                panelStack={panelStack}
-                handleBack={handleBack}
-                handleClose={handleClose}
-                handleLocationSelect={handleLocationSelect}
-                handleMunicipalitySelect={handleMunicipalitySelect}
-                handleWifiSiteSelect={handleWifiSiteSelect}
-              />
-            )}
-            
-            {detailsPanel && (
-              <DetailsPanel
-                detailsPanel={detailsPanel}
-                handleClose={() => setDetailsPanel(null)}
-              />
-            )}
-            
-            {panelStack.length === 0 && !detailsPanel && <DefaultCard />}
-            
-            <WifiSitesCard />
+        )}
+        
+        {activeTab === 'dashboard' && (
+          <div className="flex-1 p-6">
+            <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            </div>
           </div>
-        </div>
+        )}
+        
+        {activeTab === 'wifi' && (
+          <div className="flex-1 p-6">
+            <h1 className="text-2xl font-bold mb-4">Free Wi-Fi Sites</h1>
+          </div>
+        )}
       </div>
     </div>
   );
