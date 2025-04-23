@@ -6,9 +6,8 @@ import MainDashboard from "./pages/MainDashboard.jsx";
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/dashboard" element={<MainDashboard />} />
+
+      <Route path="/" element={<MainDashboard />} />
     </Routes>
   );
 }
