@@ -1,131 +1,87 @@
 import React, { useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faSearch, 
-  faChevronDown
-} from '@fortawesome/free-solid-svg-icons';
+import { useNavigate } from 'react-router-dom';
+import DICTLogo from '../assets/DICTLogo.png';
+import FreeWifi from '../assets/FreeWifi.png';
+import Dashboard from '../assets/Dashboard.png';
+import MapMarker from '../assets/MapMarker.png';
+import AddLocation from '../assets/AddLocation.png';
+import Settings from '../assets/Settings.png';
 
-const styles = {
-  sidebarGradient: {
-    background: 'linear-gradient(to bottom, #1e3a8a, #1e40af)'
-  },
-  activeBorder: {
-    borderLeft: '4px solid #3b82f6'
-  }
-};
+const Sidebar = ({ activeTab, setActiveTab }) => {
+  const [hoveredItem, setHoveredItem] = useState(null);
+  const navigate = useNavigate();
 
-const Sidebar = ({ onLocationSelect, searchQuery, setSearchQuery }) => {
-  const [isMapActive, setIsMapActive] = useState(true);
-  const [isCalabarzanActive, setIsCalabarzanActive] = useState(true);
+  const navItems = [
+    { id: 'logo', label: 'DICT Logo', icon: DICTLogo, type: 'logo' },
+    { id: 'wifi', label: 'Free WiFi', icon: FreeWifi, path: '/wifi' },
+    { id: 'dashboard', label: 'Dashboard', icon: Dashboard, showLabel: true, path: '/dashboard' },
+    { id: 'map', label: 'Map', icon: MapMarker, showLabel: true, path: '/map' },
+    { id: 'add', label: 'Add Location', icon: AddLocation, showLabel: true, path: '/add-wifi-site' },
+    { id: 'settings', label: 'Settings', icon: Settings, showLabel: true, path: '/settings' }
+  ];
 
-  const toggleMap = (e) => {
-    e.preventDefault();
-    setIsMapActive(!isMapActive);
+  const handleNavigation = (item) => {
+    setActiveTab(item.id);
+    if (item.path) {
+      navigate(item.path);
+    }
   };
 
-  const toggleCalabarzon = (e) => {
-    e.preventDefault();
-    setIsCalabarzanActive(!isCalabarzanActive);
-  };
-
-  const handleLocationClick = (location, e) => {
-    e.preventDefault();
-    onLocationSelect(location);
+  const renderNavItem = (item, index) => {
+    if (item.type === 'logo') return null;
+    
+    const isActive = activeTab === item.id;
+    const isHovered = hoveredItem === item.id;
+    const shouldShowLabel = item.showLabel && isHovered;
+    
+    return (
+      <div 
+        key={item.id}
+        className={`relative w-full flex justify-center py-4 cursor-pointer transition-all duration-200 ${isActive ? 'bg-blue-900' : 'hover:bg-blue-700'}`}
+        onClick={() => handleNavigation(item)}
+        onMouseEnter={() => setHoveredItem(item.id)}
+        onMouseLeave={() => setHoveredItem(null)}
+      >
+        <img 
+          src={item.icon} 
+          alt={item.label}
+          className="w-6 h-6"
+        />
+        
+        {shouldShowLabel && (
+          <div className="absolute left-full ml-2 px-2 py-1 bg-gray-800 text-white text-sm rounded whitespace-nowrap z-10">
+            {item.label}
+          </div>
+        )}
+      </div>
+    );
   };
 
   return (
-    <div 
-      className="flex flex-col w-56 text-white h-full"
-      style={styles.sidebarGradient}
-    >
-      <div className="p-4">
-        <div className="relative">
-          <input 
-            type="text" 
-            placeholder="Search..." 
-            className="w-full bg-white/20 border border-white/30 rounded-md py-2 px-3 text-sm text-white placeholder-white/70 focus:outline-none focus:ring-1 focus:ring-white/50"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+    <div className="bg-blue-800 text-white w-16 flex flex-col h-full">
+      <div className="w-full flex justify-center py-4 mb-6">
+        <div className="bg-white rounded-full p-2">
+          <img 
+            src={navItems[0].icon}
+            alt="DICT Logo"
+            className="w-6 h-6"
           />
-          <span className="absolute inset-y-0 right-0 flex items-center pr-3">
-            <FontAwesomeIcon icon={faSearch} className="text-white/70" />
-          </span>
         </div>
       </div>
-
-      <nav className="flex-1 flex flex-col">
-        <ul className="px-2">
-          <li className="my-1">
-            <a href="#" className="flex items-center p-3 rounded hover:bg-white/10 transition-colors">
-              <span>Dashboard</span>
-            </a>
-          </li>
-
-          <li className="my-1">
-            <a 
-              href="#" 
-              onClick={toggleMap}
-              className={`flex items-center p-3 rounded ${isMapActive ? 'bg-white/10' : 'hover:bg-white/10'}`}
-              style={isMapActive ? styles.activeBorder : {}}
-            >
-              <span>Map</span>
-            </a>
-            
-            {isMapActive && (
-              <div className="pl-5">
-                <div className="py-1">
-                  <a 
-                    href="#" 
-                    onClick={(e) => {
-                      toggleCalabarzon(e);
-                      handleLocationClick('CALABARZON', e);
-                    }}
-                    className="block p-2 text-blue-200 font-medium rounded"
-                  >
-                    CALABARZON
-                  </a>
-                  
-                  {isCalabarzanActive && (
-                    <ul className="pl-3 text-sm">
-                      <li>
-                        <a href="#" onClick={(e) => handleLocationClick('Batangas', e)} className="block py-1 px-2 text-blue-100 hover:bg-white/10 rounded">
-                          Batangas
-                        </a>
-                      </li>
-                      <li>
-                        <a href="#" onClick={(e) => handleLocationClick('Cavite', e)} className="block py-1 px-2 text-blue-100 hover:bg-white/10 rounded">
-                          Cavite
-                        </a>
-                      </li>
-                      <li>
-                        <a href="#" onClick={(e) => handleLocationClick('Laguna', e)} className="block py-1 px-2 text-blue-100 hover:bg-white/10 rounded">
-                          Laguna
-                        </a>
-                      </li>
-                      <li>
-                        <a href="#" onClick={(e) => handleLocationClick('Rizal', e)} className="block py-1 px-2 text-blue-100 hover:bg-white/10 rounded">
-                          Rizal
-                        </a>
-                      </li>
-                      <li>
-                        <a href="#" onClick={(e) => handleLocationClick('Quezon', e)} className="block py-1 px-2 text-blue-100 hover:bg-white/10 rounded">
-                          Quezon
-                        </a>
-                      </li>
-                    </ul>
-                  )}
-                </div>
-              </div>
-            )}
-          </li>
-
-          <li className="mt-auto">
-            <a href="#" className="flex items-center p-3 rounded hover:bg-white/10 transition-colors">
-              <span>Settings</span>
-            </a>
-          </li>
-        </ul>
-      </nav>
+      
+      <div className="mb-4">
+        {renderNavItem(navItems[1], 1)}
+      </div>
+      
+      <div>
+        {navItems.slice(2, 4).map((item, index) => renderNavItem(item, index + 2))}
+      </div>
+      
+      <div className="flex-grow"></div>
+      
+      <div>
+        {navItems.slice(4).map((item, index) => renderNavItem(item, index + 4))}
+      </div>
     </div>
   );
 };
