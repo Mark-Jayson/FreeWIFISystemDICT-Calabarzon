@@ -5,29 +5,33 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 
-
-const INITIAL_CENTER = [121.2, 14.1];
-const INITIAL_ZOOM = 8.8;
-const PHILIPPINES_BOUNDS = [
-  [114.0952145, 4.5873032], 
-  [126.8039607, 21.1217806], 
+// Constants for map initialization
+const INITIAL_CENTER = [121.2, 14.1];  // Initial center coordinates (Philippines)
+const INITIAL_ZOOM = 8.8;              // Initial zoom level
+const PHILIPPINES_BOUNDS = [           // Boundary coordinates for Philippines
+  [114.0952145, 4.5873032],            // Southwest corner (min longitude, min latitude)
+  [126.8039607, 21.1217806],           // Northeast corner (max longitude, max latitude)
 ]; 
 
 const MainDashboard = () => {
-  const [activeTab, setActiveTab] = useState('map');
-  const [map, setMap] = useState(null);
-  const mapRef = useRef(null);
-  const mapContainerRef = useRef(null);
-  const [error, setError] = useState(null);
-  const [center, setCenter] = useState(INITIAL_CENTER);
-  const [zoom, setZoom] = useState(INITIAL_ZOOM);
-  const [mapInitialized, setMapInitialized] = useState(false);
-  const [panelData, setPanelData] = useState(null);
+  // UI state
+  const [activeTab, setActiveTab] = useState('map');        // Current active tab (map, dashboard, wifi)
+  const [panelData, setPanelData] = useState(null);         // Data to display in the info panel
+  
+  // Map state
+  const [map, setMap] = useState(null);                     // Mapbox map instance (to pass to child components)
+  const mapRef = useRef(null);                             // Ref to store map instance (for cleanup)
+  const mapContainerRef = useRef(null);                    // Ref to the DOM element for map container
+  const [error, setError] = useState(null);                // Error state for map initialization
+  const [center, setCenter] = useState(INITIAL_CENTER);    // Current map center coordinates
+  const [zoom, setZoom] = useState(INITIAL_ZOOM);          // Current map zoom level
+  const [mapInitialized, setMapInitialized] = useState(false); // Flag to track if map is fully loaded
 
-
-  //Mapbox map
+  // Initialize and configure the Mapbox map
   useEffect(() => {
+    // Step 1: Set up the Mapbox access token from environment variables
     try {
+      // Get the Mapbox access token from Vite environment variables
       mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
       if(!mapboxgl.accessToken) {
         throw new Error('Mapbox access token is missing');
@@ -106,65 +110,80 @@ const MainDashboard = () => {
       ]
     };
 
-    mapRef.current = new mapboxgl.Map({
-      container: mapContainerRef.current,
-      center: center,
-      zoom: zoom,
-      style: 'mapbox://styles/mapbox/streets-v12',
-      maxBounds: PHILIPPINES_BOUNDS
+    // Step 2: Initialize the Mapbox map instance
+    const mapInstance = new mapboxgl.Map({
+      container: mapContainerRef.current,  // DOM element to render the map in
+      center: center,                      // Initial center position
+      zoom: zoom,                          // Initial zoom level
+      style: 'mapbox://styles/mapbox/streets-v12', // Map style to use
+      maxBounds: PHILIPPINES_BOUNDS        // Restrict panning to these boundaries
     });
     
-    // Make the map instance available for other components
-    setMap(mapRef.current);
+    // Store the map instance in the ref for cleanup when component unmounts
+    mapRef.current = mapInstance;
+    
+    // Step 3: Add navigation controls (zoom in/out, rotate, etc.)
+    mapInstance.addControl(new mapboxgl.NavigationControl(), 'bottom-left');
 
-    mapRef.current.addControl(new mapboxgl.NavigationControl(), 'bottom-left');
-
-    mapRef.current.on('load', () => {
+    // Step 4: Wait for the map to load before adding markers and updating state
+    mapInstance.on('load', () => {
       console.log("Map loaded successfully");
       
+      // Add markers for each location in the geojson data
       geojson.features.forEach(feature => {
         console.log("Adding marker at:", feature.geometry.coordinates);
         
+        // Create a red marker for each location
         const marker = new mapboxgl.Marker({
-          color: '#FF0000',
-          scale: 1.5
+          color: '#FF0000',  // Red color
+          scale: 1.5         // Slightly larger than default
         })
-        .setLngLat(feature.geometry.coordinates)
-        .addTo(mapRef.current);
-
+        .setLngLat(feature.geometry.coordinates)  // Position the marker
+        .addTo(mapInstance);                      // Add it to the map
+        
+        // Add click event listener to show location info in panel
         marker.getElement().addEventListener('click', () => {
           setPanelData({
-            ...feature.properties,
+            ...feature.properties,          // All location properties
             coordinates: feature.geometry.coordinates,
-            show: true
+            show: true                      // Flag to display the panel
           });
         });
       });
       
+      // IMPORTANT: Only set the map state AFTER map is fully loaded
+      // This ensures MapToolbar receives a fully initialized map instance
+      setMap(mapInstance);
       setMapInitialized(true);
+      console.log("Map instance set in state:", mapInstance);
     });
     
+    // Step 5: Cleanup function to remove the map when the component unmounts
+    // This prevents memory leaks
     return () => {
       if (mapRef.current) {
-        mapRef.current.remove();
-        mapRef.current = null;
+        mapRef.current.remove();  // Remove the map from the DOM
+        mapRef.current = null;    // Clear the reference
       }
     };
-  }, []);
+  }, []); // Empty dependency array means this effect runs once on mount
 
   return (
-    
     <div className="flex h-screen bg-gray-100">
+      {/* Sidebar navigation */}
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <div className="flex-1 flex flex-col">
-      
+        {/* IMPORTANT: Pass the map instance to MapToolbar so it can add markers and fly to locations */}
         <MapToolbar mapInstance={map} setPanelData={setPanelData} />
 
+        {/* Map view */}
         {activeTab === 'map' && (
           <div className="flex-1 relative">
+            {/* Map container - this div is where Mapbox will render the map */}
             <div id="map-container" className="w-full h-full" ref={mapContainerRef}></div>
             
+            {/* Information panel that appears when a location is selected */}
             {panelData && panelData.show && (
               <div className="absolute top-4 right-4 bg-white p-4 rounded shadow-lg max-w-md">
                 <h3 className="text-lg font-bold">{panelData.title}</h3>
@@ -200,7 +219,6 @@ const MainDashboard = () => {
         )}
       </div>
     </div>
-   
   );
 };
 

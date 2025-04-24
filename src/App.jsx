@@ -16,13 +16,13 @@ function App() {
         <Route path="/signup" element={<Signup />} /> */}
         
         {  /* Application routes with Layout */}
-        {/* <Route path="/" element={<Layout />}> */}
+        <Route path="/" element={<Layout />}>
           <Route path="/" element={<MainDashboard/>} />
           <Route path="map" element={<MainDashboard />} />
           <Route path="wifi" element={<MainDashboard />} />
           <Route path="add-wifi-site" element={<AddWifiSitePage />} /> {/* Add this route */}
           <Route path="settings" element={<MainDashboard />} />
-        {/* </Route> */}
+        </Route>
       </Routes>
     </Router>
 
