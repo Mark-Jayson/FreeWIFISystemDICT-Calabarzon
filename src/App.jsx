@@ -3,7 +3,7 @@ import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 import MainDashboard from "./pages/MainDashboard.jsx";
 import Layout from "./pages/Layout.jsx";
-import AddWifiSitePage from "./pages/AddWifiSitePage.jsx"; // Add this import
+import AddWifiSitePage from "./pages/AddWifiSitePage.jsx";
 
 function App() {
   return (
@@ -19,7 +19,7 @@ function App() {
           <Route path="dashboard" element={<MainDashboard />} />
           <Route path="map" element={<MainDashboard />} />
           <Route path="wifi" element={<MainDashboard />} />
-          <Route path="add-wifi-site" element={<AddWifiSitePage />} /> {/* Add this route */}
+          <Route path="add-wifi-site" element={<AddWifiSitePage />} />
           <Route path="settings" element={<MainDashboard />} />
         </Route>
       </Routes>
