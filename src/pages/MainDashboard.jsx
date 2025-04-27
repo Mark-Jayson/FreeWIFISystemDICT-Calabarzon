@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import MapToolbar from '../components/MapToolbar';
+import InfoPanel from '../components/InfoPanel';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
@@ -17,6 +18,7 @@ const MainDashboard = () => {
   // UI state
   const [activeTab, setActiveTab] = useState('map');        // Current active tab (map, dashboard, wifi)
   const [panelData, setPanelData] = useState(null);         // Data to display in the info panel
+  const [searchQuery, setSearchQuery] = useState('');       // Search query from HEAD version
   
   // Map state
   const [map, setMap] = useState(null);                     // Mapbox map instance (to pass to child components)
@@ -27,8 +29,16 @@ const MainDashboard = () => {
   const [zoom, setZoom] = useState(INITIAL_ZOOM);          // Current map zoom level
   const [mapInitialized, setMapInitialized] = useState(false); // Flag to track if map is fully loaded
 
+  // Handle search from MapToolbar
+  const handleSearch = (query) => {
+    setSearchQuery(query);
+    // You could add additional search functionality here
+  };
+
   // Initialize and configure the Mapbox map
   useEffect(() => {
+    if (activeTab !== 'map') return;
+
     // Step 1: Set up the Mapbox access token from environment variables
     try {
       // Get the Mapbox access token from Vite environment variables
@@ -39,6 +49,12 @@ const MainDashboard = () => {
     } catch(err) {
       console.error("mapbox error", err);
       setError("Failed to set Mapbox access token");
+      
+      // Fallback to placeholder if map initialization fails
+      const container = document.getElementById('map-container');
+      if (container) {
+        container.innerHTML = '<div class="flex items-center justify-center h-full bg-gray-100">Map Placeholder (MapBox not configured)</div>';
+      }
       return;
     }
 
@@ -166,7 +182,7 @@ const MainDashboard = () => {
         mapRef.current = null;    // Clear the reference
       }
     };
-  }, []); // Empty dependency array means this effect runs once on mount
+  }, [activeTab, center, zoom]); // Run when activeTab, center, or zoom changes
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -174,8 +190,12 @@ const MainDashboard = () => {
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <div className="flex-1 flex flex-col">
-        {/* IMPORTANT: Pass the map instance to MapToolbar so it can add markers and fly to locations */}
-        <MapToolbar mapInstance={map} setPanelData={setPanelData} />
+        {/* IMPORTANT: Pass both map instance and onSearch handler */}
+        <MapToolbar 
+          mapInstance={map} 
+          setPanelData={setPanelData} 
+          onSearch={handleSearch} 
+        />
 
         {/* Map view */}
         {activeTab === 'map' && (
@@ -184,7 +204,7 @@ const MainDashboard = () => {
             <div id="map-container" className="w-full h-full" ref={mapContainerRef}></div>
             
             {/* Information panel that appears when a location is selected */}
-            {panelData && panelData.show && (
+            {panelData && panelData.show ? (
               <div className="absolute top-4 right-4 bg-white p-4 rounded shadow-lg max-w-md">
                 <h3 className="text-lg font-bold">{panelData.title}</h3>
                 <p className="text-gray-600">{panelData.description}</p>
@@ -200,6 +220,9 @@ const MainDashboard = () => {
                   Close
                 </button>
               </div>
+            ) : (
+              // Include the InfoPanel from HEAD version when no marker is selected
+              <InfoPanel searchQuery={searchQuery} />
             )}
           </div>
         )}
@@ -208,6 +231,7 @@ const MainDashboard = () => {
           <div className="flex-1 p-6">
             <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="bg-white p-4 rounded shadow">Dashboard content will appear here</div>
             </div>
           </div>
         )}
@@ -215,6 +239,7 @@ const MainDashboard = () => {
         {activeTab === 'wifi' && (
           <div className="flex-1 p-6">
             <h1 className="text-2xl font-bold mb-4">Free Wi-Fi Sites</h1>
+            <div className="bg-white p-4 rounded shadow">Wi-Fi sites content will appear here</div>
           </div>
         )}
       </div>
