@@ -160,7 +160,7 @@ const AddWifiSitePage = () => {
 
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">Site</label>
+                      <label className="block text-xs text-gray-600 mb-1">Site Type</label>
                       <input
                         type="text"
                         name="site"
