@@ -3,13 +3,12 @@ import mapboxgl from 'mapbox-gl';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
-
-const MapToolbar = ({ mapInstance, setPanelData }) => {
+const MapToolbar = ({ mapInstance, setPanelData, onSearch }) => {
   // State to track which button is being hovered for UI feedback
   const [hoveredButton, setHoveredButton] = useState(null);
   // Ref to store timeout ID for debouncing search requests
   const searchTimeoutRef = useRef(null);
-
+  
   // Filter options for the map interface
   const filterItems = [
     { id: 'district', label: 'District' },
@@ -53,6 +52,11 @@ const MapToolbar = ({ mapInstance, setPanelData }) => {
       
       // Update search results state with the features returned
       setSearchResults(data.features || []);
+      
+      // Call original onSearch if provided (maintaining compatibility with HEAD version)
+      if (onSearch) {
+        onSearch(query);
+      }
     } catch (error) {
       console.error('Search error:', error);
       setSearchResults([]);
@@ -161,11 +165,8 @@ const MapToolbar = ({ mapInstance, setPanelData }) => {
     console.log("MapToolbar received mapInstance:", mapInstance);
   }, [mapInstance]);
 
-
-  
-
   return (
-    <div className="bg-white p-3 shadow-md flex items-center ">
+    <div className="bg-white p-3 shadow-md flex items-center">
       <div className="relative mr-4">
         <input 
           type="text" 
