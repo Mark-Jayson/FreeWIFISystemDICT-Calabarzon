@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Sidebar from '../components/Sidebar'; 
+import Sidebar from '../components/Sidebar';
 
 const AddWifiSitePage = () => {
-  const [activeTab, setActiveTab] = useState('add'); 
+  const [activeTab, setActiveTab] = useState('add');
   const [showNewLocationForm, setShowNewLocationForm] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -38,7 +38,7 @@ const AddWifiSitePage = () => {
 
   const handleSubmit = () => {
     setShowConfirmModal(false);
-    
+
     console.log('Form submitted:', formData);
   };
 
@@ -60,7 +60,7 @@ const AddWifiSitePage = () => {
   return (
     <div className="flex h-screen w-full">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-      
+
       <div className="flex-1 bg-white overflow-auto">
         <div className="p-6 max-w-6xl mx-auto">
           <h1 className="text-lg font-medium mb-0">Add Free Wifi Sites</h1>
@@ -81,7 +81,7 @@ const AddWifiSitePage = () => {
                   placeholder="Search"
                 />
               </div>
-              <button 
+              <button
                 className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm"
                 onClick={toggleNewLocationForm}
               >
@@ -104,7 +104,7 @@ const AddWifiSitePage = () => {
 
                   <div className="grid grid-cols-3 gap-4 mb-4">
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">Lot ID</label>
+                      <label className="block text-xs text-gray-600 mb-1">Location ID</label>
                       <input
                         type="text"
                         name="lotId"
@@ -115,14 +115,22 @@ const AddWifiSitePage = () => {
                     </div>
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Province</label>
-                      <input
-                        type="text"
+                      <select
                         name="province"
                         value={formData.province}
                         onChange={handleChange}
                         className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
-                      />
+                        required
+                      >
+                        <option value="" disabled selected className="text-gray-400">Select a province</option>
+                        <option value="Cavite">Cavite</option>
+                        <option value="Laguna">Laguna</option>
+                        <option value="Batangas">Batangas</option>
+                        <option value="Rizal">Rizal</option>
+                        <option value="Quezon">Quezon</option>
+                      </select>
                     </div>
+
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Congressional</label>
                       <input
@@ -307,7 +315,7 @@ const AddWifiSitePage = () => {
               <div>
                 <label className="block text-xs text-gray-600 mb-1">Activation Date</label>
                 <input
-                  type="text"
+                  type="date"
                   name="activationDate"
                   value={formData.activationDate}
                   onChange={handleChange}
@@ -317,7 +325,7 @@ const AddWifiSitePage = () => {
               <div>
                 <label className="block text-xs text-gray-600 mb-1">End of Contract</label>
                 <input
-                  type="text"
+                  type="date"
                   name="endOfContract"
                   value={formData.endOfContract}
                   onChange={handleChange}
@@ -327,7 +335,7 @@ const AddWifiSitePage = () => {
             </div>
 
             <div className="flex justify-end pt-2">
-              <button 
+              <button
                 className="bg-blue-500 text-white px-8 py-2 rounded-md text-sm"
                 onClick={openConfirmModal}
               >
@@ -340,7 +348,7 @@ const AddWifiSitePage = () => {
 
       <AnimatePresence>
         {showConfirmModal && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
