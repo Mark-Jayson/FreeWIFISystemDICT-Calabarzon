@@ -36,10 +36,53 @@ const AddWifiSitePage = () => {
     });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setShowConfirmModal(false);
 
-    console.log('Form submitted:', formData);
+    try {
+      const response = await fetch('http://localhost:5000/api/wifisites', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert('WiFi site added successfully!');
+        console.log('Saved Site ID:', data.siteId);
+
+        // Clear the form
+        setFormData({
+          lotId: '',
+          province: '',
+          congressional: '',
+          locality: '',
+          locationName: '',
+          site: '',
+          category: '',
+          longitude: '',
+          latitude: '',
+          siteId: '',
+          contract: '',
+          project: '',
+          procurement: '',
+          technology: '',
+          linkProvider: '',
+          bandwidth: '',
+          ispProvider: '',
+          activationDate: '',
+          endOfContract: ''
+        });
+      } else {
+        alert('Error: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('An error occurred. Please try again.');
+    }
   };
 
   const toggleNewLocationForm = () => {
