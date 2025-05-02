@@ -1,11 +1,11 @@
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Cell, ResponsiveContainer, Text } from 'recharts';
 
 const ActivationChartCard = ({ title, data, highlightYear }) => {
   return (
     <div className="bg-white rounded-lg shadow p-4 h-full">
       <div className="text-sm font-medium mb-2">{title}</div>
-      <div className="h-40">
+      <div className="h-56">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart 
             data={data}
@@ -13,9 +13,12 @@ const ActivationChartCard = ({ title, data, highlightYear }) => {
           >
             <CartesianGrid strokeDasharray="3 3" vertical={false} />
             <XAxis dataKey="year" />
-            <YAxis hide={true} />
-            <Tooltip />
-            <Bar dataKey="value" fill="#8884d8" radius={[4, 4, 0, 0]}>
+            <YAxis hide />
+            <Tooltip 
+              formatter={(value) => [`${value}`, 'Activations']}
+              labelFormatter={(label) => `Year ${label}`}
+            />
+            <Bar dataKey="value" radius={[4, 4, 0, 0]}>
               {data.map((entry, index) => (
                 <Cell 
                   key={`cell-${index}`} 
@@ -23,6 +26,18 @@ const ActivationChartCard = ({ title, data, highlightYear }) => {
                 />
               ))}
             </Bar>
+            {data.map((entry, index) => (
+              <Text
+                key={`text-${index}`}
+                x={(index + 0.5) * (600 / data.length)}
+                y={entry.year === highlightYear ? 100 : 150}
+                textAnchor="middle"
+                verticalAnchor="middle"
+                fill="#333"
+              >
+                {entry.value}
+              </Text>
+            ))}
           </BarChart>
         </ResponsiveContainer>
       </div>
