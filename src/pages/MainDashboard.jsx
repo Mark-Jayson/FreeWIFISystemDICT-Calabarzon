@@ -2,6 +2,7 @@ import { useRef, useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import MapToolbar from '../components/MapToolbar2';
 import InfoPanel from '../components/InfoPanel';
+import WiFiList from './WiFiList';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
@@ -162,7 +163,7 @@ const MainDashboard = () => {
           mapInstance={map}
           setPanelData={setPanelData}
           onSearch={handleSearch}
-        />
+        /> 
 
         {/* Map view */}
         {activeTab === 'map' && (
@@ -186,9 +187,8 @@ const MainDashboard = () => {
 
         {activeTab === 'wifi' && (
           <div className="flex-1 p-6">
-            <h1 className="text-2xl font-bold mb-4">Free Wi-Fi Sites</h1>
-            <div className="bg-white p-4 rounded shadow">Wi-Fi sites content will appear here</div>
-          </div>
+          <WiFiList/> 
+         </div>
         )}
       </div>
     </div>

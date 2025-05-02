@@ -18,6 +18,7 @@ function App() {
         {/* <Route path="/" element={<Layout />}> */}
           <Route path="/" element={<MainDashboard />} />
           <Route path="map" element={<MainDashboard />} />
+          <Route path = "dashboard" element={<MainDashboard />} />
           <Route path="wifi" element={<MainDashboard />} />
           <Route path="add-wifi-site" element={<AddWifiSitePage />} />
           <Route path="settings" element={<MainDashboard />} />

@@ -8,76 +8,7 @@ const InfoPanel = ({ searchQuery, panelData }) => {
   const [selectedCity, setSelectedCity] = useState(null);
   
   // Sampledata
-  const sampleProvinceData = {
-    provinceName: "Batangas",
-    provincialID: "L3-4335",
-    governor: "Dodo Mandanas",
-    freeWiFiSites: 20,
-    totalAPSites: 125,
-    digitizationRate: 67,
-    siteTypes: [
-      { type: "Municipal", count: 20 },
-      { type: "Hospitals", count: 12 },
-      { type: "Fire Stations", count: 3 },
-      { type: "Public Market", count: 7 },
-      { type: "Schools", count: 10 },
-      { type: "Parks", count: 3 }
-    ],
-    cities: [
-      { 
-        name: "Batangas City", 
-        locations: 5, 
-        sites: 26,
-        mayor: "Beverly Rose Dimacuha",
-        totalAPSites: 125,
-        digitizationRate: 42,
-        freeWifiLocations: [
-          { name: "Batangas City Hall", type: "Municipal", sites: 8 },
-          { name: "Batangas Provincial Hospital", type: "Hospital", sites: 12 },
-          { name: "Batangas State University", type: "School", sites: 15 }
-        ]
-      },
-      { 
-        name: "Sto. Tomas", 
-        locations: 5, 
-        sites: 41,
-        mayor: "Art Jun Maligalig",
-        totalAPSites: 125,
-        digitizationRate: 25,
-        freeWifiLocations: [
-          { name: "BatState - College of Science Building", type: "School", sites: 11 },
-          { name: "PUP Sto. Tomas Campus", type: "School", sites: 11 },
-          { name: "BatState - College of Science Building", type: "School", sites: 11 }
-        ]
-      },
-      { 
-        name: "Tanauan City", 
-        locations: 5, 
-        sites: 26,
-        mayor: "Mary Angeline Halili",
-        totalAPSites: 98,
-        digitizationRate: 35,
-        freeWifiLocations: [
-          { name: "Tanauan City Hall", type: "Municipal", sites: 7 },
-          { name: "First Asia Institute of Technology", type: "School", sites: 9 },
-          { name: "Tanauan Public Market", type: "Public Market", sites: 5 }
-        ]
-      },
-      { 
-        name: "Mataas na Kahoy", 
-        locations: 5, 
-        sites: 26,
-        mayor: "Janet Ilagan",
-        totalAPSites: 65,
-        digitizationRate: 40,
-        freeWifiLocations: [
-          { name: "Mataas na Kahoy Municipal Hall", type: "Municipal", sites: 6 },
-          { name: "Mataas na Kahoy National High School", type: "School", sites: 8 },
-          { name: "Mataas na Kahoy Healthcare Center", type: "Hospital", sites: 4 }
-        ]
-      }
-    ]
-  };
+  
 
   useEffect(() => {
     if (searchQuery && searchQuery.trim() !== '') {
