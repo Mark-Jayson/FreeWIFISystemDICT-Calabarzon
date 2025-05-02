@@ -8,7 +8,7 @@ const MapToolbar = ({ mapInstance, setPanelData, onSearch }) => {
   const [hoveredButton, setHoveredButton] = useState(null);
   // Ref to store timeout ID for debouncing search requests
   const searchTimeoutRef = useRef(null);
-
+  
   // Filter options for the map interface
   const filterItems = [
     { id: 'district', label: 'District' },
@@ -52,7 +52,7 @@ const MapToolbar = ({ mapInstance, setPanelData, onSearch }) => {
 
       // Update search results state with the features returned
       setSearchResults(data.features || []);
-
+      
       // Call original onSearch if provided (maintaining compatibility with HEAD version)
       if (onSearch) {
         onSearch(query);
