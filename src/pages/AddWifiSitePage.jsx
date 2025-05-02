@@ -67,28 +67,33 @@ const AddWifiSitePage = () => {
           <p className="text-xs text-gray-600 mb-6">This adds new Free WiFi Site to the database</p>
 
           <div className="mb-6">
-            <h2 className="font-medium text-sm mb-3">Choose location</h2>
-            <div className="flex items-center">
-              <div className="relative flex-grow mr-2">
-                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                  <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                  </svg>
-                </div>
-                <input
-                  type="text"
-                  className="w-full pl-10 pr-4 py-2 border rounded-md text-sm"
-                  placeholder="Search"
-                />
-              </div>
-              <button 
-                className="bg-gray-200 text-gray-700 px-4 py-2 rounded-md text-sm"
-                onClick={toggleNewLocationForm}
-              >
-                Add new location
-              </button>
-            </div>
-          </div>
+  <h2 className="font-medium text-sm mb-3">Choose location</h2>
+  <div className="relative flex-grow">
+    <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+      <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+      </svg>
+    </div>
+    <input
+  type="text"
+  className="pl-10 pr-4 py-2 border rounded-full text-sm"
+  style={{ width: "250px" }}
+  placeholder="Search"
+/>
+
+  </div>
+  <div className="mt-2 text-sm">
+    <span 
+      className={`underline cursor-pointer ${
+        showNewLocationForm ? 'text-gray-500' : 'text-blue-500'
+      }`}
+      onClick={toggleNewLocationForm}
+    >
+      Add new location
+    </span>
+  </div>
+</div>
+
 
           <AnimatePresence>
             {showNewLocationForm && (
