@@ -1,0 +1,244 @@
+{
+    "fws_locations": [
+      {
+        "lot_id": "FWS-CAL-001",
+        "province": "Batangas",
+        "congressional": "4th District",
+        "locality": "Lipa City",
+        "location_name": "Lipa District Hospital",
+        "site_type": "Hospital",
+        "category": "Healthcare",
+        "longitude": 121.1641,
+        "latitude": 13.9411,
+        "exact_location": [
+          "Lipa District Hospital, Main Building, 3rd Floor",
+          "Lipa District Hospital, Emergency Room",
+          "Lipa District Hospital, Administrative Office"
+        ]
+      },
+      {
+        "lot_id": "FWS-CAL-002",
+        "province": "Cavite",
+        "congressional": "7th District",
+        "locality": "Tagaytay City",
+        "location_name": "Tagaytay City Hall",
+        "site_type": "Government Office",
+        "category": "Administrative",
+        "longitude": 120.9622,
+        "latitude": 14.1153,
+        "exact_location": [
+          "Tagaytay City Hall, Main Building",
+          "Tagaytay City Hall, IT Department",
+          "Tagaytay City Hall, Conference Room A"
+        ]
+      },
+      {
+        "lot_id": "FWS-CAL-003",
+        "province": "Laguna",
+        "congressional": "2nd District",
+        "locality": "Calamba City",
+        "location_name": "University of the Philippines Los Baños",
+        "site_type": "Educational Institution",
+        "category": "Academic",
+        "longitude": 121.2437,
+        "latitude": 14.1648,
+        "exact_location": [
+          "UPLB Main Library, 2nd Floor",
+          "UPLB CAS Building, Rooftop",
+          "UPLB Student Union Building"
+        ]
+      },
+      {
+        "lot_id": "FWS-CAL-004",
+        "province": "Quezon",
+        "congressional": "1st District",
+        "locality": "Lucena City",
+        "location_name": "Quezon Provincial Capitol",
+        "site_type": "Government Office",
+        "category": "Administrative",
+        "longitude": 121.6167,
+        "latitude": 13.9419,
+        "exact_location": [
+          "Quezon Provincial Capitol, IT Center",
+          "Quezon Provincial Capitol, Main Building East Wing",
+          "Quezon Provincial Capitol, Communications Office"
+        ]
+      },
+      {
+        "lot_id": "FWS-CAL-005",
+        "province": "Rizal",
+        "congressional": "1st District",
+        "locality": "Antipolo City",
+        "location_name": "Antipolo City Hall",
+        "site_type": "Government Office",
+        "category": "Administrative",
+        "longitude": 121.1755,
+        "latitude": 14.5869,
+        "exact_location": [
+          "Antipolo City Hall, 5th Floor",
+          "Antipolo City Hall, Communications Tower",
+          "Antipolo City Hall, Emergency Response Center"
+        ]
+      },
+      {
+        "lot_id": "FWS-CAL-006",
+        "province": "Batangas",
+        "congressional": "1st District",
+        "locality": "Batangas City",
+        "location_name": "Batangas State University",
+        "site_type": "Educational Institution",
+        "category": "Academic",
+        "longitude": 121.0583,
+        "latitude": 13.7565,
+        "exact_location": [
+          "Batangas State University, Engineering Building",
+          "Batangas State University, CICS Building",
+          "Batangas State University, Administration Tower"
+        ]
+      },
+      {
+        "lot_id": "FWS-CAL-007",
+        "province": "Cavite",
+        "congressional": "4th District",
+        "locality": "Dasmariñas City",
+        "location_name": "De La Salle University - Dasmariñas",
+        "site_type": "Educational Institution",
+        "category": "Academic",
+        "longitude": 120.9539,
+        "latitude": 14.3182,
+        "exact_location": [
+          "DLSU-D, Angelo King Building",
+          "DLSU-D, Science Building",
+          "DLSU-D, University Center"
+        ]
+      },
+      {
+        "lot_id": "FWS-CAL-008",
+        "province": "Laguna",
+        "congressional": "4th District",
+        "locality": "Santa Cruz",
+        "location_name": "Laguna Provincial Hospital",
+        "site_type": "Hospital",
+        "category": "Healthcare",
+        "longitude": 121.4152,
+        "latitude": 14.2814,
+        "exact_location": [
+          "Laguna Provincial Hospital, Main Building",
+          "Laguna Provincial Hospital, ICU Wing",
+          "Laguna Provincial Hospital, Nursing Station"
+        ]
+      },
+      {
+        "lot_id": "FWS-CAL-009",
+        "province": "Quezon",
+        "congressional": "2nd District",
+        "locality": "Candelaria",
+        "location_name": "Southern Luzon State University",
+        "site_type": "Educational Institution",
+        "category": "Academic",
+        "longitude": 121.4235,
+        "latitude": 13.9343,
+        "exact_location": [
+          "SLSU Main Campus, Administration Building",
+          "SLSU Main Campus, IT Center",
+          "SLSU Main Campus, Library Building"
+        ]
+      },
+      {
+        "lot_id": "FWS-CAL-010",
+        "province": "Rizal",
+        "congressional": "2nd District",
+        "locality": "Taytay",
+        "location_name": "Taytay Municipal Hall",
+        "site_type": "Government Office",
+        "category": "Administrative",
+        "longitude": 121.1309,
+        "latitude": 14.5692,
+        "exact_location": [
+          "Taytay Municipal Hall, Main Building",
+          "Taytay Municipal Hall, DRRMO Office",
+          "Taytay Municipal Hall, Information Center"
+        ]
+      },
+      {
+        "lot_id": "FWS-CAL-011",
+        "province": "Batangas",
+        "congressional": "2nd District",
+        "locality": "Tanauan City",
+        "location_name": "First Asia Institute of Technology and Humanities",
+        "site_type": "Educational Institution",
+        "category": "Academic",
+        "longitude": 121.1486,
+        "latitude": 14.0867,
+        "exact_location": [
+          "FAITH Colleges, Main Building",
+          "FAITH Colleges, IT Building",
+          "FAITH Colleges, Communication Center"
+        ]
+      },
+      {
+        "lot_id": "FWS-CAL-012",
+        "province": "Cavite",
+        "congressional": "5th District",
+        "locality": "Silang",
+        "location_name": "Cavite State University - Silang Campus",
+        "site_type": "Educational Institution",
+        "category": "Academic",
+        "longitude": 120.9679,
+        "latitude": 14.2297,
+        "exact_location": [
+          "CvSU Silang, Administrative Building",
+          "CvSU Silang, IT Laboratory",
+          "CvSU Silang, Research Center"
+        ]
+      },
+      {
+        "lot_id": "FWS-CAL-013",
+        "province": "Laguna",
+        "congressional": "1st District",
+        "locality": "San Pedro City",
+        "location_name": "San Pedro City Hall",
+        "site_type": "Government Office",
+        "category": "Administrative",
+        "longitude": 121.0555,
+        "latitude": 14.3598,
+        "exact_location": [
+          "San Pedro City Hall, Main Building",
+          "San Pedro City Hall, Communications Department",
+          "San Pedro City Hall, Emergency Operations Center"
+        ]
+      },
+      {
+        "lot_id": "FWS-CAL-014",
+        "province": "Quezon",
+        "congressional": "3rd District",
+        "locality": "Tayabas City",
+        "location_name": "Quezon Medical Center",
+        "site_type": "Hospital",
+        "category": "Healthcare",
+        "longitude": 121.5874,
+        "latitude": 14.0192,
+        "exact_location": [
+          "Quezon Medical Center, Main Building",
+          "Quezon Medical Center, Emergency Department",
+          "Quezon Medical Center, Administrative Section"
+        ]
+      },
+      {
+        "lot_id": "FWS-CAL-015",
+        "province": "Rizal",
+        "congressional": "1st District",
+        "locality": "Binangonan",
+        "location_name": "Rizal Provincial Hospital",
+        "site_type": "Hospital",
+        "category": "Healthcare",
+        "longitude": 121.1927,
+        "latitude": 14.4547,
+        "exact_location": [
+          "Rizal Provincial Hospital, Main Wing",
+          "Rizal Provincial Hospital, Communications Center",
+          "Rizal Provincial Hospital, Emergency Room"
+        ]
+      }
+    ]
+  }
