@@ -1,6 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
-import MapToolbar from '../components/MapToolbar';
+import MapToolbar from '../components/MapToolbar2';
 import InfoPanel from '../components/InfoPanel';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
@@ -15,8 +16,12 @@ const PHILIPPINES_BOUNDS = [           // Boundary coordinates for Philippines
 ]; 
 
 const MainDashboard = () => {
+  // Get the current location to determine active tab
+  const location = useLocation();
+  const currentPath = location.pathname.split('/')[1];
+  
   // UI state
-  const [activeTab, setActiveTab] = useState('map');        // Current active tab (map, dashboard, wifi)
+  const [activeTab, setActiveTab] = useState(currentPath || 'map');  // Default to map if no path
   const [panelData, setPanelData] = useState(null);         // Data to display in the info panel
   const [searchQuery, setSearchQuery] = useState('');       // Search query from HEAD version
   
@@ -28,6 +33,11 @@ const MainDashboard = () => {
   const [center, setCenter] = useState(INITIAL_CENTER);    // Current map center coordinates
   const [zoom, setZoom] = useState(INITIAL_ZOOM);          // Current map zoom level
   const [mapInitialized, setMapInitialized] = useState(false); // Flag to track if map is fully loaded
+
+  // Update active tab when location changes
+  useEffect(() => {
+    setActiveTab(currentPath || 'map');
+  }, [currentPath]);
 
   // Handle search from MapToolbar
   const handleSearch = (query) => {
@@ -190,12 +200,14 @@ const MainDashboard = () => {
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <div className="flex-1 flex flex-col">
-        {/* IMPORTANT: Pass both map instance and onSearch handler */}
-        <MapToolbar 
-          mapInstance={map} 
-          setPanelData={setPanelData} 
-          onSearch={handleSearch} 
-        />
+        {/* Only show MapToolbar when in map view */}
+        {activeTab === 'map' && (
+          <MapToolbar 
+            mapInstance={map} 
+            setPanelData={setPanelData} 
+            onSearch={handleSearch} 
+          />
+        )}
 
         {/* Map view */}
         {activeTab === 'map' && (
@@ -227,19 +239,18 @@ const MainDashboard = () => {
           </div>
         )}
         
-        {activeTab === 'dashboard' && (
-          <div className="flex-1 p-6">
-            <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="bg-white p-4 rounded shadow">Dashboard content will appear here</div>
-            </div>
-          </div>
-        )}
-        
+        {/* We'll keep these for fallback purposes in case you need them */}
         {activeTab === 'wifi' && (
           <div className="flex-1 p-6">
             <h1 className="text-2xl font-bold mb-4">Free Wi-Fi Sites</h1>
             <div className="bg-white p-4 rounded shadow">Wi-Fi sites content will appear here</div>
+          </div>
+        )}
+        
+        {activeTab === 'settings' && (
+          <div className="flex-1 p-6">
+            <h1 className="text-2xl font-bold mb-4">Settings</h1>
+            <div className="bg-white p-4 rounded shadow">Settings content will appear here</div>
           </div>
         )}
       </div>
