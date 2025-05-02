@@ -17,6 +17,7 @@ const AddWifiSitePage = () => {
     longitude: '',
     latitude: '',
     siteId: '',
+    apSiteId: '',
     contract: '',
     project: '',
     procurement: '',
@@ -213,10 +214,12 @@ const AddWifiSitePage = () => {
             )}
           </AnimatePresence>
 
+          <hr className="border-t border-gray-300 my-6" />
+
           <div className="mb-8">
             <h2 className="text-sm font-medium mb-4">AP Site Information</h2>
 
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-3 gap-4 mb-4">
               <div>
                 <label className="block text-xs text-gray-600 mb-1">AP Site Name</label>
                 <input
@@ -225,6 +228,18 @@ const AddWifiSitePage = () => {
                   value={formData.siteId}
                   onChange={handleChange}
                   className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">AP Site ID</label>
+                <input
+                  type="text"
+                  name="apSiteId"
+                  value={formData.apSiteId || ''}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
+                  placeholder=""
+                  maxLength={10}
                 />
               </div>
               <div>
