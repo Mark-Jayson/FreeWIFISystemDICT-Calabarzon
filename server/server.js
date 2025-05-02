@@ -107,6 +107,103 @@ app.post('/api/login', async (req, res) => {
 }
 );
 
+async function createWifiSitesTableIfNotExists() {
+    const createTableQuery = `
+        DO $$
+        BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'province_enum') THEN
+                CREATE TYPE province_enum AS ENUM ('Cavite', 'Laguna', 'Rizal', 'Quezon', 'Batangas');
+            END IF;
+        END
+        $$;
+
+        CREATE TABLE IF NOT EXISTS wifi_sites (
+            id SERIAL PRIMARY KEY,
+            lot_id VARCHAR(255),
+            province province_enum,
+            congressional VARCHAR(255),
+            locality VARCHAR(255),
+            location_name VARCHAR(255),
+            site VARCHAR(255),
+            category VARCHAR(255),
+            longitude VARCHAR(255),
+            latitude VARCHAR(255),
+            site_id VARCHAR(255),
+            contract_status VARCHAR(255),
+            project VARCHAR(255),
+            procurement VARCHAR(255),
+            technology VARCHAR(255),
+            link_provider VARCHAR(255),
+            bandwidth VARCHAR(255),
+            isp_provider VARCHAR(255),
+            activation_date DATE,
+            end_of_contract DATE
+        );
+    `;
+    await pool.query(createTableQuery);
+}
+
+app.post('/api/wifisites', async (req, res) => {
+    const {
+        lotId, province, congressional, locality, locationName, site,
+        category, longitude, latitude, siteId, contract,
+        project, procurement, technology, linkProvider, bandwidth,
+        ispProvider, activationDate, endOfContract
+    } = req.body;
+
+    // Validate required fields
+    if (!locationName || !siteId) {
+        return res.status(400).json({ error: 'Required fields are missing' });
+    }
+
+    // Validate province
+    const allowedProvinces = ['Cavite', 'Laguna', 'Rizal', 'Quezon', 'Batangas'];
+    if (province && !allowedProvinces.includes(province)) {
+        return res.status(400).json({ error: 'Invalid province value' });
+    }
+
+    // Validate activationDate and endOfContract
+    const isValidDate = (date) => {
+        return !isNaN(Date.parse(date));
+    };
+    if (activationDate && !isValidDate(activationDate)) {
+        return res.status(400).json({ error: 'Invalid activationDate format' });
+    }
+    if (endOfContract && !isValidDate(endOfContract)) {
+        return res.status(400).json({ error: 'Invalid endOfContract format' });
+    }
+
+    try {
+        // Ensure the table exists first
+        await createWifiSitesTableIfNotExists();
+
+        const query = `
+            INSERT INTO wifi_sites 
+            (lot_id, province, congressional, locality, location_name, site, category, longitude, latitude,
+            site_id, contract_status, project, procurement, technology, link_provider, bandwidth,
+            isp_provider, activation_date, end_of_contract)
+            VALUES 
+            ($1, $2, $3, $4, $5, $6, $7, $8, $9,
+             $10, $11, $12, $13, $14, $15, $16,
+             $17, $18, $19)
+            RETURNING id
+        `;
+        const values = [
+            lotId, province, congressional, locality, locationName, site, category, longitude, latitude,
+            siteId, contract, project, procurement, technology, linkProvider, bandwidth,
+            ispProvider, activationDate ? new Date(activationDate) : null, 
+            endOfContract ? new Date(endOfContract) : null
+        ];
+
+        const result = await pool.query(query, values);
+
+        res.status(201).json({ message: 'WiFi site added successfully', siteId: result.rows[0].id });
+    } catch (error) {
+        console.error('Error adding WiFi site:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Sidebar from '../components/Sidebar'; 
+import Sidebar from '../components/Sidebar';
 
 const AddWifiSitePage = () => {
-  const [activeTab, setActiveTab] = useState('add'); 
+  const [activeTab, setActiveTab] = useState('add');
   const [showNewLocationForm, setShowNewLocationForm] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [formData, setFormData] = useState({
@@ -37,10 +37,53 @@ const AddWifiSitePage = () => {
     });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setShowConfirmModal(false);
-    
-    console.log('Form submitted:', formData);
+
+    try {
+      const response = await fetch('http://localhost:5000/api/wifisites', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert('WiFi site added successfully!');
+        console.log('Saved Site ID:', data.siteId);
+
+        // Clear the form
+        setFormData({
+          lotId: '',
+          province: '',
+          congressional: '',
+          locality: '',
+          locationName: '',
+          site: '',
+          category: '',
+          longitude: '',
+          latitude: '',
+          siteId: '',
+          contract: '',
+          project: '',
+          procurement: '',
+          technology: '',
+          linkProvider: '',
+          bandwidth: '',
+          ispProvider: '',
+          activationDate: '',
+          endOfContract: ''
+        });
+      } else {
+        alert('Error: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      alert('An error occurred. Please try again.');
+    }
   };
 
   const toggleNewLocationForm = () => {
@@ -61,15 +104,16 @@ const AddWifiSitePage = () => {
   return (
     <div className="flex h-screen w-full">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-      
+
       <div className="flex-1 bg-white overflow-auto">
         <div className="p-6 max-w-6xl mx-auto">
           <h1 className="text-lg font-medium mb-0">Add Free Wifi Sites</h1>
           <p className="text-xs text-gray-600 mb-6">This adds new Free WiFi Site to the database</p>
 
           <div className="mb-6">
-  <h2 className="font-medium text-sm mb-3">Choose location</h2>
-  <div className="relative flex-grow">
+
+            <h2 className="font-medium text-sm mb-3">Choose location</h2>
+     <div className="relative flex-grow">
     <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
       <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -94,8 +138,6 @@ const AddWifiSitePage = () => {
     </span>
   </div>
 </div>
-
-
           <AnimatePresence>
             {showNewLocationForm && (
               <motion.div
@@ -110,7 +152,7 @@ const AddWifiSitePage = () => {
 
                   <div className="grid grid-cols-3 gap-4 mb-4">
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">Lot ID</label>
+                      <label className="block text-xs text-gray-600 mb-1">Location ID</label>
                       <input
                         type="text"
                         name="lotId"
@@ -121,14 +163,22 @@ const AddWifiSitePage = () => {
                     </div>
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Province</label>
-                      <input
-                        type="text"
+                      <select
                         name="province"
                         value={formData.province}
                         onChange={handleChange}
                         className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
-                      />
+                        required
+                      >
+                        <option value="" disabled selected className="text-gray-400">Select a province</option>
+                        <option value="Cavite">Cavite</option>
+                        <option value="Laguna">Laguna</option>
+                        <option value="Batangas">Batangas</option>
+                        <option value="Rizal">Rizal</option>
+                        <option value="Quezon">Quezon</option>
+                      </select>
                     </div>
+
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Congressional</label>
                       <input
@@ -166,7 +216,7 @@ const AddWifiSitePage = () => {
 
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">Site</label>
+                      <label className="block text-xs text-gray-600 mb-1">Site Type</label>
                       <input
                         type="text"
                         name="site"
@@ -327,7 +377,7 @@ const AddWifiSitePage = () => {
               <div>
                 <label className="block text-xs text-gray-600 mb-1">Activation Date</label>
                 <input
-                  type="text"
+                  type="date"
                   name="activationDate"
                   value={formData.activationDate}
                   onChange={handleChange}
@@ -337,7 +387,7 @@ const AddWifiSitePage = () => {
               <div>
                 <label className="block text-xs text-gray-600 mb-1">End of Contract</label>
                 <input
-                  type="text"
+                  type="date"
                   name="endOfContract"
                   value={formData.endOfContract}
                   onChange={handleChange}
@@ -347,7 +397,7 @@ const AddWifiSitePage = () => {
             </div>
 
             <div className="flex justify-end pt-2">
-              <button 
+              <button
                 className="bg-blue-500 text-white px-8 py-2 rounded-md text-sm"
                 onClick={openConfirmModal}
               >
@@ -360,7 +410,7 @@ const AddWifiSitePage = () => {
 
       <AnimatePresence>
         {showConfirmModal && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
