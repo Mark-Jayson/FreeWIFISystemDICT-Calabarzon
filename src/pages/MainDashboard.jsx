@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import MapToolbar from '../components/MapToolbar2';
 import InfoPanel from '../components/InfoPanel';
+import CityInfoPanel from '../components/CityInfoPanel';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
@@ -22,17 +23,17 @@ const MainDashboard = () => {
   
   // UI state
   const [activeTab, setActiveTab] = useState(currentPath || 'map');  // Default to map if no path
-  const [panelData, setPanelData] = useState(null);         // Data to display in the info panel
-  const [searchQuery, setSearchQuery] = useState('');       // Search query from HEAD version
+  const [selectedCity, setSelectedCity] = useState(null);          // City data when a city is selected
+  const [searchQuery, setSearchQuery] = useState('');             // Search query from toolbar
   
   // Map state
-  const [map, setMap] = useState(null);                     // Mapbox map instance (to pass to child components)
-  const mapRef = useRef(null);                             // Ref to store map instance (for cleanup)
-  const mapContainerRef = useRef(null);                    // Ref to the DOM element for map container
-  const [error, setError] = useState(null);                // Error state for map initialization
-  const [center, setCenter] = useState(INITIAL_CENTER);    // Current map center coordinates
-  const [zoom, setZoom] = useState(INITIAL_ZOOM);          // Current map zoom level
-  const [mapInitialized, setMapInitialized] = useState(false); // Flag to track if map is fully loaded
+  const [map, setMap] = useState(null);                          // Mapbox map instance
+  const mapRef = useRef(null);                                   // Ref to store map instance (for cleanup)
+  const mapContainerRef = useRef(null);                          // Ref to the DOM element for map container
+  const [error, setError] = useState(null);                      // Error state for map initialization
+  const [center, setCenter] = useState(INITIAL_CENTER);          // Current map center coordinates
+  const [zoom, setZoom] = useState(INITIAL_ZOOM);                // Current map zoom level
+  const [mapInitialized, setMapInitialized] = useState(false);   // Flag to track if map is fully loaded
 
   // Update active tab when location changes
   useEffect(() => {
@@ -42,7 +43,18 @@ const MainDashboard = () => {
   // Handle search from MapToolbar
   const handleSearch = (query) => {
     setSearchQuery(query);
-    // You could add additional search functionality here
+    // Clear any selected city when performing a new search
+    setSelectedCity(null);
+  };
+
+  // Handle marker click to show city info
+  const handleMarkerClick = (cityData) => {
+    setSelectedCity(cityData);
+  };
+
+  // Handle closing the city info panel
+  const handleCloseCityPanel = () => {
+    setSelectedCity(null);
   };
 
   // Initialize and configure the Mapbox map
@@ -68,6 +80,7 @@ const MainDashboard = () => {
       return;
     }
 
+    // Sample geojson data - would normally come from an API
     const geojson = {
       type: 'FeatureCollection',
       features: [
@@ -86,7 +99,17 @@ const MainDashboard = () => {
             mayor: 'John Doe',
             freeWifiSites: 41,
             digitizationRate: 25,
-            siteLocations: [
+            provinceName: 'Sorsogon',
+            totalAPSites: 125,
+            siteTypes: [
+              { type: "School", count: 20 },
+              { type: "Hospital", count: 12 },
+              { type: "Fire Station", count: 3 },
+              { type: "Public Market", count: 7 },
+              { type: "Barangay", count: 15 },
+              { type: "Park", count: 6 }
+            ],
+            freeWifiLocations: [
               {
                 name: 'Sorsogon City Hall',
                 sites: 11,
@@ -117,7 +140,17 @@ const MainDashboard = () => {
             mayor: 'Jane Smith',
             freeWifiSites: 45,
             digitizationRate: 35,
-            siteLocations: [
+            provinceName: 'Albay',
+            totalAPSites: 145,
+            siteTypes: [
+              { type: "School", count: 25 },
+              { type: "Hospital", count: 10 },
+              { type: "Fire Station", count: 5 },
+              { type: "Public Market", count: 8 },
+              { type: "Barangay", count: 20 },
+              { type: "Park", count: 7 }
+            ],
+            freeWifiLocations: [
               {
                 name: 'Legazpi City Hall',
                 sites: 15,
@@ -169,10 +202,16 @@ const MainDashboard = () => {
         
         // Add click event listener to show location info in panel
         marker.getElement().addEventListener('click', () => {
-          setPanelData({
-            ...feature.properties,          // All location properties
-            coordinates: feature.geometry.coordinates,
-            show: true                      // Flag to display the panel
+          // Pass the city data to the city info panel component
+          handleMarkerClick({
+            name: feature.properties.title,
+            provinceName: feature.properties.provinceName,
+            totalSites: feature.properties.sites,
+            mayor: feature.properties.mayor,
+            totalAPSites: feature.properties.totalAPSites,
+            digitizationRate: feature.properties.digitizationRate,
+            siteTypes: feature.properties.siteTypes,
+            freeWifiLocations: feature.properties.freeWifiLocations,
           });
         });
       });
@@ -194,6 +233,59 @@ const MainDashboard = () => {
     };
   }, [activeTab, center, zoom]); // Run when activeTab, center, or zoom changes
 
+  // Render appropriate content based on active tab
+  const renderContent = () => {
+    switch(activeTab) {
+      case 'map':
+        return (
+          <div className="flex-1 relative">
+            {/* Map container - this div is where Mapbox will render the map */}
+            <div id="map-container" className="w-full h-full" ref={mapContainerRef}></div>
+            
+            {/* Show the info panel when search is performed but no city is selected */}
+            {searchQuery && !selectedCity && (
+              <InfoPanel searchQuery={searchQuery} onCityClick={handleMarkerClick} />
+            )}
+            
+            {/* Show the city info panel when a city is selected */}
+            {selectedCity && (
+              <CityInfoPanel cityData={selectedCity} onBack={handleCloseCityPanel} />
+            )}
+          </div>
+        );
+      case 'dashboard':
+        return (
+          <div className="flex-1 p-6">
+            <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="bg-white p-4 rounded shadow">Dashboard content will appear here</div>
+            </div>
+          </div>
+        );
+      case 'wifi':
+        return (
+          <div className="flex-1 p-6">
+            <h1 className="text-2xl font-bold mb-4">Free Wi-Fi Sites</h1>
+            <div className="bg-white p-4 rounded shadow">Wi-Fi sites content will appear here</div>
+          </div>
+        );
+      case 'settings':
+        return (
+          <div className="flex-1 p-6">
+            <h1 className="text-2xl font-bold mb-4">Settings</h1>
+            <div className="bg-white p-4 rounded shadow">Settings content will appear here</div>
+          </div>
+        );
+      default:
+        return (
+          <div className="flex-1 p-6">
+            <h1 className="text-2xl font-bold mb-4">Page Not Found</h1>
+            <p>The requested page could not be found.</p>
+          </div>
+        );
+    }
+  };
+
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar navigation */}
@@ -204,55 +296,12 @@ const MainDashboard = () => {
         {activeTab === 'map' && (
           <MapToolbar 
             mapInstance={map} 
-            setPanelData={setPanelData} 
             onSearch={handleSearch} 
           />
         )}
 
-        {/* Map view */}
-        {activeTab === 'map' && (
-          <div className="flex-1 relative">
-            {/* Map container - this div is where Mapbox will render the map */}
-            <div id="map-container" className="w-full h-full" ref={mapContainerRef}></div>
-            
-            {/* Information panel that appears when a location is selected */}
-            {panelData && panelData.show ? (
-              <div className="absolute top-4 right-4 bg-white p-4 rounded shadow-lg max-w-md">
-                <h3 className="text-lg font-bold">{panelData.title}</h3>
-                <p className="text-gray-600">{panelData.description}</p>
-                <div className="mt-2">
-                  <p><strong>Sites:</strong> {panelData.sites}</p>
-                  <p><strong>Free WiFi Sites:</strong> {panelData.freeWifiSites}</p>
-                  <p><strong>Mayor:</strong> {panelData.mayor}</p>
-                </div>
-                <button 
-                  className="mt-3 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
-                  onClick={() => setPanelData(prev => ({ ...prev, show: false }))}
-                >
-                  Close
-                </button>
-              </div>
-            ) : (
-              // Include the InfoPanel from HEAD version when no marker is selected
-              <InfoPanel searchQuery={searchQuery} />
-            )}
-          </div>
-        )}
-        
-        {/* We'll keep these for fallback purposes in case you need them */}
-        {activeTab === 'wifi' && (
-          <div className="flex-1 p-6">
-            <h1 className="text-2xl font-bold mb-4">Free Wi-Fi Sites</h1>
-            <div className="bg-white p-4 rounded shadow">Wi-Fi sites content will appear here</div>
-          </div>
-        )}
-        
-        {activeTab === 'settings' && (
-          <div className="flex-1 p-6">
-            <h1 className="text-2xl font-bold mb-4">Settings</h1>
-            <div className="bg-white p-4 rounded shadow">Settings content will appear here</div>
-          </div>
-        )}
+        {/* Dynamic content based on active tab */}
+        {renderContent()}
       </div>
     </div>
   );
