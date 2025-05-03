@@ -2,9 +2,9 @@ import React from 'react';
 
 const SimpleStatCard = ({ title, value }) => {
   return (
-    <div className="bg-white rounded-lg shadow p-4 h-full">
-      <div className="text-sm font-medium mb-2">{title}</div>
-      <div className="text-4xl font-bold text-center my-4">{value}</div>
+    <div className="py-2">
+      <div className="text-sm font-medium mb-1 text-gray-700">{title}</div>
+      <div className="text-4xl font-bold text-right text-gray-900">{value}</div>
     </div>
   );
 };
