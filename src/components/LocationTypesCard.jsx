@@ -2,7 +2,7 @@ import React from 'react';
 
 const LocationTypesCard = ({ title, subtitle, data }) => {
   return (
-    <div className="bg-white rounded-lg shadow p-4 h-full">
+    <div className="bg-white rounded-lg shadow p-4 h-full ">
       <div className="text-sm font-medium mb-1">{title}</div>
       {subtitle && <div className="text-xs text-gray-600 mb-2">{subtitle}</div>}
       

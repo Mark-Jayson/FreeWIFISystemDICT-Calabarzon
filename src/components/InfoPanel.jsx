@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import CityInfoPanel from './CityInfoPanel';
 
 
-const InfoPanel = ({ searchQuery }) => {
+const InfoPanel = ({ searchQuery, panelData }) => {
   const [showPanel, setShowPanel] = useState(false);
   const [provinceData, setProvinceData] = useState(null);
   const [selectedCity, setSelectedCity] = useState(null);
@@ -14,7 +14,7 @@ const InfoPanel = ({ searchQuery }) => {
     if (searchQuery && searchQuery.trim() !== '') {
       // In a real app, you would fetch data based on the search query
       // For now, we'll just show the sample data
-      setProvinceData(sampleProvinceData);
+      setProvinceData(panelData);
       setShowPanel(true);
       setSelectedCity(null); 
     }

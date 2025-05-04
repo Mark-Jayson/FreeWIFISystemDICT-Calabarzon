@@ -11,7 +11,7 @@ const EnhancedStatCard = ({
   activePercentage
 }) => {
   return (
-    <div className="bg-white rounded-lg shadow p-4 h-full">
+    <div className="bg-white rounded-lg shadow p-4 h-full truncate wrap-anywhere">
       <div className="flex h-full">
         <div className="flex flex-col flex-1 border-r pr-4">
           <div className="flex items-start mb-2">
@@ -22,7 +22,7 @@ const EnhancedStatCard = ({
             </div>
           </div>
           
-          <div className="flex items-center text-xs mt-1">
+          <div className="flex items-center text-xs mt-1 truncate wrap-anywhere">
             <div className="flex items-center text-red-600">
               <span className="mr-1">↓</span> {trendValue}
             </div>
@@ -41,7 +41,7 @@ const EnhancedStatCard = ({
             ></div>
           </div>
           
-          <div className="flex justify-between text-xs">
+          <div className="flex justify-between text-xs ">
             <div className="flex items-center gap-1">
               <span className="w-2 h-2 bg-green-500 rounded-full"></span>
               <span>{activeCount}</span>
