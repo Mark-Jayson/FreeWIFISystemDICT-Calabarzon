@@ -197,6 +197,7 @@ app.post('/api/location', async (req, res) => {
         
         await client.query('BEGIN');
 
+<<<<<<< HEAD
         // 1. Insert into location table
         const locationQuery = `
             INSERT INTO public.location 
@@ -234,6 +235,23 @@ app.post('/api/location', async (req, res) => {
             bandwidth ? parseInt(bandwidth) : null,
             ispProvider,
             activationDate ? new Date(activationDate) : null,
+=======
+        const query = `
+            INSERT INTO wifi_sites 
+            (lot_id, province, congressional, locality, location_name, site, category, longitude, latitude,
+            site_id, contract_status, project, procurement, technology, link_provider, bandwidth,
+            isp_provider, activation_date, end_of_contract)
+            VALUES 
+            ($1, $2, $3, $4, $5, $6, $7, $8, $9,
+            $10, $11, $12, $13, $14, $15, $16,
+            $17, $18, $19)
+            RETURNING id
+        `;
+        const values = [
+            lotId, province, congressional, locality, locationName, site, category, longitude, latitude,
+            siteId, contract, project, procurement, technology, linkProvider, bandwidth,
+            ispProvider, activationDate ? new Date(activationDate) : null,
+>>>>>>> f4f9d698dc252ba668f48f1ed59bc586c8f42cd8
             endOfContract ? new Date(endOfContract) : null
         ];
         const apsitesResult = await client.query(apsitesQuery, apsitesValues);
