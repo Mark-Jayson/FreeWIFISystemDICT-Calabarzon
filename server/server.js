@@ -184,14 +184,14 @@ app.post('/api/wifisites', async (req, res) => {
             isp_provider, activation_date, end_of_contract)
             VALUES 
             ($1, $2, $3, $4, $5, $6, $7, $8, $9,
-             $10, $11, $12, $13, $14, $15, $16,
-             $17, $18, $19)
+            $10, $11, $12, $13, $14, $15, $16,
+            $17, $18, $19)
             RETURNING id
         `;
         const values = [
             lotId, province, congressional, locality, locationName, site, category, longitude, latitude,
             siteId, contract, project, procurement, technology, linkProvider, bandwidth,
-            ispProvider, activationDate ? new Date(activationDate) : null, 
+            ispProvider, activationDate ? new Date(activationDate) : null,
             endOfContract ? new Date(endOfContract) : null
         ];
 
