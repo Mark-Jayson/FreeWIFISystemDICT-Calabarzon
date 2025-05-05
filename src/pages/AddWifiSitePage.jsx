@@ -16,13 +16,7 @@ const AddWifiSitePage = () => {
     category: '',
     longitude: '',
     latitude: '',
-<<<<<<< HEAD
-
-    // AP Site data
-    siteId: '', // site_name in apsites table
-=======
     siteId: '',
->>>>>>> f4f9d698dc252ba668f48f1ed59bc586c8f42cd8
     contract: '',
     project: '',
     procurement: '',
