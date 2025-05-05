@@ -11,10 +11,9 @@ function App() {
     <Router>
       <Routes>
         {/* Authentication routes */}
-        {/* <Route path="/" element={<Login />} />
+        <Route path="/" element={<Login />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-         */}
         {/* Application routes with Layout */}
         {/* <Route path="/" element={<Layout />}> */}
           <Route path="dashboard" element={<Dashboard />} /> {/* Use the Dashboard component */}
