@@ -67,7 +67,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-screen w-full">
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       
       <div className="flex-1 bg-blue-50 overflow-y-auto">
