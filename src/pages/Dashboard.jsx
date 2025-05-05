@@ -13,6 +13,7 @@ import ActivationChartCard from '../components/ActivationChartCard';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [selectedRegion, setSelectedRegion] = useState('Region IV - A CALABARZON');
   
   // Sample data 
   const provincesData = [
@@ -70,7 +71,8 @@ const Dashboard = () => {
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
       
       <div className="flex-1 bg-blue-50 overflow-y-auto">
-        <Header region="Region IV - A Calabarzon" />
+        <Header region={selectedRegion} 
+        onRegionChange={setSelectedRegion} />
         
         <div className="px-6 pb-6">
           <div className="grid grid-cols-3 gap-4">
@@ -84,7 +86,7 @@ const Dashboard = () => {
               <WifiTechnologyCard data={wifiTechData} />
               
               <LocationTypesCard 
-                title="Free WiFi Sites location per location types in Calabarzon"
+                title={"Free WiFi Sites location per location types in" + selectedRegion}
                 subtitle="Free WiFi sites location per location types in Batangas"
                 data={locationTypes}
               />
@@ -117,7 +119,7 @@ const Dashboard = () => {
               </div>
               
               <LGUListCard 
-                title="LGUs with most Free WiFi Location"
+                title={'LGUs in ${selectedRegion }with most Free WiFi Location'}
                 data={lguData}
               />
             </div>
