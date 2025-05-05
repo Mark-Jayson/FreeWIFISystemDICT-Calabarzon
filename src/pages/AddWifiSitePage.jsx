@@ -122,6 +122,7 @@ const AddWifiSitePage = () => {
   const handleSubmit = async () => {
     setShowConfirmModal(false);
 
+
     // Validate required fields
     if (!formData.locationName || !formData.siteId) {
       alert('Location name and AP Site name are required');
@@ -138,6 +139,8 @@ const AddWifiSitePage = () => {
       });
 
       const data = await response.json();
+      console.log('Response status:', response.status);
+      console.log('Response data:', data);
 
       if (response.ok) {
         alert('WiFi site added successfully!');
