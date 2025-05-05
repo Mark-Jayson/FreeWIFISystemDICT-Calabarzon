@@ -161,7 +161,6 @@ async function createTablesIfNotExist() {
     }
 }
 
-
 // Initialize tables when server starts
 (async () => {
     try {
@@ -248,7 +247,6 @@ app.post('/api/location', async (req, res) => {
     if (!locationName || !siteId) {
         return res.status(400).json({ error: 'Location name and AP site name are required' });
     }
-
 
     // Start a transaction
     const client = await pool.connect();
@@ -341,15 +339,6 @@ app.post('/api/location', async (req, res) => {
             activationDate ? new Date(activationDate) : null,
             endOfContract ? new Date(endOfContract) : null
         ];
-        const apsitesResult = await client.query(apsitesQuery, apsitesValues);
-        const siteIdResult = apsitesResult.rows[0].site_id;
-
-        // 3. Insert into connect table (junction table)
-        const connectQuery = `
-            INSERT INTO public.connect (location_id, site_id)
-            VALUES ($1, $2)
-        `;
-        await client.query(connectQuery, [locationId, siteIdResult]);
 
         const apsitesResult = await client.query(apsitesQuery, apsitesValues);
         const siteIdResult = apsitesResult.rows[0].site_id;
@@ -383,7 +372,6 @@ app.get('/api/wifisites', async (req, res) => {
             FROM 
                 public.apsites a
             JOIN 
-
                 public.location l ON c.location_id = l.location_id
         `;
         
