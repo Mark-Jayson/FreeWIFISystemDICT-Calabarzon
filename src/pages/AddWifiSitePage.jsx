@@ -7,16 +7,22 @@ const AddWifiSitePage = () => {
   const [showNewLocationForm, setShowNewLocationForm] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [formData, setFormData] = useState({
-    lotId: '',
+    // Location data
     province: '',
     congressional: '',
     locality: '',
     locationName: '',
-    site: '',
+    site: '', // site_name in location table
     category: '',
     longitude: '',
     latitude: '',
+<<<<<<< HEAD
+
+    // AP Site data
+    siteId: '', // site_name in apsites table
+=======
     siteId: '',
+>>>>>>> f4f9d698dc252ba668f48f1ed59bc586c8f42cd8
     contract: '',
     project: '',
     procurement: '',
@@ -39,8 +45,10 @@ const AddWifiSitePage = () => {
   const handleSubmit = async () => {
     setShowConfirmModal(false);
 
+    console.log('Submitting form data:', formData);
+
     try {
-      const response = await fetch('http://localhost:5000/api/wifisites', {
+      const response = await fetch('http://localhost:5000/api/location', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -49,14 +57,16 @@ const AddWifiSitePage = () => {
       });
 
       const data = await response.json();
+      console.log('Response status:', response.status);
+      console.log('Response data:', data);
 
       if (response.ok) {
         alert('WiFi site added successfully!');
+        console.log('Saved Location ID:', data.locationId);
         console.log('Saved Site ID:', data.siteId);
 
         // Clear the form
         setFormData({
-          lotId: '',
           province: '',
           congressional: '',
           locality: '',

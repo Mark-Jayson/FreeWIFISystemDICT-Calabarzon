@@ -107,76 +107,135 @@ app.post('/api/login', async (req, res) => {
 }
 );
 
-async function createWifiSitesTableIfNotExists() {
-    const createTableQuery = `
-        DO $$
-        BEGIN
-            IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'province_enum') THEN
-                CREATE TYPE province_enum AS ENUM ('Cavite', 'Laguna', 'Rizal', 'Quezon', 'Batangas');
-            END IF;
-        END
-        $$;
+async function createTablesIfNotExist() {
+    const createTablesQuery = `
+        -- Create location table
+        CREATE TABLE IF NOT EXISTS public.location (
+            location_id SERIAL PRIMARY KEY,
+            location_name VARCHAR(100),
+            province VARCHAR(100),
+            congressional VARCHAR(100),
+            locality VARCHAR(100),
+            site_name VARCHAR(100),
+            category VARCHAR(100),
+            longitude NUMERIC(9,6),
+            latitude NUMERIC(9,6)
+        );
 
-        CREATE TABLE IF NOT EXISTS wifi_sites (
-            id SERIAL PRIMARY KEY,
-            lot_id VARCHAR(255),
-            province province_enum,
-            congressional VARCHAR(255),
-            locality VARCHAR(255),
-            location_name VARCHAR(255),
-            site VARCHAR(255),
-            category VARCHAR(255),
-            longitude VARCHAR(255),
-            latitude VARCHAR(255),
-            site_id VARCHAR(255),
-            contract_status VARCHAR(255),
-            project VARCHAR(255),
-            procurement VARCHAR(255),
-            technology VARCHAR(255),
-            link_provider VARCHAR(255),
-            bandwidth VARCHAR(255),
-            isp_provider VARCHAR(255),
+        -- Create apsites table
+        CREATE TABLE IF NOT EXISTS public.apsites (
+            site_id SERIAL PRIMARY KEY,
+            site_name VARCHAR(100),
+            contract_status VARCHAR(20),
+            project VARCHAR(100),
+            procurement VARCHAR(100),
+            technology VARCHAR(100),
+            link_provider VARCHAR(100),
+            bandwidth INTEGER,
+            isp_provider VARCHAR(100),
             activation_date DATE,
             end_of_contract DATE
         );
+
+        -- Create connect table (junction table)
+        CREATE TABLE IF NOT EXISTS public.connect (
+            location_id INTEGER,
+            site_id INTEGER,
+            PRIMARY KEY (location_id, site_id),
+            FOREIGN KEY (location_id) REFERENCES public.location(location_id) ON DELETE CASCADE,
+            FOREIGN KEY (site_id) REFERENCES public.apsites(site_id) ON DELETE CASCADE
+        );
     `;
-    await pool.query(createTableQuery);
+    
+    try {
+        await pool.query(createTablesQuery);
+        console.log('Database tables created or already exist');
+    } catch (error) {
+        console.error('Error creating database tables:', error);
+        throw error;
+    }
 }
 
-app.post('/api/wifisites', async (req, res) => {
+app.post('/api/location', async (req, res) => {
     const {
-        lotId, province, congressional, locality, locationName, site,
-        category, longitude, latitude, siteId, contract,
-        project, procurement, technology, linkProvider, bandwidth,
-        ispProvider, activationDate, endOfContract
+        // Location data
+        lotId, 
+        province, 
+        congressional, 
+        locality, 
+        locationName, 
+        site, // site_type in the React form
+        category, 
+        longitude, 
+        latitude,
+
+        // AP Site data
+        siteId, // site_name in the React form
+        contract,
+        project, 
+        procurement, 
+        technology, 
+        linkProvider, 
+        bandwidth, 
+        ispProvider, 
+        activationDate, 
+        endOfContract
     } = req.body;
 
     // Validate required fields
     if (!locationName || !siteId) {
-        return res.status(400).json({ error: 'Required fields are missing' });
+        return res.status(400).json({ error: 'Location name and AP site name are required' });
     }
 
-    // Validate province
-    const allowedProvinces = ['Cavite', 'Laguna', 'Rizal', 'Quezon', 'Batangas'];
-    if (province && !allowedProvinces.includes(province)) {
-        return res.status(400).json({ error: 'Invalid province value' });
-    }
+    console.log('Request body:', req.body);
 
-    // Validate activationDate and endOfContract
-    const isValidDate = (date) => {
-        return !isNaN(Date.parse(date));
-    };
-    if (activationDate && !isValidDate(activationDate)) {
-        return res.status(400).json({ error: 'Invalid activationDate format' });
-    }
-    if (endOfContract && !isValidDate(endOfContract)) {
-        return res.status(400).json({ error: 'Invalid endOfContract format' });
-    }
-
+    // Start a transaction
+    const client = await pool.connect();
     try {
-        // Ensure the table exists first
-        await createWifiSitesTableIfNotExists();
+        // Ensure tables exist
+        await createTablesIfNotExist();
+        
+        await client.query('BEGIN');
 
+<<<<<<< HEAD
+        // 1. Insert into location table
+        const locationQuery = `
+            INSERT INTO public.location 
+            (location_name, province, congressional, locality, site_name, category, longitude, latitude)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+            RETURNING location_id
+        `;
+        const locationValues = [
+            locationName, 
+            province, 
+            congressional, 
+            locality, 
+            site, // using site as site_name in the location table
+            category, 
+            longitude ? parseFloat(longitude) : null, 
+            latitude ? parseFloat(latitude) : null
+        ];
+        const locationResult = await client.query(locationQuery, locationValues);
+        const locationId = locationResult.rows[0].location_id;
+
+        // 2. Insert into apsites table
+        const apsitesQuery = `
+            INSERT INTO public.apsites 
+            (site_name, contract_status, project, procurement, technology, link_provider, bandwidth, isp_provider, activation_date, end_of_contract)
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
+            RETURNING site_id
+        `;
+        const apsitesValues = [
+            siteId, 
+            contract, 
+            project, 
+            procurement, 
+            technology, 
+            linkProvider, 
+            bandwidth ? parseInt(bandwidth) : null,
+            ispProvider,
+            activationDate ? new Date(activationDate) : null,
+=======
         const query = `
             INSERT INTO wifi_sites 
             (lot_id, province, congressional, locality, location_name, site, category, longitude, latitude,
@@ -192,14 +251,57 @@ app.post('/api/wifisites', async (req, res) => {
             lotId, province, congressional, locality, locationName, site, category, longitude, latitude,
             siteId, contract, project, procurement, technology, linkProvider, bandwidth,
             ispProvider, activationDate ? new Date(activationDate) : null,
+>>>>>>> f4f9d698dc252ba668f48f1ed59bc586c8f42cd8
             endOfContract ? new Date(endOfContract) : null
         ];
+        const apsitesResult = await client.query(apsitesQuery, apsitesValues);
+        const siteIdResult = apsitesResult.rows[0].site_id;
 
-        const result = await pool.query(query, values);
+        // 3. Insert into connect table (junction table)
+        const connectQuery = `
+            INSERT INTO public.connect (location_id, site_id)
+            VALUES ($1, $2)
+        `;
+        await client.query(connectQuery, [locationId, siteIdResult]);
 
-        res.status(201).json({ message: 'WiFi site added successfully', siteId: result.rows[0].id });
+        await client.query('COMMIT');
+
+        res.status(201).json({ 
+            message: 'WiFi site added successfully', 
+            locationId: locationId,
+            siteId: siteIdResult
+        });
     } catch (error) {
+        await client.query('ROLLBACK');
         console.error('Error adding WiFi site:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    } finally {
+        client.release();
+    }
+});
+
+// Get all WiFi sites with location data
+app.get('/api/wifisites', async (req, res) => {
+    try {
+        const query = `
+            SELECT 
+                a.site_id, a.site_name, a.contract_status, a.project, a.procurement,
+                a.technology, a.link_provider, a.bandwidth, a.isp_provider, 
+                a.activation_date, a.end_of_contract,
+                l.location_id, l.province, l.congressional, l.locality,
+                l.location_name, l.site_name as location_site_type, l.category, l.longitude, l.latitude
+            FROM 
+                public.apsites a
+            JOIN 
+                public.connect c ON a.site_id = c.site_id
+            JOIN 
+                public.location l ON c.location_id = l.location_id
+        `;
+        
+        const result = await pool.query(query);
+        res.status(200).json(result.rows);
+    } catch (error) {
+        console.error('Error fetching WiFi sites:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
