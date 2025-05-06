@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import SiteInfoPanel from './SiteInfoPanel';
+import SiteInfoPanel from "./SiteInfoPanel";
 
 const CityInfoPanel = ({ cityData, onBack }) => {
   const [selectedSite, setSelectedSite] = useState(null);
