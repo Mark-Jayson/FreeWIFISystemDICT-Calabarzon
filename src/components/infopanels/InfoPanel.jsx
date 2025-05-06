@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import CityInfoPanel from './CityInfoPanel';
-
+import CityInfoPanel from "./CityInfoPanel";
 
 const InfoPanel = ({ searchQuery, panelData }) => {
   const [showPanel, setShowPanel] = useState(false);
