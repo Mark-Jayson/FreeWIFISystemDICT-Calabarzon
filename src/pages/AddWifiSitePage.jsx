@@ -26,6 +26,7 @@ const AddWifiSitePage = () => {
 
     // AP Site data
     siteId: '', // site_name in apsites table
+    siteName: '',
     contract: '',
     project: '',
     procurement: '',
@@ -156,6 +157,7 @@ const AddWifiSitePage = () => {
           longitude: '',
           latitude: '',
           siteId: '',
+          siteName: '',
           contract: '',
           project: '',
           procurement: '',
@@ -414,12 +416,22 @@ const AddWifiSitePage = () => {
             <h2 className="text-sm font-medium mb-4">AP Site Information</h2>
 
             <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+                <label className="block text-xs text-gray-600 mb-1">Site Code</label>
+                <input
+                  type="text"
+                  name="siteId"
+                  value={formData.siteId}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
+                />
+              </div>
               <div>
                 <label className="block text-xs text-gray-600 mb-1">AP Site Name</label>
                 <input
                   type="text"
                   name="siteId"
-                  value={formData.siteId}
+                  value={formData.siteName}
                   onChange={handleChange}
                   className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                 />
