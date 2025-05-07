@@ -108,6 +108,7 @@ const Dashboard = () => {
                 percentage={67}
                 totalCount={21464}
                 activeCount={3125}
+
                 description="(No. of Brgys with WiFi Location / Total no. of Brgys)"
               />
               
