@@ -1,6 +1,5 @@
 import { useRef, useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
 import MapToolbar from '../components/MapToolbar2';
 import InfoPanel from '../components/infopanels/InfoPanel';
 import CityInfoPanel from '../components/infopanels/CityInfoPanel';
@@ -236,7 +235,6 @@ const MainDashboard = () => {
   return (
     <div className="flex h-screen w-full">
       
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <div className="flex-1 flex flex-col">
         {/* Only show MapToolbar when in map view */}

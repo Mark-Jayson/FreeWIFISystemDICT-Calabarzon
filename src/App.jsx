@@ -2,27 +2,28 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 import MainDashboard from "./pages/MainDashboard.jsx";
-import Dashboard from "./pages/Dashboard.jsx"; // Import the Dashboard component
+import Dashboard from "./pages/Dashboard.jsx";
 import Layout from "./pages/Layout.jsx";
 import AddWifiSitePage from "./pages/AddWifiSitePage.jsx";
+import WiFiList from "./pages/WiFiList.jsx";
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* Authentication routes */}
-        {/* <Route path="/" element={<Login />} />
-        <Route path="/login" element={<Login />} />
+        {/* Optional: Auth routes without sidebar */}
+        {/* <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} /> */}
-        {/* Application routes with Layout */}
-        {/* <Route path="/" element={<Layout />}> */}
-          <Route path="dashboard" element={<Dashboard />} /> {/* Use the Dashboard component */}
+
+        {/* Routes with sidebar and layout */}
+        <Route path="/" element={<Layout />}>
+          <Route index element={<MainDashboard />} /> {/* "/" default route */}
+          <Route path="dashboard" element={<Dashboard />} />
           <Route path="map" element={<MainDashboard />} />
-          <Route path = "/" element={<MainDashboard />} />
-          <Route path="wifi" element={<MainDashboard />} />
+          <Route path="wifi" element={<WiFiList />} />
           <Route path="add-wifi-site" element={<AddWifiSitePage />} />
           <Route path="settings" element={<MainDashboard />} />
-        {/* </Route> */}
+        </Route>
       </Routes>
     </Router>
   );
