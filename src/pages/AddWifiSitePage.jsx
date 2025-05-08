@@ -13,6 +13,29 @@ const AddWifiSitePage = () => {
   const [error, setError] = useState('');
   const searchResultsRef = useRef(null);
 
+  const provinceData = {
+    'Cavite': {
+      localities: ['Bacoor', 'Cavite City', 'Dasmariñas', 'General Trias', 'Imus', 'Tagaytay', 'Trece Martires'],
+      congressionals: ['1st District', '2nd District', '3rd District', '4th District', '5th District', '6th District', '7th District', '8th District']
+    },
+    'Laguna': {
+      localities: ['Biñan', 'Cabuyao', 'Calamba', 'Los Baños', 'San Pablo', 'San Pedro', 'Santa Rosa'],
+      congressionals: ['1st District', '2nd District', '3rd District', '4th District', '5th District']
+    },
+    'Batangas': {
+      localities: ['Batangas City', 'Lipa', 'Santo Tomas', 'Tanauan', 'Bauan', 'Nasugbu', 'San Juan'],
+      congressionals: ['1st District', '2nd District', '3rd District', '4th District', '5th District', '6th District']
+    },
+    'Rizal': {
+      localities: ['Antipolo', 'Cainta', 'Taytay', 'Rodriguez', 'San Mateo', 'Tanay', 'Teresa'],
+      congressionals: ['1st District', '2nd District', '3rd District', '4th District']
+    },
+    'Quezon': {
+      localities: ['Lucena', 'Tayabas', 'Candelaria', 'Sariaya', 'Lucban', 'Infanta', 'Pagbilao'],
+      congressionals: ['1st District', '2nd District', '3rd District', '4th District']
+    }
+  };
+
   const [formData, setFormData] = useState({
     // Location data
     province: '',
@@ -26,6 +49,7 @@ const AddWifiSitePage = () => {
 
     // AP Site data
     siteId: '', // site_name in apsites table
+    siteName: '',
     contract: '',
     project: '',
     procurement: '',
@@ -36,6 +60,27 @@ const AddWifiSitePage = () => {
     activationDate: '',
     endOfContract: ''
   });
+
+  const [localityOptions, setLocalityOptions] = useState([]);
+  const [congressionalOptions, setCongressionalOptions] = useState([]);
+
+  // Update locality and congressional options when province changes
+  useEffect(() => {
+    if (formData.province && provinceData[formData.province]) {
+      setLocalityOptions(provinceData[formData.province].localities);
+      setCongressionalOptions(provinceData[formData.province].congressionals);
+
+      // Reset locality and congressional when province changes
+      setFormData(prev => ({
+        ...prev,
+        locality: '',
+        congressional: ''
+      }));
+    } else {
+      setLocalityOptions([]);
+      setCongressionalOptions([]);
+    }
+  }, [formData.province]);
 
   // Close search results when clicking outside
   useEffect(() => {
@@ -156,6 +201,7 @@ const AddWifiSitePage = () => {
           longitude: '',
           latitude: '',
           siteId: '',
+          siteName: '',
           contract: '',
           project: '',
           procurement: '',
@@ -316,7 +362,7 @@ const AddWifiSitePage = () => {
                         className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                         required
                       >
-                        <option value="" disabled selected className="text-gray-400">Select a province</option>
+                        <option value="" disabled selected className="text-gray-400">Select a Province</option>
                         <option value="Cavite">Cavite</option>
                         <option value="Laguna">Laguna</option>
                         <option value="Batangas">Batangas</option>
@@ -327,26 +373,44 @@ const AddWifiSitePage = () => {
 
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Congressional</label>
-                      <input
-                        type="text"
+                      <select
                         name="congressional"
                         value={formData.congressional}
                         onChange={handleChange}
                         className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
-                      />
+                        disabled={!formData.province}
+                      >
+                        <option value="" disabled selected className="text-gray-400">
+                          {formData.province ? "Select Congressional District" : "Congressional District"}
+                        </option>
+                        {congressionalOptions.map((congressional, index) => (
+                          <option key={index} value={congressional}>
+                            {congressional}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Locality</label>
-                      <input
-                        type="text"
+                      <select
                         name="locality"
                         value={formData.locality}
                         onChange={handleChange}
                         className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
-                      />
+                        disabled={!formData.province}
+                      >
+                        <option value="" disabled selected className="text-gray-400">
+                          {formData.province ? "Select Locality" : "Locality"}
+                        </option>
+                        {localityOptions.map((locality, index) => (
+                          <option key={index} value={locality}>
+                            {locality}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Location Name</label>
@@ -415,11 +479,21 @@ const AddWifiSitePage = () => {
 
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-xs text-gray-600 mb-1">AP Site Name</label>
+                <label className="block text-xs text-gray-600 mb-1">Site Code</label>
                 <input
                   type="text"
                   name="siteId"
                   value={formData.siteId}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">AP Site Name</label>
+                <input
+                  type="text"
+                  name="siteId"
+                  value={formData.siteName}
                   onChange={handleChange}
                   className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                 />

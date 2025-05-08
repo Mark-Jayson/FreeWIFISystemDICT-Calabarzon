@@ -234,8 +234,8 @@ const MainDashboard = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Sidebar navigation */}
+    <div className="flex h-screen w-full">
+      
       <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <div className="flex-1 flex flex-col">
