@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Sidebar from '../components/Sidebar';
 
 const AddWifiSitePage = () => {
   const [activeTab, setActiveTab] = useState('add');
@@ -258,7 +257,6 @@ const AddWifiSitePage = () => {
 
   return (
     <div className="flex h-screen w-full">
-      <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <div className="flex-1 bg-white overflow-auto">
         <div className="p-6 max-w-6xl mx-auto">
