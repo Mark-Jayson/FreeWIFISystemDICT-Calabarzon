@@ -369,7 +369,7 @@ const AddWifiSitePage = () => {
                         className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                       />
                     </div>
-                    <div class = "break-after-column">
+                    <div class="break-after-column">
                       <label className="block text-xs text-gray-600 mb-1">Province</label>
                       <select
                         name="province"
@@ -406,7 +406,7 @@ const AddWifiSitePage = () => {
                       </select>
                     </div>
 
-                  
+
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Congressional District</label>
                       <select
@@ -458,20 +458,23 @@ const AddWifiSitePage = () => {
                         <option value="Tourism Sites">Tourism Sites</option>
                         <option value="Transport Terminals">Transport Terminals</option>
                       </select>
-                    
-                      
+
+
 
                     </div>
 
 
                   </div>
+                  <hr class="border-t-1 border-gray-400 my-4" />
+
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
 
           <div className="mb-8">
-            <h2 className="text-sm font-medium mb-4">AP Site Information</h2>
+            <h2 className="text-md font-medium mb-4">AP Site Information <hr class="border-t-4 border-gray-500 my-6" />
+            </h2>
 
             <div className="container md:columns-3 lg:columns-3 sm:columns-2 space-y-9 space-x-4 mb-8">
               <div>
@@ -513,7 +516,7 @@ const AddWifiSitePage = () => {
                 </select>
               </div>
 
-            
+
               <div>
                 <label className="block text-xs text-gray-600 mb-1">Activation Date</label>
                 <input
@@ -524,7 +527,7 @@ const AddWifiSitePage = () => {
                   className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                 />
               </div>
-              <div class = "break-after-column">
+              <div class="break-after-column">
                 <label className="block text-xs text-gray-600 mb-1">End of Contract</label>
                 <input
                   type="date"
@@ -544,16 +547,48 @@ const AddWifiSitePage = () => {
                   className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                 />
               </div>
-            
+
               <div>
                 <label className="block text-xs text-gray-600 mb-1">Site Type</label>
-                <input
-                  type="text"
-                  name="siteType"
-                  value={formData.siteType}
+                <select
+                  name="category"
+                  value={formData.category}
                   onChange={handleChange}
                   className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
-                />
+                >
+                  <option value="" disabled={formData.category !== ""}>
+                    Select category
+                  </option>
+                  <option value="*PM">Public Market</option>
+                  <option value="*PP">Parks and Playground</option>
+                  <option value="BGY">Barangay</option>
+                  <option value="CQF">Clinical Quality Framework</option>
+                  <option value="DRRMO">Disaster Risk Reduction and Management Office</option>
+                  <option value="FO">Field Office</option>
+                  <option value="HEI-SUC">Higher Education Institutions - State Universities and Colleges</option>
+
+                  <option value="HSP"> Health Service Provider </option>
+                  <option value="LGU"> Local Government Unit </option>
+                  <option value="LGU - BRGY"> Local Government Unit - Barangay </option>
+                  <option value="LGU - HALL"> Local Government Unit - Municipal Hall / City Hall </option>
+                  <option value="LGU - HEALTH"> Local Government Unit - Heath Services </option>
+                  <option value="LGU - OTHERS"> Local Government Unit - Others </option>
+                  <option value="LGU - POL"> Local Government Unit - Police </option>
+                  <option value="LGU - TOUR"> Local Government Unit - Tourism </option>
+                  <option value="LIB"> Library </option>
+                  <option value="MKT"> Market </option>
+                  <option value="NGA"> National Government Agency </option>
+                  <option value="PES"> Public Elementary School </option>
+                  <option value="PHS"> Public High School </option>
+                  <option value="PLZ"> Plaza </option>
+                  <option value="PP"> PP </option>
+                  <option value="RHU"> Rural Health Unit </option>
+                  <option value="SEA"> SEA </option>
+                  <option value="SUC"> State Universities and Colleges </option>
+                  <option value="TRM - LAND"> Tourism - Land </option>
+                  <option value="TRM - SEA"> Tourism - Sea </option>
+
+                </select>
               </div>
               <div>
                 <label className="block text-xs text-gray-600 mb-1">CMS Provider</label>
@@ -565,9 +600,9 @@ const AddWifiSitePage = () => {
                   className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                 />
               </div>
-            
 
-            
+
+
               <div>
                 <label className="block text-xs text-gray-600 mb-1">Link Provider</label>
                 <input
