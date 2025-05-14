@@ -37,27 +37,31 @@ const AddWifiSitePage = () => {
 
   const [formData, setFormData] = useState({
     // Location data
-    province: '',
-    congressional: '',
-    locality: '',
+    locationID: '',
     locationName: '',
-    site: '', // site_name in location table
+    province: '',
+    locality: '',
+    congDistrict: '',
+    cluster: '',
     category: '',
-    longitude: '',
-    latitude: '',
 
     // AP Site data
-    siteId: '', // site_name in apsites table
+    sideCode: '', // site_name in apsites table
     siteName: '',
+    contractStatus: '',
+    dateActivation: '',
+    dateEndContract: '',
     contract: '',
-    project: '',
-    procurement: '',
-    technology: '',
+    siteType: '',
+    cmsProvider: '',
     linkProvider: '',
     bandwidth: '',
-    ispProvider: '',
-    activationDate: '',
-    endOfContract: ''
+    latitude: '',
+    longitude: '',
+    termination: '',
+    year: '',
+    dateAccepted: '',
+    dateDeclaration: ''
   });
 
   const [localityOptions, setLocalityOptions] = useState([]);
@@ -72,8 +76,9 @@ const AddWifiSitePage = () => {
       // Reset locality and congressional when province changes
       setFormData(prev => ({
         ...prev,
-        locality: '',
-        congressional: ''
+        congDistrict: '',
+        locality: ''
+
       }));
     } else {
       setLocalityOptions([]);
@@ -139,15 +144,13 @@ const AddWifiSitePage = () => {
   const selectLocation = (location) => {
     setFormData({
       ...formData,
-      province: location.province || '',
-      congressional: location.congressional || '',
-      locality: location.locality || '',
+      locationID: location.locationID || '',
       locationName: location.location_name || '',
-      site: location.site_name || '',
-      category: location.category || '',
-      longitude: location.longitude ? location.longitude.toString() : '',
-      latitude: location.latitude ? location.latitude.toString() : '',
-      // Keep AP Site data unchanged
+      province: location.province || '',
+      locality: location.locality || '',
+      congDistrict: location.congDistrict || '',
+      cluster: location.cluster || '',
+      category: location.category || ''
     });
 
     setShowSearchResults(false);
@@ -168,7 +171,7 @@ const AddWifiSitePage = () => {
 
 
     // Validate required fields
-    if (!formData.locationName || !formData.siteId) {
+    if (!formData.locationName || !formData.sideCode) {
       alert('Location name and AP Site name are required');
       return;
     }
@@ -191,25 +194,31 @@ const AddWifiSitePage = () => {
 
         // Clear the form
         setFormData({
-          province: '',
-          congressional: '',
-          locality: '',
+          locationID: '',
           locationName: '',
-          site: '',
+          province: '',
+          locality: '',
+          congDistrict: '',
+          cluster: '',
           category: '',
-          longitude: '',
-          latitude: '',
-          siteId: '',
+
+          // AP Site data
+          sideCode: '', // site_name in apsites table
           siteName: '',
+          contractStatus: '',
+          dateActivation: '',
+          dateEndContract: '',
           contract: '',
-          project: '',
-          procurement: '',
-          technology: '',
+          siteType: '',
+          cmsProvider: '',
           linkProvider: '',
           bandwidth: '',
-          ispProvider: '',
-          activationDate: '',
-          endOfContract: ''
+          latitude: '',
+          longitude: '',
+          termination: '',
+          year: '',
+          dateAccepted: '',
+          dateDeclaration: ''
         });
 
         setSearchQuery('');
@@ -230,14 +239,13 @@ const AddWifiSitePage = () => {
     if (showNewLocationForm) {
       setFormData({
         ...formData,
-        province: '',
-        congressional: '',
-        locality: '',
+        locationID: '',
         locationName: '',
-        site: '',
-        category: '',
-        longitude: '',
-        latitude: '',
+        province: '',
+        locality: '',
+        congDistrict: '',
+        cluster: '',
+        category: ''
       });
       setSearchQuery('');
     }
@@ -340,18 +348,28 @@ const AddWifiSitePage = () => {
                     {searchQuery ? "Using selected location" : "Adding new location of AP sites"}
                   </h2>
 
-                  <div className="grid grid-cols-3 gap-4 mb-4">
+                  <div className="container md:columns-3 lg:columns-3 sm:columns-2 space-y-9 space-x-4 mb-8">
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Location ID</label>
                       <input
                         type="text"
                         name="lotId"
-                        value={formData.lotId}
+                        value={formData.locationID}
                         onChange={handleChange}
                         className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                       />
                     </div>
                     <div>
+                      <label className="block text-xs text-gray-600 mb-1">Location Name</label>
+                      <input
+                        type="text"
+                        name="lotId"
+                        value={formData.locationName}
+                        onChange={handleChange}
+                        className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
+                      />
+                    </div>
+                    <div class = "break-after-column">
                       <label className="block text-xs text-gray-600 mb-1">Province</label>
                       <select
                         name="province"
@@ -368,29 +386,6 @@ const AddWifiSitePage = () => {
                         <option value="Quezon">Quezon</option>
                       </select>
                     </div>
-
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">Congressional</label>
-                      <select
-                        name="congressional"
-                        value={formData.congressional}
-                        onChange={handleChange}
-                        className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
-                        disabled={!formData.province}
-                      >
-                        <option value="" disabled selected className="text-gray-400">
-                          {formData.province ? "Select Congressional District" : "Congressional District"}
-                        </option>
-                        {congressionalOptions.map((congressional, index) => (
-                          <option key={index} value={congressional}>
-                            {congressional}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Locality</label>
                       <select
@@ -410,62 +405,65 @@ const AddWifiSitePage = () => {
                         ))}
                       </select>
                     </div>
+
+                  
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">Location Name</label>
-                      <input
-                        type="text"
-                        name="locationName"
-                        value={formData.locationName}
+                      <label className="block text-xs text-gray-600 mb-1">Congressional District</label>
+                      <select
+                        name="congressional"
+                        value={formData.congDistrict}
                         onChange={handleChange}
                         className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
-                      />
+                        disabled={!formData.province}
+                      >
+                        <option value="" disabled selected className="text-gray-400">
+                          {formData.province ? "Select Congressional District" : "Congressional District"}
+                        </option>
+                        {congressionalOptions.map((congressional, index) => (
+                          <option key={index} value={congressional}>
+                            {congressional}
+                          </option>
+                        ))}
+                      </select>
                     </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">Site Type</label>
+                      <label className="block text-xs text-gray-600 mb-1">Cluster</label>
                       <input
                         type="text"
-                        name="site"
-                        value={formData.site}
+                        name="cluster"
+                        value={formData.cluster}
                         onChange={handleChange}
                         className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                       />
                     </div>
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Category</label>
-                      <input
-                        type="text"
+                      <select
                         name="category"
                         value={formData.category}
                         onChange={handleChange}
                         className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
-                      />
-                    </div>
-                  </div>
+                      >
+                        <option value="" disabled={formData.category !== ""}>
+                          Select category
+                        </option>
+                        <option value="Plaza and Open Areas">Plaza and Open Areas</option>
+                        <option value="Government Hospitals and RHUs">Government Hospitals and RHUs</option>
+                        <option value="National and Local Government Offices">National and Local Government Offices</option>
+                        <option value="Integrated HS">Integrated HS</option>
+                        <option value="High School">High School</option>
+                        <option value="Elementary School">Elementary School</option>
+                        <option value="Public Libraries">Public Spaces</option>
+                        <option value="State Universities and Colleges">SUC</option>
+                        <option value="Tourism Sites">Tourism Sites</option>
+                        <option value="Transport Terminals">Transport Terminals</option>
+                      </select>
+                    
+                      
 
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">Longitude</label>
-                      <input
-                        type="text"
-                        name="longitude"
-                        value={formData.longitude}
-                        onChange={handleChange}
-                        className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
-                      />
                     </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">Latitude</label>
-                      <input
-                        type="text"
-                        name="latitude"
-                        value={formData.latitude}
-                        onChange={handleChange}
-                        className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
-                      />
-                    </div>
+
+
                   </div>
                 </div>
               </motion.div>
@@ -475,13 +473,13 @@ const AddWifiSitePage = () => {
           <div className="mb-8">
             <h2 className="text-sm font-medium mb-4">AP Site Information</h2>
 
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="container md:columns-3 lg:columns-3 sm:columns-2 space-y-9 space-x-4 mb-8">
               <div>
                 <label className="block text-xs text-gray-600 mb-1">Site Code</label>
                 <input
                   type="text"
-                  name="siteId"
-                  value={formData.siteId}
+                  name="sideCode"
+                  value={formData.sideCode}
                   onChange={handleChange}
                   className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                 />
@@ -490,7 +488,7 @@ const AddWifiSitePage = () => {
                 <label className="block text-xs text-gray-600 mb-1">AP Site Name</label>
                 <input
                   type="text"
-                  name="siteId"
+                  name="siteName"
                   value={formData.siteName}
                   onChange={handleChange}
                   className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
@@ -500,7 +498,7 @@ const AddWifiSitePage = () => {
                 <label className="block text-xs text-gray-600 mb-1">Contract Status</label>
                 <select
                   name="contract"
-                  value={formData.contract}
+                  value={formData.contractStatus}
                   onChange={handleChange}
                   className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                 >
@@ -515,42 +513,61 @@ const AddWifiSitePage = () => {
                 </select>
               </div>
 
-            </div>
+            
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">Activation Date</label>
+                <input
+                  type="date"
+                  name="dateActivation"
+                  value={formData.dateActivation}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
+                />
+              </div>
+              <div class = "break-after-column">
+                <label className="block text-xs text-gray-600 mb-1">End of Contract</label>
+                <input
+                  type="date"
+                  name="dateEndContract"
+                  value={formData.dateEndContract}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
+                />
+              </div>
+              <div >
+                <label className="block text-xs text-gray-600 mb-1">Contract</label>
+                <input
+                  type="text"
+                  name="contract"
+                  value={formData.contract}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
+                />
+              </div>
+            
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">Site Type</label>
+                <input
+                  type="text"
+                  name="siteType"
+                  value={formData.siteType}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">CMS Provider</label>
+                <input
+                  type="text"
+                  name="cmsProvider"
+                  value={formData.cmsProvider}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
+                />
+              </div>
+            
 
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block text-xs text-gray-600 mb-1">Project</label>
-                <input
-                  type="text"
-                  name="project"
-                  value={formData.project}
-                  onChange={handleChange}
-                  className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
-                />
-              </div>
-              <div>
-                <label className="block text-xs text-gray-600 mb-1">Procurement</label>
-                <input
-                  type="text"
-                  name="procurement"
-                  value={formData.procurement}
-                  onChange={handleChange}
-                  className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block text-xs text-gray-600 mb-1">Technology</label>
-                <input
-                  type="text"
-                  name="technology"
-                  value={formData.technology}
-                  onChange={handleChange}
-                  className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
-                />
-              </div>
+            
               <div>
                 <label className="block text-xs text-gray-600 mb-1">Link Provider</label>
                 <input
@@ -561,10 +578,7 @@ const AddWifiSitePage = () => {
                   className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                 />
               </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
+              <div className="break-after-column">
                 <label className="block text-xs text-gray-600 mb-1">Bandwidth</label>
                 <input
                   type="text"
@@ -575,34 +589,61 @@ const AddWifiSitePage = () => {
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-600 mb-1">ISP Provider</label>
+                <label className="block text-xs text-gray-600 mb-1">Latitude</label>
                 <input
                   type="text"
-                  name="ispProvider"
-                  value={formData.ispProvider}
-                  onChange={handleChange}
-                  className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <div>
-                <label className="block text-xs text-gray-600 mb-1">Activation Date</label>
-                <input
-                  type="date"
-                  name="activationDate"
-                  value={formData.activationDate}
+                  name="latitude"
+                  value={formData.latitude}
                   onChange={handleChange}
                   className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-600 mb-1">End of Contract</label>
+                <label className="block text-xs text-gray-600 mb-1">Longitude</label>
                 <input
-                  type="date"
-                  name="endOfContract"
-                  value={formData.endOfContract}
+                  type="text"
+                  name="longitude"
+                  value={formData.longitude}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">Termination</label>
+                <input
+                  type="text"
+                  name="termination"
+                  value={formData.termination}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">Year Accepted</label>
+                <input
+                  type="text"
+                  name="year"
+                  value={formData.year}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">Date Accepted</label>
+                <input
+                  type="text"
+                  name="dateAccepted"
+                  value={formData.dateAccepted}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">Date of Declaration</label>
+                <input
+                  type="text"
+                  name="dateDeclaration"
+                  value={formData.dateDeclaration}
                   onChange={handleChange}
                   className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                 />
