@@ -1,0 +1,4 @@
+Installation of Tailwind CSS reference https://github.com/tailwindlabs/tailwindcss/discussions/15820
+
+$ npm install -D tailwindcss@3 postcss autoprefixer
+$ npx tailwindcss init -p
