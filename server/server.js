@@ -109,44 +109,38 @@ app.post('/api/login', async (req, res) => {
 
 async function createTablesIfNotExist() {
     const createTablesQuery = `
-        -- Create location table with constraints to prevent duplicates
         CREATE TABLE IF NOT EXISTS public.location (
-            location_id SERIAL PRIMARY KEY,
+            loc_id SERIAL PRIMARY KEY,
+            location_id VARCHAR(50) UNIQUE NOT NULL,
             location_name VARCHAR(100) NOT NULL,
             province VARCHAR(100),
-            congressional VARCHAR(100),
+            congressional_district VARCHAR(100),
             locality VARCHAR(100),
-            site_name VARCHAR(100),
             category VARCHAR(100),
-            longitude NUMERIC(9,6),
-            latitude NUMERIC(9,6),
-            -- Create a unique constraint on location_name to prevent duplicates
-            CONSTRAINT unique_location_name UNIQUE (location_name),
-            -- Create a compound unique constraint for more complex uniqueness rules
+            cluster VARCHAR(100),
             CONSTRAINT unique_location_composite UNIQUE (province, locality, location_name)
         );
 
-        -- Create apsites table with foreign key to location
-        CREATE TABLE IF NOT EXISTS public.apsites (
+        CREATE TABLE IF NOT EXISTS public.site (
             site_id SERIAL PRIMARY KEY,
-            location_id INTEGER NOT NULL,
-            site_name VARCHAR(100) NOT NULL,
+            location_id INTEGER NOT NULL REFERENCES public.location(loc_id) ON DELETE CASCADE,
+            site_code VARCHAR(100) NOT NULL,
+            site_name VARCHAR(100),
             contract_status VARCHAR(20),
-            project VARCHAR(100),
-            procurement VARCHAR(100),
-            technology VARCHAR(100),
+            activation_date DATE,
+            end_of_contract DATE,   
+            contract VARCHAR(100),
+            site_type VARCHAR(100),
+            cms_provider VARCHAR(100),
             link_provider VARCHAR(100),
             bandwidth INTEGER,
-            isp_provider VARCHAR(100),
-            activation_date DATE,
-            end_of_contract DATE,
-            -- Create a unique constraint on site_name to prevent duplicates
-            CONSTRAINT unique_site_name UNIQUE (site_name),
-            -- Add foreign key reference to location table
-            CONSTRAINT fk_location FOREIGN KEY (location_id) REFERENCES public.location(location_id) ON DELETE CASCADE
+            latitude NUMERIC(9,6),
+            longitude NUMERIC(9,6),
+            date_accepted DATE,
+            date_declaration DATE,
+            CONSTRAINT unique_site_code UNIQUE (site_code)
         );
 
-        -- Create indices for faster searching
         CREATE INDEX IF NOT EXISTS idx_location_name ON public.location(location_name);
         CREATE INDEX IF NOT EXISTS idx_province ON public.location(province);
         CREATE INDEX IF NOT EXISTS idx_locality ON public.location(locality);
@@ -154,7 +148,7 @@ async function createTablesIfNotExist() {
 
     try {
         await pool.query(createTablesQuery);
-        console.log('Database tables created or already exist');
+        console.log('Location and site tables created or already exist.');
     } catch (error) {
         console.error('Error creating database tables:', error);
         throw error;
@@ -171,7 +165,7 @@ async function createTablesIfNotExist() {
 })();
 
 // Search locations endpoint - improved with better error handling
-app.get('/api/locations/search', async (req, res) => {
+app.get('/api/location/search', async (req, res) => {
     try {
         const { query } = req.query;
 
@@ -181,11 +175,12 @@ app.get('/api/locations/search', async (req, res) => {
 
         const searchQuery = `
             SELECT * FROM public.location
-            WHERE 
+            WHERE
+                location_id ILIKE $1 OR 
                 location_name ILIKE $1 OR
                 province ILIKE $1 OR
                 locality ILIKE $1 OR
-                congressional ILIKE $1
+                congressional_district ILIKE $1
             ORDER BY location_name
             LIMIT 10
         `;
@@ -217,142 +212,132 @@ app.get('/api/locations/:id', async (req, res) => {
     }
 });
 
-// Add new location and AP site with improved error handling and validation
 app.post('/api/location', async (req, res) => {
     const {
         // Location data
-        province,
-        congressional,
-        locality,
+        locationID,
         locationName,
-        site, // site_name in the location table
+        province,
+        congDistrict,
+        locality,
         category,
-        longitude,
-        latitude,
+        cluster,
 
-        // AP Site data
-        siteId, // site_name in apsites table
+        // Site data
+        sideCode,
+        siteName,
+        contractStatus,
+        dateActivation,
+        dateEndContract,
         contract,
-        project,
-        procurement,
-        technology,
+        siteType,
+        cmsProvider,
         linkProvider,
         bandwidth,
-        ispProvider,
-        activationDate,
-        endOfContract
+        latitude,
+        longitude,
+        termination,
+        year,
+        dateAccepted,
+        dateDeclaration
     } = req.body;
 
-    // Validate required fields
-    if (!locationName || !siteId) {
-        return res.status(400).json({ error: 'Location name and AP site name are required' });
+    if (!locationID || !locationName || !sideCode) {
+        return res.status(400).json({ error: 'Location ID, Location name, and Site Code are required' });
     }
 
-    // Start a transaction
     const client = await pool.connect();
+
     try {
         await client.query('BEGIN');
 
-        // First check if location with this name already exists
+        // Check if location already exists
         const locationCheck = await client.query(
-            'SELECT location_id FROM public.location WHERE location_name = $1',
-            [locationName]
+            'SELECT loc_id FROM public.location WHERE location_id = $1',
+            [locationID]
         );
 
-        let locationId;
+        let locId;
 
         if (locationCheck.rows.length > 0) {
-            // Location exists, get its ID
-            locationId = locationCheck.rows[0].location_id;
-            
-            // Update the existing location data
-            const updateLocationQuery = `
-                UPDATE public.location 
-                SET province = $1, congressional = $2, locality = $3, site_name = $4, 
-                    category = $5, longitude = $6, latitude = $7
-                WHERE location_id = $8
-            `;
-            
-            await client.query(updateLocationQuery, [
-                province,
-                congressional,
-                locality,
-                site,
-                category,
-                longitude ? parseFloat(longitude) : null,
-                latitude ? parseFloat(latitude) : null,
-                locationId
-            ]);
-        } else {
-            // Insert new location
-            const locationQuery = `
-                INSERT INTO public.location 
-                (location_name, province, congressional, locality, site_name, category, longitude, latitude)
-                VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-                RETURNING location_id
-            `;
-            
-            const locationValues = [
-                locationName,
-                province,
-                congressional,
-                locality,
-                site,
-                category,
-                longitude ? parseFloat(longitude) : null,
-                latitude ? parseFloat(latitude) : null
-            ];
+            // Update existing location
+            locId = locationCheck.rows[0].loc_id;
 
-            const locationResult = await client.query(locationQuery, locationValues);
-            locationId = locationResult.rows[0].location_id;
+            await client.query(`
+                UPDATE public.location
+                SET location_name = $1, province = $2, congressional_district = $3,
+                    locality = $4, category = $5, cluster = $6
+                WHERE location_id = $7
+            `, [locationName, province, congDistrict, locality, category, cluster, locationID]);
+
+        } else {
+            // Insert new location with RETURNING loc_id
+            const locationResult = await client.query(`
+                INSERT INTO public.location (
+                    location_id, location_name, province, congressional_district, locality, category, cluster
+                ) VALUES ($1, $2, $3, $4, $5, $6, $7)
+                RETURNING loc_id
+            `, [locationID, locationName, province, congDistrict, locality, category, cluster]);
+
+            locId = locationResult.rows[0].loc_id;
         }
 
-        // Check if AP site with this name already exists
+        // Check if site already exists
         const siteCheck = await client.query(
-            'SELECT site_id FROM public.apsites WHERE site_name = $1',
-            [siteId]
+            'SELECT site_id FROM public.site WHERE site_code = $1',
+            [sideCode]
         );
 
         if (siteCheck.rows.length > 0) {
             await client.query('ROLLBACK');
-            return res.status(400).json({ error: 'AP site with this name already exists' });
+            return res.status(400).json({ error: 'Site with this code already exists' });
         }
 
-        // Insert into apsites table with the location_id
-        const apsitesQuery = `
-            INSERT INTO public.apsites 
-            (location_id, site_name, contract_status, project, procurement, technology, link_provider, bandwidth, isp_provider, activation_date, end_of_contract)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
-            RETURNING site_id
+        // Insert into site table
+        const siteInsert = `
+        INSERT INTO public.site (
+            location_id, site_code, site_name, contract_status, activation_date, end_of_contract,
+            contract, site_type, cms_provider, link_provider, bandwidth,
+            latitude, longitude, date_accepted, date_declaration
+        ) VALUES (
+            $1, $2, $3, $4, $5, $6,
+            $7, $8, $9, $10, $11,
+            $12, $13, $14, $15
+        ) RETURNING site_id
         `;
-        
-        const apsitesValues = [
-            locationId,
-            siteId,
+
+        const siteValues = [
+            locId,
+            sideCode,
+            siteName,
+            contractStatus,
+            dateActivation ? new Date(dateActivation) : null,
+            dateEndContract ? new Date(dateEndContract) : null,
             contract,
-            project,
-            procurement,
-            technology,
+            siteType,
+            cmsProvider,
             linkProvider,
-            bandwidth ? parseInt(bandwidth) : null,
-            ispProvider,
-            activationDate ? new Date(activationDate) : null,
-            endOfContract ? new Date(endOfContract) : null
+            isNaN(parseInt(bandwidth)) ? null : parseInt(bandwidth),
+            latitude ? parseFloat(latitude) : null,
+            longitude ? parseFloat(longitude) : null,
+            dateAccepted ? new Date(dateAccepted) : null,
+            dateDeclaration ? new Date(dateDeclaration) : null
         ];
 
-        const apsitesResult = await client.query(apsitesQuery, apsitesValues);
-        const siteIdResult = apsitesResult.rows[0].site_id;
+        const siteResult = await client.query(siteInsert, siteValues);
 
         await client.query('COMMIT');
 
         res.status(201).json({
             message: 'WiFi site added successfully',
-            locationId: locationId,
-            siteId: siteIdResult
+            locationId: locationID,
+            locId: locId,
+            siteId: siteResult.rows[0].site_id
         });
+
     } catch (error) {
         await client.query('ROLLBACK');
-        console.error('Error adding WiFi site:', error);
+        console.error('Error adding location/site:', error);
         res.status(500).json({ error: 'Internal server error' });
     } finally {
         client.release();
@@ -367,14 +352,13 @@ app.get('/api/wifisites', async (req, res) => {
                 a.site_id, a.site_name, a.contract_status, a.project, a.procurement,
                 a.technology, a.link_provider, a.bandwidth, a.isp_provider, 
                 a.activation_date, a.end_of_contract,
-                l.location_id, l.province, l.congressional, l.locality,
+                l.location_id, l.province, l.congressional_district, l.locality,
                 l.location_name, l.site_name as location_site_type, l.category, l.longitude, l.latitude
             FROM 
                 public.apsites a
-            JOIN 
-                public.location l ON c.location_id = l.location_id
+            JOIN public.location l ON a.location_id = l.loc_id
         `;
-        
+
         const result = await pool.query(query);
         res.status(200).json(result.rows);
     } catch (error) {
