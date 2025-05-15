@@ -72,19 +72,23 @@ const AddWifiSitePage = () => {
     if (formData.province && provinceData[formData.province]) {
       setLocalityOptions(provinceData[formData.province].localities);
       setCongressionalOptions(provinceData[formData.province].congressionals);
-
-      // Reset locality and congressional when province changes
-      setFormData(prev => ({
-        ...prev,
-        congDistrict: '',
-        locality: ''
-
-      }));
+  
+      // Only reset if locality or congDistrict don't match available values
+      setFormData(prev => {
+        const localityValid = provinceData[formData.province].localities.includes(prev.locality);
+        const congValid = provinceData[formData.province].congressionals.includes(prev.congDistrict);
+        return {
+          ...prev,
+          locality: localityValid ? prev.locality : '',
+          congDistrict: congValid ? prev.congDistrict : ''
+        };
+      });
     } else {
       setLocalityOptions([]);
       setCongressionalOptions([]);
     }
   }, [formData.province]);
+  
 
   // Close search results when clicking outside
   useEffect(() => {
@@ -121,7 +125,7 @@ const AddWifiSitePage = () => {
     setIsSearching(true);
 
     try {
-      const response = await fetch(`http://localhost:5000/api/locations/search?query=${encodeURIComponent(query)}`);
+      const response = await fetch(`http://localhost:5000/api/location/search?query=${encodeURIComponent(query)}`);
       const data = await response.json();
 
       if (response.ok) {
@@ -138,25 +142,32 @@ const AddWifiSitePage = () => {
     } finally {
       setIsSearching(false);
     }
-  };
+};
 
   // Select a location from search results
   const selectLocation = (location) => {
-    setFormData({
-      ...formData,
-      locationID: location.locationID || '',
+    // Set locality and congressional options before setting province so it won't be cleared
+    if (provinceData[location.province]) {
+      setLocalityOptions(provinceData[location.province].localities);
+      setCongressionalOptions(provinceData[location.province].congressionals);
+    }
+  
+    setFormData(prev => ({
+      ...prev,
+      locationID: location.location_id || '',
       locationName: location.location_name || '',
       province: location.province || '',
       locality: location.locality || '',
-      congDistrict: location.congDistrict || '',
+      congDistrict: location.congressional_district || '',
       cluster: location.cluster || '',
       category: location.category || ''
-    });
-
+    }));
+  
     setShowSearchResults(false);
     setSearchQuery(location.location_name || '');
-    setShowNewLocationForm(true); // Show the form with populated data
+    setShowNewLocationForm(true);
   };
+  
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -353,7 +364,7 @@ const AddWifiSitePage = () => {
                       <label className="block text-xs text-gray-600 mb-1">Location ID</label>
                       <input
                         type="text"
-                        name="lotId"
+                        name="locationID"
                         value={formData.locationID}
                         onChange={handleChange}
                         className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
@@ -363,7 +374,7 @@ const AddWifiSitePage = () => {
                       <label className="block text-xs text-gray-600 mb-1">Location Name</label>
                       <input
                         type="text"
-                        name="lotId"
+                        name="locationName"
                         value={formData.locationName}
                         onChange={handleChange}
                         className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
@@ -410,7 +421,7 @@ const AddWifiSitePage = () => {
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Congressional District</label>
                       <select
-                        name="congressional"
+                        name="congDistrict"
                         value={formData.congDistrict}
                         onChange={handleChange}
                         className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
@@ -500,12 +511,12 @@ const AddWifiSitePage = () => {
               <div>
                 <label className="block text-xs text-gray-600 mb-1">Contract Status</label>
                 <select
-                  name="contract"
+                  name="contractStatus" 
                   value={formData.contractStatus}
                   onChange={handleChange}
                   className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                 >
-                  <option value="" disabled={formData.contract !== ""}>
+                  <option value="" disabled={formData.contractStatus !== ""}>
                     Select status
                   </option>
                   <option value="Active">Active</option>
@@ -551,8 +562,8 @@ const AddWifiSitePage = () => {
               <div>
                 <label className="block text-xs text-gray-600 mb-1">Site Type</label>
                 <select
-                  name="category"
-                  value={formData.category}
+                  name="siteType"
+                  value={formData.siteType}
                   onChange={handleChange}
                   className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                 >
