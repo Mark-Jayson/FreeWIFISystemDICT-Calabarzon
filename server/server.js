@@ -368,6 +368,7 @@ app.get('/api/wifisites', async (req, res) => {
 });
 
 app.get('/api/map-pins', async (req, res) => {
+
     try {
         const result = await pool.query(`
       SELECT 
@@ -385,6 +386,7 @@ app.get('/api/map-pins', async (req, res) => {
       JOIN public.location l ON s.location_id = l.loc_id
       WHERE s.latitude IS NOT NULL AND s.longitude IS NOT NULL
     `);
+
 
         res.status(200).json(result.rows);
     } catch (error) {
