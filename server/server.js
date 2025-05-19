@@ -367,6 +367,31 @@ app.get('/api/wifisites', async (req, res) => {
     }
 });
 
+app.get('/api/map-pins', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT 
+        s.site_id,
+        s.site_code,
+        s.site_name,
+        s.latitude,
+        s.longitude,
+        l.location_name,
+        l.province,
+        l.locality,
+        l.category,
+        l.cluster
+      FROM public.site s
+      JOIN public.location l ON s.location_id = l.loc_id
+      WHERE s.latitude IS NOT NULL AND s.longitude IS NOT NULL
+    `);
+
+    res.status(200).json(result.rows);
+  } catch (error) {
+    console.error('Error fetching map pins:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
