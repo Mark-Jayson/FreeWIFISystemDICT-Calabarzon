@@ -88,44 +88,87 @@ const MainDashboard = () => {
 
   // Function to add FWS markers to the map
   const addFWSMarkers = async (mapInstance) => {
-  if (markers.length > 0) {
-    clearMarkers('');
-  }
 
-  try {
-    const response = await fetch('http://localhost:5000/api/map-pins');
-    const data = await response.json();
+    if (markers.length > 0) {
+      clearMarkers('');
+    }
 
-    const newMarkers = data.map(site => {
-      const marker = new mapboxgl.Marker({ color: '#0066FF', scale: 1.2 })
-        .setLngLat([site.longitude, site.latitude])
-        .addTo(mapInstance);
+    try {
+      const response = await fetch('http://localhost:5000/api/map-pins');
+      const data = await response.json();
 
-      marker.getElement().addEventListener('click', () => {
-        const formattedData = {
-          site_id: site.site_id,
-          site_code: site.site_code,
-          site_name: site.site_name,
-          location_name: site.location_name,
-          province: site.province,
-          locality: site.locality,
-          category: site.category,
-          cluster: site.cluster,
-        };
-        setPanelData(formattedData);
-        setSearchQuery(site.location_name);
-        handleLocationMarkerClick(formattedData);
+      const newMarkers = data.map(site => {
+        const marker = new mapboxgl.Marker({ color: '#0066FF', scale: 1.2 })
+          .setLngLat([site.longitude, site.latitude])
+          .addTo(mapInstance);
+
+        marker.getElement().addEventListener('click', async () => {
+          try {
+            const response = await fetch(`http://localhost:5000/api/location-with-sites/${site.site_id}`);
+            const fullData = await response.json();
+            setSelectedLocation(fullData); // Now full data with apSites
+          } catch (err) {
+            console.error('Error fetching location with sites:', err);
+          }
+
+          setSearchQuery(site.location_name);
+          setSelectedCity(null); // Clear city if any
+        });
+
+        return marker;
       });
 
-      return marker;
+      setMarkers(newMarkers);
+      console.log(`Added ${newMarkers.length} markers from database`);
+    } catch (err) {
+      console.error('Failed to fetch map pins:', err);
+    }
+  };
+
+  // Initialize and configure the Mapbox map
+  useEffect(() => {
+    if (activeTab !== 'map') return;
+
+    // Step 1: Set up the Mapbox access token from environment variables
+    try {
+      // Get the Mapbox access token from Vite environment variables
+      mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+      if (!mapboxgl.accessToken) {
+        throw new Error('Mapbox access token is missing');
+      }
+    } catch (err) {
+      console.error("mapbox error", err);
+      setError("Failed to set Mapbox access token");
+
+      // Fallback to placeholder if map initialization fails
+      const container = document.getElementById('map-container');
+      if (container) {
+        container.innerHTML = '<div class="flex items-center justify-center h-full bg-gray-100">Map Placeholder (MapBox not configured)</div>';
+      }
+      return;
+    }
+
+    // Step 2: Initialize the Mapbox map instance
+    const mapInstance = new mapboxgl.Map({
+      container: mapContainerRef.current,  // DOM element to render the map in
+      center: center,                      // Initial center position
+      zoom: zoom,                          // Initial zoom level
+      style: 'mapbox://styles/mapbox/streets-v12', // Map style to use
+      maxBounds: PHILIPPINES_BOUNDS        // Restrict panning to these boundaries
     });
 
-    setMarkers(newMarkers);
-    console.log(`Added ${newMarkers.length} markers from database`);
-  } catch (err) {
-    console.error('Failed to fetch map pins:', err);
-  }
-};
+    // Store the map instance in the ref for cleanup when component unmounts
+    mapRef.current = mapInstance;
+
+    // Step 3: Add navigation controls (zoom in/out, rotate, etc.)
+    mapInstance.addControl(new mapboxgl.NavigationControl(), 'bottom-left');
+
+    // Step 4: Wait for the map to load before adding markers and updating state
+    mapInstance.on('load', () => {
+      console.log("Map loaded successfully");
+
+      // IMPORTANT: Call addFWSMarkers to display WiFi site markers from JSON data
+      addFWSMarkers(mapInstance);
 
 // Initialize and configure the Mapbox map
 useEffect(() => {
