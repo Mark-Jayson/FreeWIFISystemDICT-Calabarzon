@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import SiteInfoPanel from "./SiteInfoPanel";
+import LocationInfoPanel from "./LocationInfoPanel";
 
 const CityInfoPanel = ({ cityData, onBack }) => {
-  const [selectedSite, setSelectedSite] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState(null);
   
   // Default values in case some data is missing
   const {
@@ -26,6 +26,12 @@ const CityInfoPanel = ({ cityData, onBack }) => {
         type: "School", 
         sites: 11,
         location: "Batangas State University - Alangilan",
+        locID: "L3-4335",
+        category: "SUCs",
+        address: "0234 Mababang Parang, Batangas City, Batangas",
+        congressional: "IV",
+        latitude: "12.8797",
+        longitude: "16.8797",
         technology: "LEO",
         procurement: "Central",
         cmsProvider: "HTECH Inc.",
@@ -34,13 +40,25 @@ const CityInfoPanel = ({ cityData, onBack }) => {
         project: "DICT Calabarzon",
         contractStatus: "Active",
         activationDate: "January 3, 2022",
-        endOfContract: "March 30, 2028"
+        endOfContract: "March 30, 2028",
+        apSites: [
+          { name: "BatStateU Building 1", technology: "LEO", status: "Active" },
+          { name: "BatStateU Building 2", technology: "LEO", status: "Active" },
+          { name: "BatStateU Building 3", technology: "LEO", status: "Active" },
+          { name: "BatStateU Building 4", technology: "LEO", status: "Active" }
+        ]
       },
       { 
         name: "PUP Sto. Tomas Campus", 
         type: "School", 
         sites: 11,
         location: "PUP Sto. Tomas",
+        locID: "L3-4336",
+        category: "SUCs",
+        address: "National Highway, Sto. Tomas, Batangas",
+        congressional: "IV",
+        latitude: "14.1234",
+        longitude: "121.1456",
         technology: "VSAT",
         procurement: "Regional",
         cmsProvider: "HTECH Inc.",
@@ -49,13 +67,24 @@ const CityInfoPanel = ({ cityData, onBack }) => {
         project: "DICT Calabarzon",
         contractStatus: "Active",
         activationDate: "June 15, 2022",
-        endOfContract: "June 15, 2025"
+        endOfContract: "June 15, 2025",
+        apSites: [
+          { name: "PUP Main Building", technology: "VSAT", status: "Active" },
+          { name: "PUP Library", technology: "VSAT", status: "Active" },
+          { name: "PUP Gymnasium", technology: "VSAT", status: "Active" }
+        ]
       },
       { 
         name: "Sto. Tomas Public Library", 
         type: "Public", 
         sites: 6,
         location: "Sto. Tomas City Center",
+        locID: "L3-4337",
+        category: "LGU",
+        address: "City Hall Complex, Sto. Tomas, Batangas",
+        congressional: "IV",
+        latitude: "14.0987",
+        longitude: "121.2345",
         technology: "Fiber",
         procurement: "Local",
         cmsProvider: "DICT",
@@ -64,17 +93,22 @@ const CityInfoPanel = ({ cityData, onBack }) => {
         project: "DICT Calabarzon",
         contractStatus: "Active",
         activationDate: "November 20, 2021",
-        endOfContract: "November 20, 2024"
+        endOfContract: "November 20, 2024",
+        apSites: [
+          { name: "Library Main Hall", technology: "Fiber", status: "Active" },
+          { name: "Reading Room", technology: "Fiber", status: "Active" },
+          { name: "Computer Laboratory", technology: "Fiber", status: "Active" }
+        ]
       }
     ]
   } = cityData || {};
 
-  const handleSiteClick = (site) => {
-    setSelectedSite(site);
+  const handleLocationClick = (location) => {
+    setSelectedLocation(location);
   };
   
   const handleBackToCity = () => {
-    setSelectedSite(null);
+    setSelectedLocation(null);
   };
 
   return (
@@ -169,7 +203,7 @@ const CityInfoPanel = ({ cityData, onBack }) => {
               <div 
                 key={index} 
                 className="border border-gray-200 rounded-lg p-3 mb-3 cursor-pointer hover:shadow-md transition-all duration-200"
-                onClick={() => handleSiteClick(location)}
+                onClick={() => handleLocationClick(location)}
               >
                 <div className="text-xs text-gray-500">Site Location</div>
                 <div className="text-sm font-medium mb-2">{location.name}</div>
@@ -206,8 +240,8 @@ const CityInfoPanel = ({ cityData, onBack }) => {
         `}</style>
       </div>
       
-      {selectedSite && (
-        <SiteInfoPanel siteData={selectedSite} onBack={handleBackToCity} />
+      {selectedLocation && (
+        <LocationInfoPanel locationData={selectedLocation} onBack={handleBackToCity} />
       )}
     </>
   );
