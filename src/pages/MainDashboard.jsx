@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import MapToolbar from '../components/MapToolbar2';
 import InfoPanel from '../components/infopanels/InfoPanel';
 import CityInfoPanel from '../components/infopanels/CityInfoPanel';
+import LocationInfoPanel from '../components/infopanels/LocationInfoPanel';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
@@ -23,10 +24,11 @@ const MainDashboard = () => {
 
   // UI state
   const [activeTab, setActiveTab] = useState(currentPath || 'map');  // Default to map if no path
-  const [selectedCity, setSelectedCity] = useState(null);          // City data when a city is selected
-  const [searchQuery, setSearchQuery] = useState('');             // Search query from toolbar
+  const [selectedCity, setSelectedCity] = useState(null);            // City data when a city is selected
+  const [selectedLocation, setSelectedLocation] = useState(null);    // Location data when a location is selected
+  const [searchQuery, setSearchQuery] = useState('');                // Search query from toolbar
   const [markers, setMarkers] = useState([]);
-  const [panelData, setPanelData] = useState(null);              // Added missing state for panel data
+  const [panelData, setPanelData] = useState(null);                  // Panel data for InfoPanel
 
   // Map state
   const [map, setMap] = useState(null);                          // Mapbox map instance
@@ -45,8 +47,9 @@ const MainDashboard = () => {
   // Fixed clearMarkers function - removed + symbols and defined query parameter
   const clearMarkers = (query) => {
     setSearchQuery(query);
-    // Clear any selected city when performing a new search
+    // Clear any selected city or location when performing a new search
     setSelectedCity(null);
+    setSelectedLocation(null);
     
     // Remove existing markers from the map
     markers.forEach(marker => marker.remove());
@@ -56,13 +59,31 @@ const MainDashboard = () => {
   // Handle search from MapToolbar
   const handleSearch = (query) => {
     setSearchQuery(query);
-    // Clear any selected city when performing a new search
+    // Clear any selected city or location when performing a new search
     setSelectedCity(null);
+    setSelectedLocation(null);
   };
 
   // Handle marker click to show city info
   const handleMarkerClick = (cityData) => {
     setSelectedCity(cityData);
+    setSelectedLocation(null); // Clear any selected location when selecting a city
+  };
+
+  // Handle marker click to show location info
+  const handleLocationMarkerClick = (locationData) => {
+    setSelectedLocation(locationData);
+    setSelectedCity(null); // Clear any selected city when selecting a location
+  };
+
+  // Handle closing the location info panel
+  const handleCloseLocationPanel = () => {
+    setSelectedLocation(null);
+  };
+
+  // Handle closing the city info panel
+  const handleCloseCityPanel = () => {
+    setSelectedCity(null);
   };
 
   // Function to add FWS markers to the map
@@ -99,6 +120,9 @@ const MainDashboard = () => {
             // Set the panel data to display the location info
             setPanelData(formattedData);
             setSearchQuery(location.location_name);
+            
+            // IMPORTANT: Now directly open the LocationInfoPanel
+            handleLocationMarkerClick(formattedData);
           }
         });
       });
@@ -110,11 +134,6 @@ const MainDashboard = () => {
     setMarkers(newMarkers);
     
     console.log(`Added ${newMarkers.length} FWS markers to the map`);
-  };
-
-  // Handle closing the city info panel
-  const handleCloseCityPanel = () => {
-    setSelectedCity(null);
   };
 
   // Initialize and configure the Mapbox map
@@ -188,14 +207,19 @@ const MainDashboard = () => {
             {/* Map container - this div is where Mapbox will render the map */}
             <div id="map-container" className="w-full h-full" ref={mapContainerRef}></div>
 
-            {/* Show the info panel when search is performed but no city is selected */}
-            {searchQuery && !selectedCity && (
+            {/* Show the info panel when search is performed but no city/location is selected */}
+            {searchQuery && !selectedCity && !selectedLocation && (
               <InfoPanel searchQuery={searchQuery} onCityClick={handleMarkerClick} panelData={panelData} />
             )}
 
             {/* Show the city info panel when a city is selected */}
             {selectedCity && (
               <CityInfoPanel cityData={selectedCity} onBack={handleCloseCityPanel} />
+            )}
+
+            {/* Show the location info panel when a location is selected */}
+            {selectedLocation && (
+              <LocationInfoPanel locationData={selectedLocation} onBack={handleCloseLocationPanel} />
             )}
           </div>
         );
@@ -234,8 +258,6 @@ const MainDashboard = () => {
 
   return (
     <div className="flex h-screen w-full">
-      
-
       <div className="flex-1 flex flex-col">
         {/* Only show MapToolbar when in map view */}
         {activeTab === 'map' && (
