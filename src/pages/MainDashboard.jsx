@@ -125,51 +125,6 @@ const MainDashboard = () => {
     }
   };
 
-  // Initialize and configure the Mapbox map
-  useEffect(() => {
-    if (activeTab !== 'map') return;
-
-    // Step 1: Set up the Mapbox access token from environment variables
-    try {
-      // Get the Mapbox access token from Vite environment variables
-      mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
-      if (!mapboxgl.accessToken) {
-        throw new Error('Mapbox access token is missing');
-      }
-    } catch (err) {
-      console.error("mapbox error", err);
-      setError("Failed to set Mapbox access token");
-
-      // Fallback to placeholder if map initialization fails
-      const container = document.getElementById('map-container');
-      if (container) {
-        container.innerHTML = '<div class="flex items-center justify-center h-full bg-gray-100">Map Placeholder (MapBox not configured)</div>';
-      }
-      return;
-    }
-
-    // Step 2: Initialize the Mapbox map instance
-    const mapInstance = new mapboxgl.Map({
-      container: mapContainerRef.current,  // DOM element to render the map in
-      center: center,                      // Initial center position
-      zoom: zoom,                          // Initial zoom level
-      style: 'mapbox://styles/mapbox/streets-v12', // Map style to use
-      maxBounds: PHILIPPINES_BOUNDS        // Restrict panning to these boundaries
-    });
-
-    // Store the map instance in the ref for cleanup when component unmounts
-    mapRef.current = mapInstance;
-
-    // Step 3: Add navigation controls (zoom in/out, rotate, etc.)
-    mapInstance.addControl(new mapboxgl.NavigationControl(), 'bottom-left');
-
-    // Step 4: Wait for the map to load before adding markers and updating state
-    mapInstance.on('load', () => {
-      console.log("Map loaded successfully");
-
-      // IMPORTANT: Call addFWSMarkers to display WiFi site markers from JSON data
-      addFWSMarkers(mapInstance);
-
 // Initialize and configure the Mapbox map
 useEffect(() => {
   if (activeTab !== 'map') return;
