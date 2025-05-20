@@ -6,6 +6,8 @@ import Dashboard from "./pages/Dashboard.jsx";
 import Layout from "./pages/Layout.jsx";
 import AddWifiSitePage from "./pages/AddWifiSitePage.jsx";
 import WiFiList from "./pages/WiFiList.jsx";
+import OtherPage from "./pages/Other.jsx";
+
 
 function App() {
   return (
@@ -17,10 +19,12 @@ function App() {
 
         {/* Routes with sidebar and layout */}
         <Route path="/" element={<Layout />}>
-          <Route index element={<MainDashboard />} /> {/* "/" default route */}
+          <Route index element={<WiFiList />} /> {/* "/" default route */}
+    
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="map" element={<MainDashboard />} />
           <Route path="wifi" element={<WiFiList />} />
+          <Route path="playground" element={<OtherPage />} />
           <Route path="add-wifi-site" element={<AddWifiSitePage />} />
           <Route path="settings" element={<MainDashboard />} />
         </Route>
