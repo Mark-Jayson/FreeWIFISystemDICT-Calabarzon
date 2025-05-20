@@ -367,6 +367,101 @@ app.get('/api/wifisites', async (req, res) => {
     }
 });
 
+app.get('/api/map-pins', async (req, res) => {
+
+    try {
+        const result = await pool.query(`
+      SELECT 
+        s.site_id,
+        s.site_code,
+        s.site_name,
+        s.latitude,
+        s.longitude,
+        l.location_name,
+        l.province,
+        l.locality,
+        l.category,
+        l.cluster
+      FROM public.site s
+      JOIN public.location l ON s.location_id = l.loc_id
+      WHERE s.latitude IS NOT NULL AND s.longitude IS NOT NULL
+    `);
+
+
+        res.status(200).json(result.rows);
+    } catch (error) {
+        console.error('Error fetching map pins:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+app.get('/api/location-with-sites/:site_id', async (req, res) => {
+  const { site_id } = req.params;
+
+  try {
+    const locationResult = await pool.query(`
+      SELECT 
+        l.*,
+        s.latitude,
+        s.longitude
+      FROM public.site s
+      JOIN public.location l ON s.location_id = l.loc_id
+      WHERE s.site_id = $1
+    `, [site_id]);
+
+    if (locationResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Location not found for the given site ID' });
+    }
+
+    const locationData = locationResult.rows[0];
+
+    const sitesResult = await pool.query(`
+      SELECT 
+        s.site_id,
+        s.site_name,
+        s.contract_status AS status,
+        s.site_type AS technology
+      FROM public.site s
+      WHERE s.location_id = (
+        SELECT location_id FROM public.site WHERE site_id = $1
+      )
+    `, [site_id]);
+
+    res.status(200).json({
+      ...locationData,
+      apSites: sitesResult.rows
+    });
+
+  } catch (err) {
+    console.error('Error fetching location with sites:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+app.get('/api/site/:id', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const result = await pool.query(`
+      SELECT 
+        s.*, 
+        l.location_name
+      FROM public.site s
+      JOIN public.location l ON s.location_id = l.loc_id
+      WHERE s.site_id = $1
+    `, [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Site not found' });
+    }
+
+    res.status(200).json(result.rows[0]);
+  } catch (err) {
+    console.error('Error fetching site:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
