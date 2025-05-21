@@ -79,7 +79,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
 
   return (
     <div className="bg-blue-800 text-white w-16 flex flex-col h-full overflow-hidden shadow-black-100">
-      <div className="bg-white h-1/6">
+      <div className="bg-white h-50"> 
         <div className="w-full flex justify-center py-3">
           <div className="bg-white rounded-full p-1">
             <img
