@@ -72,7 +72,7 @@ const AddWifiSitePage = () => {
     if (formData.province && provinceData[formData.province]) {
       setLocalityOptions(provinceData[formData.province].localities);
       setCongressionalOptions(provinceData[formData.province].congressionals);
-  
+
       // Only reset if locality or congDistrict don't match available values
       setFormData(prev => {
         const localityValid = provinceData[formData.province].localities.includes(prev.locality);
@@ -88,7 +88,7 @@ const AddWifiSitePage = () => {
       setCongressionalOptions([]);
     }
   }, [formData.province]);
-  
+
 
   // Close search results when clicking outside
   useEffect(() => {
@@ -142,7 +142,7 @@ const AddWifiSitePage = () => {
     } finally {
       setIsSearching(false);
     }
-};
+  };
 
   // Select a location from search results
   const selectLocation = (location) => {
@@ -151,7 +151,7 @@ const AddWifiSitePage = () => {
       setLocalityOptions(provinceData[location.province].localities);
       setCongressionalOptions(provinceData[location.province].congressionals);
     }
-  
+
     setFormData(prev => ({
       ...prev,
       locationID: location.location_id || '',
@@ -162,12 +162,12 @@ const AddWifiSitePage = () => {
       cluster: location.cluster || '',
       category: location.category || ''
     }));
-  
+
     setShowSearchResults(false);
     setSearchQuery(location.location_name || '');
     setShowNewLocationForm(true);
   };
-  
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -469,15 +469,9 @@ const AddWifiSitePage = () => {
                         <option value="Tourism Sites">Tourism Sites</option>
                         <option value="Transport Terminals">Transport Terminals</option>
                       </select>
-
-
-
                     </div>
-
-
                   </div>
                   <hr class="border-t-1 border-gray-400 my-4" />
-
                 </div>
               </motion.div>
             )}
@@ -511,7 +505,7 @@ const AddWifiSitePage = () => {
               <div>
                 <label className="block text-xs text-gray-600 mb-1">Contract Status</label>
                 <select
-                  name="contractStatus" 
+                  name="contractStatus"
                   value={formData.contractStatus}
                   onChange={handleChange}
                   className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
