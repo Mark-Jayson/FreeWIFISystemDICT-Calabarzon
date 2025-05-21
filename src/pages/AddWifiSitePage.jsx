@@ -484,7 +484,7 @@ const AddWifiSitePage = () => {
           </AnimatePresence>
 
           <div className="mb-8">
-            <h2 className="text-md font-medium mb-4">AP Site Information <hr class="border-t-4 border-gray-500 my-6" />
+            <h2 className="text-md font-medium mb-4">AP Site Information 
             </h2>
 
             <div className="container md:columns-3 lg:columns-3 sm:columns-2 space-y-9 space-x-4 mb-8">

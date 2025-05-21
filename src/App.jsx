@@ -14,12 +14,13 @@ function App() {
     <Router>
       <Routes>
         {/* Optional: Auth routes without sidebar */}
-        {/* <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} /> */}
+        <Route index element={<Login />} />
+         <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} /> 
 
         {/* Routes with sidebar and layout */}
         <Route path="/" element={<Layout />}>
-          <Route index element={<WiFiList />} /> {/* "/" default route */}
+          <Route index element={<MainDashboard />} /> {/* "/" default route */}
     
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="map" element={<MainDashboard />} />
