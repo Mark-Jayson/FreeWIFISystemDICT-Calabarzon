@@ -12,28 +12,28 @@ const AddWifiSitePage = () => {
   const [error, setError] = useState('');
   const searchResultsRef = useRef(null);
 
-  const provinceData = {
-    'Cavite': {
-      localities: ['Bacoor', 'Cavite City', 'Dasmariñas', 'General Trias', 'Imus', 'Tagaytay', 'Trece Martires'],
-      congressionals: ['1st District', '2nd District', '3rd District', '4th District', '5th District', '6th District', '7th District', '8th District']
-    },
-    'Laguna': {
-      localities: ['Biñan', 'Cabuyao', 'Calamba', 'Los Baños', 'San Pablo', 'San Pedro', 'Santa Rosa'],
-      congressionals: ['1st District', '2nd District', '3rd District', '4th District', '5th District']
-    },
-    'Batangas': {
-      localities: ['Batangas City', 'Lipa', 'Santo Tomas', 'Tanauan', 'Bauan', 'Nasugbu', 'San Juan'],
-      congressionals: ['1st District', '2nd District', '3rd District', '4th District', '5th District', '6th District']
-    },
-    'Rizal': {
-      localities: ['Antipolo', 'Cainta', 'Taytay', 'Rodriguez', 'San Mateo', 'Tanay', 'Teresa'],
-      congressionals: ['1st District', '2nd District', '3rd District', '4th District']
-    },
-    'Quezon': {
-      localities: ['Lucena', 'Tayabas', 'Candelaria', 'Sariaya', 'Lucban', 'Infanta', 'Pagbilao'],
-      congressionals: ['1st District', '2nd District', '3rd District', '4th District']
-    }
-  };
+  // const provinceData = {
+  //   'Cavite': {
+  //     localities: ['Bacoor', 'Cavite City', 'Dasmariñas', 'General Trias', 'Imus', 'Tagaytay', 'Trece Martires'],
+  //     congressionals: ['1st District', '2nd District', '3rd District', '4th District', '5th District', '6th District', '7th District', '8th District']
+  //   },
+  //   'Laguna': {
+  //     localities: ['Biñan', 'Cabuyao', 'Calamba', 'Los Baños', 'San Pablo', 'San Pedro', 'Santa Rosa'],
+  //     congressionals: ['1st District', '2nd District', '3rd District', '4th District', '5th District']
+  //   },
+  //   'Batangas': {
+  //     localities: ['Batangas City', 'Lipa', 'Santo Tomas', 'Tanauan', 'Bauan', 'Nasugbu', 'San Juan'],
+  //     congressionals: ['1st District', '2nd District', '3rd District', '4th District', '5th District', '6th District']
+  //   },
+  //   'Rizal': {
+  //     localities: ['Antipolo', 'Cainta', 'Taytay', 'Rodriguez', 'San Mateo', 'Tanay', 'Teresa'],
+  //     congressionals: ['1st District', '2nd District', '3rd District', '4th District']
+  //   },
+  //   'Quezon': {
+  //     localities: ['Lucena', 'Tayabas', 'Candelaria', 'Sariaya', 'Lucban', 'Infanta', 'Pagbilao'],
+  //     congressionals: ['1st District', '2nd District', '3rd District', '4th District']
+  //   }
+  // };
 
   const [formData, setFormData] = useState({
     // Location data
@@ -359,7 +359,7 @@ const AddWifiSitePage = () => {
                     {searchQuery ? "Using selected location" : "Adding new location of AP sites"}
                   </h2>
 
-                  <div className="container md:columns-3 lg:columns-3 sm:columns-2 space-y-9 space-x-4 mb-8">
+                  <div className="container grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3  space-y-9 space-x-4 mb-8">
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Location ID</label>
                       <input
@@ -481,7 +481,7 @@ const AddWifiSitePage = () => {
             <h2 className="text-md font-medium mb-4">AP Site Information 
             </h2>
 
-            <div className="container md:columns-3 lg:columns-3 sm:columns-2 space-y-9 space-x-4 mb-8">
+            <div className="container grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 space-y-9 space-x-4 mb-8">
               <div>
                 <label className="block text-xs text-gray-600 mb-1">Site Code</label>
                 <input
