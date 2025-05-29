@@ -388,7 +388,7 @@ const AddWifiSitePage = () => {
                         onChange={handleChange}
                         className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                         required
-                      >
+                      > 
                         <option value="" disabled selected className="text-gray-400">Select a Province</option>
                         <option value="Cavite">Cavite</option>
                         <option value="Laguna">Laguna</option>
