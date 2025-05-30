@@ -12,6 +12,29 @@ const AddWifiSitePage = () => {
   const [error, setError] = useState('');
   const searchResultsRef = useRef(null);
 
+  // const provinceData = {
+  //   'Cavite': {
+  //     localities: ['Bacoor', 'Cavite City', 'Dasmariñas', 'General Trias', 'Imus', 'Tagaytay', 'Trece Martires'],
+  //     congressionals: ['1st District', '2nd District', '3rd District', '4th District', '5th District', '6th District', '7th District', '8th District']
+  //   },
+  //   'Laguna': {
+  //     localities: ['Biñan', 'Cabuyao', 'Calamba', 'Los Baños', 'San Pablo', 'San Pedro', 'Santa Rosa'],
+  //     congressionals: ['1st District', '2nd District', '3rd District', '4th District', '5th District']
+  //   },
+  //   'Batangas': {
+  //     localities: ['Batangas City', 'Lipa', 'Santo Tomas', 'Tanauan', 'Bauan', 'Nasugbu', 'San Juan'],
+  //     congressionals: ['1st District', '2nd District', '3rd District', '4th District', '5th District', '6th District']
+  //   },
+  //   'Rizal': {
+  //     localities: ['Antipolo', 'Cainta', 'Taytay', 'Rodriguez', 'San Mateo', 'Tanay', 'Teresa'],
+  //     congressionals: ['1st District', '2nd District', '3rd District', '4th District']
+  //   },
+  //   'Quezon': {
+  //     localities: ['Lucena', 'Tayabas', 'Candelaria', 'Sariaya', 'Lucban', 'Infanta', 'Pagbilao'],
+  //     congressionals: ['1st District', '2nd District', '3rd District', '4th District']
+  //   }
+  // };
+
   const [formData, setFormData] = useState({
     province: '',
     locality: '',

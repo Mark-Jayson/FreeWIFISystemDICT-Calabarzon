@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import SiteInfoPanel from "./SiteInfoPanel";
 
-const LocationInfoPanel = ({ locationData, onBack }) => {
+const LocationInfoPanel = ({ locationData,  onBack }) => {
   const [selectedSite, setSelectedSite] = useState(null);
 
   const handleBackToLocation = () => {
