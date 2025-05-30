@@ -12,82 +12,71 @@ const AddWifiSitePage = () => {
   const [error, setError] = useState('');
   const searchResultsRef = useRef(null);
 
-  const provinceData = {
-    'Cavite': {
-      localities: ['Bacoor', 'Cavite City', 'Dasmariñas', 'General Trias', 'Imus', 'Tagaytay', 'Trece Martires'],
-      congressionals: ['1st District', '2nd District', '3rd District', '4th District', '5th District', '6th District', '7th District', '8th District']
-    },
-    'Laguna': {
-      localities: ['Biñan', 'Cabuyao', 'Calamba', 'Los Baños', 'San Pablo', 'San Pedro', 'Santa Rosa'],
-      congressionals: ['1st District', '2nd District', '3rd District', '4th District', '5th District']
-    },
-    'Batangas': {
-      localities: ['Batangas City', 'Lipa', 'Santo Tomas', 'Tanauan', 'Bauan', 'Nasugbu', 'San Juan'],
-      congressionals: ['1st District', '2nd District', '3rd District', '4th District', '5th District', '6th District']
-    },
-    'Rizal': {
-      localities: ['Antipolo', 'Cainta', 'Taytay', 'Rodriguez', 'San Mateo', 'Tanay', 'Teresa'],
-      congressionals: ['1st District', '2nd District', '3rd District', '4th District']
-    },
-    'Quezon': {
-      localities: ['Lucena', 'Tayabas', 'Candelaria', 'Sariaya', 'Lucban', 'Infanta', 'Pagbilao'],
-      congressionals: ['1st District', '2nd District', '3rd District', '4th District']
-    }
-  };
-
   const [formData, setFormData] = useState({
-    // Location data
-    locationID: '',
-    locationName: '',
     province: '',
     locality: '',
-    congDistrict: '',
-    cluster: '',
-    category: '',
-
-    // AP Site data
-    sideCode: '', // site_name in apsites table
-    siteName: '',
-    contractStatus: '',
-    dateActivation: '',
-    dateEndContract: '',
-    contract: '',
-    siteType: '',
-    cmsProvider: '',
-    linkProvider: '',
-    bandwidth: '',
-    latitude: '',
-    longitude: '',
-    termination: '',
-    year: '',
-    dateAccepted: '',
-    dateDeclaration: ''
+    congDistrict: ''
   });
 
+  const [provinceData, setProvinceData] = useState({});
   const [localityOptions, setLocalityOptions] = useState([]);
   const [congressionalOptions, setCongressionalOptions] = useState([]);
 
-  // Update locality and congressional options when province changes
+  // Load JSON once
+  useEffect(() => {
+    fetch('src/data/congressional-district.json')
+      .then(res => res.json())
+      .then(data => {
+        const dataMap = {};
+        data.province.forEach(province => {
+          const localitiesSet = new Set();
+          const congressionalSet = new Set();
+
+          province.districts.forEach(district => {
+            district.municipalities.forEach(locality => {
+              localitiesSet.add(locality);
+            });
+            district.district_number.forEach(num => {
+              congressionalSet.add(`District ${num}`);
+            });
+          });
+
+          dataMap[province.name] = {
+            localities: Array.from(localitiesSet),
+            congressionals: Array.from(congressionalSet)
+          };
+        });
+
+        setProvinceData(dataMap);
+      })
+      .catch(err => console.error('Error loading JSON:', err));
+  }, []);
+
+  // Update options when province changes
   useEffect(() => {
     if (formData.province && provinceData[formData.province]) {
       setLocalityOptions(provinceData[formData.province].localities);
       setCongressionalOptions(provinceData[formData.province].congressionals);
-
-      // Only reset if locality or congDistrict don't match available values
-      setFormData(prev => {
-        const localityValid = provinceData[formData.province].localities.includes(prev.locality);
-        const congValid = provinceData[formData.province].congressionals.includes(prev.congDistrict);
-        return {
-          ...prev,
-          locality: localityValid ? prev.locality : '',
-          congDistrict: congValid ? prev.congDistrict : ''
-        };
-      });
+      setFormData(prev => ({
+        ...prev,
+        locality: '',
+        congDistrict: ''
+      }));
     } else {
       setLocalityOptions([]);
       setCongressionalOptions([]);
     }
-  }, [formData.province]);
+  }, [formData.province, provinceData]);
+
+  // Handle form changes
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
 
 
   // Close search results when clicking outside
@@ -166,15 +155,6 @@ const AddWifiSitePage = () => {
     setShowSearchResults(false);
     setSearchQuery(location.location_name || '');
     setShowNewLocationForm(true);
-  };
-
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
   };
 
   const handleSubmit = async () => {
@@ -359,7 +339,7 @@ const AddWifiSitePage = () => {
                     {searchQuery ? "Using selected location" : "Adding new location of AP sites"}
                   </h2>
 
-                  <div className="container md:columns-3 lg:columns-3 sm:columns-2 space-y-9 space-x-4 mb-8">
+                  <div className="container grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3  space-y-9 space-x-4 mb-8">
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Location ID</label>
                       <input
@@ -380,7 +360,8 @@ const AddWifiSitePage = () => {
                         className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                       />
                     </div>
-                    <div class="break-after-column">
+
+                    <div>
                       <label className="block text-xs text-gray-600 mb-1">Province</label>
                       <select
                         name="province"
@@ -389,14 +370,13 @@ const AddWifiSitePage = () => {
                         className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                         required
                       >
-                        <option value="" disabled selected className="text-gray-400">Select a Province</option>
-                        <option value="Cavite">Cavite</option>
-                        <option value="Laguna">Laguna</option>
-                        <option value="Batangas">Batangas</option>
-                        <option value="Rizal">Rizal</option>
-                        <option value="Quezon">Quezon</option>
+                        <option value="" disabled>Select a Province</option>
+                        {Object.keys(provinceData).map((province, index) => (
+                          <option key={index} value={province}>{province}</option>
+                        ))}
                       </select>
                     </div>
+
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Locality</label>
                       <select
@@ -406,17 +386,14 @@ const AddWifiSitePage = () => {
                         className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                         disabled={!formData.province}
                       >
-                        <option value="" disabled selected className="text-gray-400">
+                        <option value="" disabled>
                           {formData.province ? "Select Locality" : "Locality"}
                         </option>
                         {localityOptions.map((locality, index) => (
-                          <option key={index} value={locality}>
-                            {locality}
-                          </option>
+                          <option key={index} value={locality}>{locality}</option>
                         ))}
                       </select>
                     </div>
-
 
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Congressional District</label>
@@ -427,16 +404,16 @@ const AddWifiSitePage = () => {
                         className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                         disabled={!formData.province}
                       >
-                        <option value="" disabled selected className="text-gray-400">
+                        <option value="" disabled>
                           {formData.province ? "Select Congressional District" : "Congressional District"}
                         </option>
-                        {congressionalOptions.map((congressional, index) => (
-                          <option key={index} value={congressional}>
-                            {congressional}
-                          </option>
+                        {congressionalOptions.map((district, index) => (
+                          <option key={index} value={district}>{district}</option>
                         ))}
                       </select>
                     </div>
+
+
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Cluster</label>
                       <input
@@ -478,10 +455,10 @@ const AddWifiSitePage = () => {
           </AnimatePresence>
 
           <div className="mb-8">
-            <h2 className="text-md font-medium mb-4">AP Site Information 
+            <h2 className="text-md font-medium mb-4">AP Site Information
             </h2>
 
-            <div className="container md:columns-3 lg:columns-3 sm:columns-2 space-y-9 space-x-4 mb-8">
+            <div className="container grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 space-y-9 space-x-4 mb-8">
               <div>
                 <label className="block text-xs text-gray-600 mb-1">Site Code</label>
                 <input
