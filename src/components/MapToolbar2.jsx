@@ -1,12 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { searchFWSLocations } from '../utils/fwsLocations';
+// COMMENTED OUT: Import from hardcoded JSON utils file
+// import { searchFWSLocations } from '../utils/fwsLocations';
 
 const MapToolbar = ({ mapInstance, setPanelData, onSearch }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const searchResultsRef = useRef(null);
   const [hoveredButton, setHoveredButton] = useState(null);
+  
   const filterItems = [
     { id: 'district', label: 'District' },
     { id: 'technology', label: 'Technology' },
@@ -16,6 +19,7 @@ const MapToolbar = ({ mapInstance, setPanelData, onSearch }) => {
     { id: 'type', label: 'Type' },
     { id: 'classification', label: 'Classification' }
   ];
+
   // Handle click outside of search results
   useEffect(() => {
     function handleClickOutside(event) {
@@ -30,8 +34,28 @@ const MapToolbar = ({ mapInstance, setPanelData, onSearch }) => {
     };
   }, []);
 
-  // Handle search input change
-  const handleSearchChange = (e) => {
+  // NEW: Database search function
+  const searchDatabaseLocations = async (query) => {
+    try {
+      setIsSearching(true);
+      const response = await fetch(`http://localhost:5000/api/location/search?query=${encodeURIComponent(query)}`);
+      
+      if (!response.ok) {
+        throw new Error('Search request failed');
+      }
+      
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Error searching database:', error);
+      return [];
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // Handle search input change - UPDATED to use database
+  const handleSearchChange = async (e) => {
     const query = e.target.value;
     setSearchTerm(query);
 
@@ -41,37 +65,69 @@ const MapToolbar = ({ mapInstance, setPanelData, onSearch }) => {
       return;
     }
 
-    // Search FWS locations with the query
-    const results = searchFWSLocations(query);
+    // UPDATED: Search database locations instead of hardcoded JSON
+    const results = await searchDatabaseLocations(query);
     setSearchResults(results);
-    setShowResults(true);
+    setShowResults(results.length > 0);
   };
 
-  // Handle search result selection
-  const handleResultClick = (location) => {
+  // Handle search result selection - UPDATED for database structure
+  const handleResultClick = async (location) => {
     // Hide the search results dropdown
     setShowResults(false);
 
     // Clear the search input
     setSearchTerm('');
 
-    // If map instance exists, fly to the selected location
-    if (mapInstance) {
-      mapInstance.flyTo({
-        center: [location.longitude, location.latitude],
-        zoom: 15,
-        essential: true
-      });
+    try {
+      // Get site data for this location from database
+      const siteResponse = await fetch(`http://localhost:5000/api/map-pins`);
+      const allSites = await siteResponse.json();
+      
+      // Find sites that match this location
+      const locationSites = allSites.filter(site => 
+        site.location_name === location.location_name && 
+        site.province === location.province
+      );
+
+      if (locationSites.length > 0 && mapInstance) {
+        // Use the first site's coordinates for map navigation
+        const firstSite = locationSites[0];
+        mapInstance.flyTo({
+          center: [firstSite.longitude, firstSite.latitude],
+          zoom: 15,
+          essential: true
+        });
+      }
+
+      // Trigger search with the selected location's data
+      onSearch(location.location_name);
+
+      // UPDATED: Set panel data with database location information
+      if (setPanelData) {
+        const formattedData = formatLocationDataForInfoPanel(location, locationSites);
+        setPanelData(formattedData);
+      }
+
+    } catch (error) {
+      console.error('Error handling result click:', error);
+      // Still trigger search even if other operations fail
+      onSearch(location.location_name);
     }
+  };
 
-    // Trigger search with the selected location's data
-    onSearch(location.location_name);
-
-    // Set panel data with the selected location's information
-    import('../utils/fwsLocations').then(module => {
-      const formattedData = module.formatFWSDataForInfoPanel(location);
-      setPanelData(formattedData);
-    });
+  // NEW: Format database location data for InfoPanel
+  const formatLocationDataForInfoPanel = (location, sites) => {
+    return {
+      location_name: location.location_name,
+      province: location.province,
+      locality: location.locality,
+      congressional_district: location.congressional_district,
+      category: location.category,
+      cluster: location.cluster,
+      totalSites: sites ? sites.length : 0,
+      sites: sites || []
+    };
   };
 
   return (
@@ -79,7 +135,7 @@ const MapToolbar = ({ mapInstance, setPanelData, onSearch }) => {
       <div className="relative mr-4">
         <input
           type="text"
-          placeholder="Search"
+          placeholder="Search Location"
           className="w-48 pl-8 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 text-m"
           value={searchTerm}
           onChange={handleSearchChange}
@@ -91,29 +147,52 @@ const MapToolbar = ({ mapInstance, setPanelData, onSearch }) => {
           </svg>
         </div>
 
+        {/* Loading indicator */}
+        {isSearching && (
+          <div className="absolute z-20 mt-1 w-[280px] bg-white rounded shadow-lg p-2 text-gray-700 text-sm">
+            <div className="flex items-center">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2"></div>
+              Searching database...
+            </div>
+          </div>
+        )}
 
-
-        {showResults && searchResults.length > 0 && (
-          <div className="absolute z-20 mt-1 w-[228px] max-h-60 overflow-y-auto bg-white rounded shadow-lg">
+        {/* Search results dropdown - UPDATED for database structure */}
+        {showResults && searchResults.length > 0 && !isSearching && (
+          <div className="absolute z-20 mt-1 w-[280px] max-h-60 overflow-y-auto bg-white rounded shadow-lg" ref={searchResultsRef}>
             {searchResults.map((location, index) => (
               <div
-                key={location.lot_id || index}
-                className="p-2 hover:bg-gray-100 cursor-pointer text-gray-700 text-sm"
+                key={location.loc_id || index}
+                className="p-3 hover:bg-gray-100 cursor-pointer text-gray-700 text-sm border-b border-gray-100 last:border-b-0"
                 onClick={() => handleResultClick(location)}
               >
-                <div className="font-medium">{location.location_name}</div>
-                <div className="text-sm text-gray-600">{location.locality}, {location.province}</div>
-                <div className="text-xs text-gray-500">{location.site_type}</div>
+                <div className="font-medium text-blue-600">{location.location_name}</div>
+                <div className="text-sm text-gray-600 mt-1">
+                  {location.locality && `${location.locality}, `}{location.province}
+                </div>
+                {location.congressional_district && (
+                  <div className="text-xs text-gray-500 mt-1">
+                    District: {location.congressional_district}
+                  </div>
+                )}
+                {location.category && (
+                  <div className="text-xs text-green-600 mt-1">
+                    Category: {location.category}
+                  </div>
+                )}
               </div>
             ))}
           </div>
         )}
 
-        {/* {isSearching && searchResults.length === 0 && (
-          <div className="absolute z-20 mt-1 w-[228px] bg-white rounded shadow-lg p-2 text-gray-700 text-sm">
-            Searching...
+        {/* No results message */}
+        {showResults && searchResults.length === 0 && !isSearching && searchTerm.trim() !== '' && (
+          <div className="absolute z-20 mt-1 w-[280px] bg-white rounded shadow-lg p-3 text-gray-700 text-sm">
+            <div className="text-center text-gray-500">
+              No locations found for "{searchTerm}"
+            </div>
           </div>
-        )} */}
+        )}
       </div>
 
       <div className="text-gray-700 mr-2 text-sm whitespace-nowrap">
