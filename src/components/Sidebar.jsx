@@ -6,6 +6,7 @@ import Dashboard from '../assets/Dashboard.png';
 import MapMarker from '../assets/MapMarker.png';
 import AddLocation from '../assets/AddLocation.png';
 import Settings from '../assets/Settings.png';
+import Playground from '../assets/Playground.png';
 import { DogIcon } from 'lucide-react';
 
 const Sidebar = ({ activeTab, setActiveTab }) => {
@@ -20,7 +21,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
 
   const navItems = [
     { id: 'logo', label: 'DICT Logo', icon: DICTLogo, type: 'logo' },
-
+    { id: 'playground', label: 'Playground', icon: Playground, path: '/playground', type: 'title' },
     { id: 'wifi', label: 'Free WiFi', icon: FreeWifi, path: '/wifi', type: 'title' },
 
     { id: 'dashboard', label: 'Dashboard', icon: Dashboard, path: '/dashboard', section: 'main' },
@@ -78,7 +79,8 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
 
   return (
     <div className="bg-blue-800 text-white w-16 flex flex-col h-full overflow-hidden shadow-black-100">
-      <div className="bg-white h-1/6">
+
+      <div className="bg-white h-40"> 
         <div className="w-full flex justify-center py-3">
           <div className="bg-white rounded-full p-1">
             <img
