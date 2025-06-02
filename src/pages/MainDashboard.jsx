@@ -7,7 +7,6 @@ import LocationInfoPanel from '../components/infopanels/LocationInfoPanel';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
-//import { convertFWSToGeoJSON, formatFWSDataForInfoPanel } from '../utils/fwsLocations';
 
 // Constants for map initialization
 const INITIAL_CENTER = [121.2, 14.1];  // Initial center coordinates (Philippines)
@@ -79,11 +78,40 @@ const MainDashboard = () => {
   // Handle closing the location info panel
   const handleCloseLocationPanel = () => {
     setSelectedLocation(null);
+    // Keep selectedCity and panelData so we can navigate back to CityInfoPanel
   };
 
   // Handle closing the city info panel
   const handleCloseCityPanel = () => {
     setSelectedCity(null);
+    // Keep panelData and searchQuery so we can navigate back to InfoPanel
+  };
+
+  // Function to fetch city and province data for proper navigation hierarchy
+  const fetchHierarchyData = async (locationData) => {
+    try {
+      // Extract city/municipality name from the location data
+      const cityName = locationData.locality || locationData.city_name;
+      const provinceName = locationData.province;
+
+      if (!cityName || !provinceName) {
+        console.warn('Missing city or province information:', { cityName, provinceName });
+        return null;
+      }
+
+      // Fetch province data (you might need to adjust this endpoint)
+      const provinceResponse = await fetch(`http://localhost:5000/api/province/${provinceName}`);
+      const provinceData = await provinceResponse.json();
+
+      // Fetch city data (you might need to adjust this endpoint)
+      const cityResponse = await fetch(`http://localhost:5000/api/city/${cityName}`);
+      const cityData = await cityResponse.json();
+
+      return { provinceData, cityData };
+    } catch (error) {
+      console.error('Error fetching hierarchy data:', error);
+      return null;
+    }
   };
 
   // Function to add FWS markers to the map
@@ -104,15 +132,39 @@ const MainDashboard = () => {
 
         marker.getElement().addEventListener('click', async () => {
           try {
+            // Fetch the location data with associated sites
             const response = await fetch(`http://localhost:5000/api/location-with-sites/${site.site_id}`);
-            const fullData = await response.json();
-            setSelectedLocation(fullData); // Now full data with apSites
+            const fullLocationData = await response.json();
+
+            // Fetch hierarchy data (province and city) for proper navigation
+            const hierarchyData = await fetchHierarchyData(fullLocationData);
+            
+            if (hierarchyData) {
+              // Set the province data for InfoPanel
+              setPanelData(hierarchyData.provinceData);
+              
+              // Set the city data for CityInfoPanel
+              setSelectedCity(hierarchyData.cityData);
+              
+              // Set search query to show InfoPanel
+              setSearchQuery(fullLocationData.location_name || site.location_name);
+            }
+
+            // Set the location data for LocationInfoPanel
+            setSelectedLocation(fullLocationData);
+
           } catch (err) {
             console.error('Error fetching location with sites:', err);
+            // Fallback: still show location panel even if hierarchy fetch fails
+            try {
+              const response = await fetch(`http://localhost:5000/api/location-with-sites/${site.site_id}`);
+              const fullLocationData = await response.json();
+              setSelectedLocation(fullLocationData);
+              setSearchQuery(site.location_name);
+            } catch (fallbackErr) {
+              console.error('Fallback fetch also failed:', fallbackErr);
+            }
           }
-
-          setSearchQuery(site.location_name);
-          setSelectedCity(null); // Clear city if any
         });
 
         return marker;
@@ -201,8 +253,8 @@ const renderContent = () => {
             <InfoPanel searchQuery={searchQuery} onCityClick={handleMarkerClick} panelData={panelData} />
           )}
 
-          {/* Show the city info panel when a city is selected */}
-          {selectedCity && (
+          {/* Show the city info panel when a city is selected but no location is selected */}
+          {selectedCity && !selectedLocation && (
             <CityInfoPanel cityData={selectedCity} onBack={handleCloseCityPanel} />
           )}
 
