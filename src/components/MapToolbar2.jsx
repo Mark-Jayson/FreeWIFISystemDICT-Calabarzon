@@ -50,7 +50,7 @@ const MapToolbar = ({ mapInstance, setPanelData, onSearch }) => {
       console.error('Error searching database:', error);
       return [];
     } finally {
-      setIsSearching(false);
+      setIsSearching(false); 
     }
   };
 
