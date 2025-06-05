@@ -1,13 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import CityInfoPanel from "./CityInfoPanel";
 
-const InfoPanel = ({ searchQuery, panelData }) => {
+const InfoPanel = ({ searchQuery, panelData, onClose, onCityClick }) => {
   const [showPanel, setShowPanel] = useState(false);
   const [provinceData, setProvinceData] = useState(null);
-  const [selectedCity, setSelectedCity] = useState(null);
-  
-  // Sampledata
-  
 
   useEffect(() => {
     if (searchQuery && searchQuery.trim() !== '') {
@@ -15,28 +11,24 @@ const InfoPanel = ({ searchQuery, panelData }) => {
       // For now, we'll just show the sample data
       setProvinceData(panelData);
       setShowPanel(true);
-      setSelectedCity(null); 
     }
-  }, [searchQuery]);
+  }, [searchQuery, panelData]);
 
   const handleClosePanel = () => {
     setShowPanel(false);
-    setSelectedCity(null);
+    if (onClose) {
+      onClose();
+    }
   };
   
   const handleCityClick = (city) => {
-    setSelectedCity(city);
-  };
-  
-  const handleBackToProvince = () => {
-    setSelectedCity(null);
+    // Use the parent's onCityClick handler to maintain proper navigation
+    if (onCityClick) {
+      onCityClick(city);
+    }
   };
 
   if (!showPanel) return null;
-  
-  if (selectedCity) {
-    return <CityInfoPanel cityData={selectedCity} onBack={handleBackToProvince} />;
-  }
 
   return (
     <div className="fixed top-[108px] right-4 bg-white rounded-lg shadow-lg w-80 z-50 max-h-[75vh] flex flex-col">
@@ -77,36 +69,36 @@ const InfoPanel = ({ searchQuery, panelData }) => {
         <div className="text-xs text-gray-500 mb-2">Free WiFi sites location per location types in {provinceData?.provinceName}:</div>
         
         <div className="flex justify-between mb-4">
-  {provinceData?.siteTypes.slice(0, 6).map((site, index) => {
-    const getIconPath = (type) => {
-      const typeMap = {
-        "Municipal": new URL('../assets/Jeep.png', import.meta.url).href,
-        "Hospitals": new URL('../assets/Hospital.png', import.meta.url).href,
-        "Fire Stations": new URL('../assets/Firestation.png', import.meta.url).href,
-        "Public Market": new URL('../assets/Shop.png', import.meta.url).href,
-        "Schools": new URL('../assets/School.png', import.meta.url).href,
-        "Parks": new URL('../assets/Playground.png', import.meta.url).href
-      };
-      return typeMap[type] || new URL('../assets/default.png', import.meta.url).href;
-    };
-    
-    return (
-      <div key={index} className="flex flex-col items-center" style={{ width: '16%' }}>
-        <div className="w-8 h-8 mb-1 rounded-full flex items-center justify-center bg-gray-100 overflow-hidden">
-          <img 
-            src={getIconPath(site.type)} 
-            alt={site.type} 
-            className="w-5 h-5 object-contain"
-          />
+          {provinceData?.siteTypes.slice(0, 6).map((site, index) => {
+            const getIconPath = (type) => {
+              const typeMap = {
+                "Municipal": new URL('../assets/Jeep.png', import.meta.url).href,
+                "Hospitals": new URL('../assets/Hospital.png', import.meta.url).href,
+                "Fire Stations": new URL('../assets/Firestation.png', import.meta.url).href,
+                "Public Market": new URL('../assets/Shop.png', import.meta.url).href,
+                "Schools": new URL('../assets/School.png', import.meta.url).href,
+                "Parks": new URL('../assets/Playground.png', import.meta.url).href
+              };
+              return typeMap[type] || new URL('../assets/default.png', import.meta.url).href;
+            };
+            
+            return (
+              <div key={index} className="flex flex-col items-center" style={{ width: '16%' }}>
+                <div className="w-8 h-8 mb-1 rounded-full flex items-center justify-center bg-gray-100 overflow-hidden">
+                  <img 
+                    src={getIconPath(site.type)} 
+                    alt={site.type} 
+                    className="w-5 h-5 object-contain"
+                  />
+                </div>
+                <div className="text-xs font-bold text-center">{site.count}</div>
+                <div className="text-xs text-gray-500 text-center" style={{ fontSize: "0.65rem" }}>
+                  {site.type.includes(' ') ? site.type.split(' ')[0] : site.type}
+                </div>
+              </div>
+            );
+          })}
         </div>
-        <div className="text-xs font-bold text-center">{site.count}</div>
-        <div className="text-xs text-gray-500 text-center" style={{ fontSize: "0.65rem" }}>
-          {site.type.includes(' ') ? site.type.split(' ')[0] : site.type}
-        </div>
-      </div>
-    );
-  })}
-</div>
         
         <div className="flex justify-between items-center mb-4">
           <div className="text-xs text-gray-500">Total no. of AP sites<br />in {provinceData?.provinceName}</div>
@@ -127,51 +119,29 @@ const InfoPanel = ({ searchQuery, panelData }) => {
         </div>
         
         <div className="mb-4 border-t border-gray-200 pt-3">
-          <div className="text-sm text-gray-500 mb-3">Some Cities/Municipalities of {provinceData?.provinceName}</div>
-          <div className="grid grid-cols-2 gap-3">
-            {provinceData?.cities.slice(0, 2).map((city, index) => (
-              <div 
-                key={index} 
-                className="border border-gray-200 rounded-lg p-3 cursor-pointer hover:shadow-md transition duration-200"
-                onClick={() => handleCityClick(city)}
-              >
-                <div className="text-xs text-gray-500">City</div>
-                <div className="text-sm font-medium mb-3">{city.name}</div>
-                <div className="flex justify-between border-t border-gray-200 pt-2">
-                  <div className="text-center">
-                    <div className="text-xl font-bold">{city.locations}</div>
-                    <div className="text-xs text-gray-500">Locations</div>
+          <div className="text-sm text-gray-500 mb-3">Cities/Municipalities with Free WiFi Sites</div>
+          
+          {provinceData?.cities?.map((city, index) => (
+            <div 
+              key={index} 
+              className="border border-gray-200 rounded-lg p-3 mb-3 cursor-pointer hover:shadow-md transition-all duration-200"
+              onClick={() => handleCityClick(city)}
+            >
+              <div className="text-xs text-gray-500">City/Municipality</div>
+              <div className="text-sm font-medium mb-2">{city.name}</div>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center">
+                  <div className="bg-blue-500 rounded-full p-2 mr-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H3m2 0h3M9 7h1m-1 4h1m4-4h1m-1 4h1m-1-8h1m-1 4h1" />
+                    </svg>
                   </div>
-                  <div className="text-center">
-                    <div className="text-xl font-bold">{city.sites}</div>
-                    <div className="text-xs text-gray-500">Sites</div>
-                  </div>
+                  <div className="text-xs text-gray-500">{city.totalSites} WiFi Sites</div>
                 </div>
+                <div className="text-xs text-gray-400">Click to view</div>
               </div>
-            ))}
-          </div>
-          <div className="grid grid-cols-2 gap-3 mt-3">
-            {provinceData?.cities.slice(2, 4).map((city, index) => (
-              <div 
-                key={index + 2} 
-                className="border border-gray-200 rounded-lg p-3 cursor-pointer hover:shadow-md transition duration-200"
-                onClick={() => handleCityClick(city)}
-              >
-                <div className="text-xs text-gray-500">City</div>
-                <div className="text-sm font-medium mb-3">{city.name}</div>
-                <div className="flex justify-between border-t border-gray-200 pt-2">
-                  <div className="text-center">
-                    <div className="text-xl font-bold">{city.locations}</div>
-                    <div className="text-xs text-gray-500">Locations</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-xl font-bold">{city.sites}</div>
-                    <div className="text-xs text-gray-500">Sites</div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       </div>
       
