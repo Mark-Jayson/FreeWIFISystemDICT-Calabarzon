@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../components/dashboard/Header';
 import FreeWifiStatCard from '../components/dashboard/FreeWifiStatCard';
 import DigitizationCard from '../components/dashboard/DigitizationCard';
@@ -13,10 +13,65 @@ import { provinceData, staticData } from '../utils/provinceData';
 
 const Dashboard = () => {
   const [selectedProvince, setSelectedProvince] = useState('all');
+  const [wifiStats, setWifiStats] = useState({
+    totalSites: 0,
+    activeSites: 0,
+    terminatedSites: 0,
+    activePercentage: 0,
+    terminatedPercentage: 0,
+    trendValue: "0%",
+    isPositiveTrend: true,
+    loading: true,
+    error: null
+  });
 
   const handleProvinceSelect = (provinceId) => {
     setSelectedProvince(provinceId);
   };
+
+  // Fetch WiFi statistics from API
+  const fetchWifiStats = async (province = 'all') => {
+    try {
+      setWifiStats(prev => ({ ...prev, loading: true, error: null }));
+      
+      const url = province === 'all' 
+        ? 'http://localhost:5000/api/wifi-stats'
+        : `http://localhost:5000/api/wifi-stats?province=${province}`;
+      
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      setWifiStats({
+        totalSites: data.totalSites,
+        activeSites: data.activeSites,
+        terminatedSites: data.terminatedSites,
+        activePercentage: data.activePercentage,
+        terminatedPercentage: data.terminatedPercentage,
+        trendValue: data.trendValue,
+        isPositiveTrend: data.isPositiveTrend,
+        loading: false,
+        error: null
+      });
+      
+    } catch (error) {
+      console.error('Error fetching WiFi stats:', error);
+      setWifiStats(prev => ({
+        ...prev,
+        loading: false,
+        error: 'Failed to fetch WiFi statistics'
+      }));
+    }
+  };
+
+  // Fetch data when component mounts or province changes
+  useEffect(() => {
+    fetchWifiStats(selectedProvince);
+  }, [selectedProvince]);
 
   return (
     <div className="flex-1 bg-blue-50 overflow-y-auto">
@@ -25,12 +80,15 @@ const Dashboard = () => {
         onProvinceSelect={handleProvinceSelect}
         selectedProvince={selectedProvince}
       />
-      <DashboardContent selectedProvince={selectedProvince} />
+      <DashboardContent 
+        selectedProvince={selectedProvince} 
+        wifiStats={wifiStats}
+      />
     </div>
   );
 };
 
-const DashboardContent = ({ selectedProvince }) => {
+const DashboardContent = ({ selectedProvince, wifiStats }) => {
   const currentData = provinceData[selectedProvince];
   const { expiringContracts, activationData } = staticData;
 
@@ -64,12 +122,13 @@ const DashboardContent = ({ selectedProvince }) => {
         <div className="flex flex-col gap-4">
           <FreeWifiStatCard
             title="Total No. of FreeWiFi Sites"
-            value={currentData.freeWifiStats.totalCount}
-            trendValue={currentData.freeWifiStats.trendValue}
-            totalSites={currentData.freeWifiStats.totalSites}
-            activeCount={currentData.freeWifiStats.activeCount}
-            terminatedCount={currentData.freeWifiStats.terminatedCount}
-            activePercentage={currentData.freeWifiStats.activePercentage}
+            totalSites={wifiStats.totalSites}
+            activeSites={wifiStats.activeSites}
+            terminatedSites={wifiStats.terminatedSites}
+            trendValue={wifiStats.trendValue}
+            isPositiveTrend={wifiStats.isPositiveTrend}
+            loading={wifiStats.loading}
+            error={wifiStats.error}
           />
           <KeyMetricCard
             gidaCount={currentData.gidaCount}
