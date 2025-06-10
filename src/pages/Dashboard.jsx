@@ -30,6 +30,7 @@ const Dashboard = () => {
     setSelectedProvince(provinceId);
   };
 
+
   const fetchWifiStats = async (province = 'all') => {
     try {
       setWifiStats(prev => ({ ...prev, loading: true, error: null }));
@@ -68,6 +69,7 @@ const Dashboard = () => {
     }
   };
 
+
   const fetchExpiringContracts = async () => {
     try {
       const response = await fetch('http://localhost:5000/api/expiring-contracts');
@@ -80,13 +82,16 @@ const Dashboard = () => {
     }
   };
 
+
   useEffect(() => {
     fetchWifiStats(selectedProvince);
   }, [selectedProvince]);
 
+
   useEffect(() => {
     fetchExpiringContracts();
   }, []);
+
 
   return (
     <div className="flex-1 bg-blue-50 overflow-y-auto">
@@ -95,14 +100,17 @@ const Dashboard = () => {
         onProvinceSelect={handleProvinceSelect}
         selectedProvince={selectedProvince}
       />
+
       <DashboardContent
         selectedProvince={selectedProvince}
         wifiStats={wifiStats}
         expiringContracts={expiringContracts}
+
       />
     </div>
   );
 };
+
 
 const DashboardContent = ({ selectedProvince, wifiStats, expiringContracts }) => {
   const currentData = provinceData[selectedProvince];
