@@ -13,6 +13,7 @@ import { provinceData, staticData } from '../utils/provinceData';
 
 const Dashboard = () => {
   const [selectedProvince, setSelectedProvince] = useState('all');
+  const [expiringContracts, setExpiringContracts] = useState([]);
   const [wifiStats, setWifiStats] = useState({
     totalSites: 0,
     activeSites: 0,
@@ -29,23 +30,23 @@ const Dashboard = () => {
     setSelectedProvince(provinceId);
   };
 
-  // Fetch WiFi statistics from API
+
   const fetchWifiStats = async (province = 'all') => {
     try {
       setWifiStats(prev => ({ ...prev, loading: true, error: null }));
-      
-      const url = province === 'all' 
+
+      const url = province === 'all'
         ? 'http://localhost:5000/api/wifi-stats'
         : `http://localhost:5000/api/wifi-stats?province=${province}`;
-      
+
       const response = await fetch(url);
-      
+
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const data = await response.json();
-      
+
       setWifiStats({
         totalSites: data.totalSites,
         activeSites: data.activeSites,
@@ -57,7 +58,7 @@ const Dashboard = () => {
         loading: false,
         error: null
       });
-      
+
     } catch (error) {
       console.error('Error fetching WiFi stats:', error);
       setWifiStats(prev => ({
@@ -68,10 +69,29 @@ const Dashboard = () => {
     }
   };
 
-  // Fetch data when component mounts or province changes
+
+  const fetchExpiringContracts = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/expiring-contracts');
+      if (!response.ok) throw new Error('Failed to fetch contracts');
+      const data = await response.json();
+      setExpiringContracts(data);
+    } catch (error) {
+      console.error('Error fetching expiring contracts:', error);
+      setExpiringContracts([]);
+    }
+  };
+
+
   useEffect(() => {
     fetchWifiStats(selectedProvince);
   }, [selectedProvince]);
+
+
+  useEffect(() => {
+    fetchExpiringContracts();
+  }, []);
+
 
   return (
     <div className="flex-1 bg-blue-50 overflow-y-auto">
@@ -80,17 +100,21 @@ const Dashboard = () => {
         onProvinceSelect={handleProvinceSelect}
         selectedProvince={selectedProvince}
       />
-      <DashboardContent 
-        selectedProvince={selectedProvince} 
+
+      <DashboardContent
+        selectedProvince={selectedProvince}
         wifiStats={wifiStats}
+        expiringContracts={expiringContracts}
+
       />
     </div>
   );
 };
 
-const DashboardContent = ({ selectedProvince, wifiStats }) => {
+
+const DashboardContent = ({ selectedProvince, wifiStats, expiringContracts }) => {
   const currentData = provinceData[selectedProvince];
-  const { expiringContracts, activationData } = staticData;
+  const { activationData } = staticData;
 
   return (
     <div className="px-6 pb-6">
@@ -148,7 +172,7 @@ const DashboardContent = ({ selectedProvince, wifiStats }) => {
 
         {/* Right Column */}
         <div className="flex flex-col gap-4">
-          <div className="bg-white rounded-lg shadow p-4 h-full">
+          <div className="bg-white rounded-lg shadow p-4">
             <ExpiringContractsTable contracts={expiringContracts} />
           </div>
           <div className="bg-white rounded-lg shadow p-4 h-full">
