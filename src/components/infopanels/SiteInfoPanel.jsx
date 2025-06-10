@@ -27,11 +27,21 @@ const SiteInfoPanel = ({ siteData, onBack }) => {
     location_name
   } = siteData;
 
+  // Determine the class for contract status
+  const getContractStatusClass = (status) => {
+    if (status === 'ACTIVE') {
+      return 'text-green-600';
+    } else if (status === 'TERMINATED') {
+      return 'text-red-600';
+    }
+    return ''; // Default or no special color
+  };
+
   return (
     <div className="fixed top-[108px] right-4 bg-white rounded-lg shadow-lg w-80 z-50 max-h-[75vh] flex flex-col" style={{ right: '340px' }}>
       <div className="p-4 pb-2 relative border-b border-gray-100">
-        <button 
-          onClick={onBack} 
+        <button
+          onClick={onBack}
           className="absolute top-2 left-2 text-gray-400 hover:text-gray-600 z-10"
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -53,7 +63,7 @@ const SiteInfoPanel = ({ siteData, onBack }) => {
         <div className="flex flex-col">
           <InfoRow label="Location" value={location_name} />
           <InfoRow label="Site Type" value={site_type} />
-          <InfoRow label="Contract Status" value={contract_status} />
+          <InfoRow label="Contract Status" value={contract_status} valueClassName={getContractStatusClass(contract_status)}/>
           <InfoRow label="Activation Date" value={formatDate(activation_date)} />
           <InfoRow label="End of Contract" value={formatDate(end_of_contract)} />
           <InfoRow label="Contract" value={contract} />
@@ -94,10 +104,11 @@ const formatDate = (dateStr) => {
   return date.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
 };
 
-const InfoRow = ({ label, value }) => (
+// Modified InfoRow component to accept valueClassName
+const InfoRow = ({ label, value, valueClassName = '' }) => (
   <div className="flex justify-between py-3 px-4 border-b border-gray-100">
     <div className="text-sm text-gray-500">{label}</div>
-    <div className="text-sm font-medium text-right">{value ?? '—'}</div>
+    <div className={`text-sm font-medium text-right ${valueClassName}`}>{value ?? '—'}</div>
   </div>
 );
 
