@@ -462,6 +462,41 @@ app.get('/api/site/:id', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+app.get('/api/wifi-stats', async (req, res) => {
+  try {
+    const totalResult = await pool.query('SELECT COUNT(*) FROM public.site');
+    const activeResult = await pool.query("SELECT COUNT(*) FROM public.site WHERE contract_status = 'ACTIVE'");
+    const terminatedResult = await pool.query("SELECT COUNT(*) FROM public.site WHERE contract_status = 'TERMINATED'");
+
+    const totalSites = parseInt(totalResult.rows[0].count);
+    const activeSites = parseInt(activeResult.rows[0].count);
+    const terminatedSites = parseInt(terminatedResult.rows[0].count);
+
+    // Calculate percentages with rounding correction to ensure 100%
+    let activePercentage = 0;
+    let terminatedPercentage = 0;
+    if (totalSites > 0) {
+      activePercentage = Math.round((activeSites / totalSites) * 100);
+      terminatedPercentage = 100 - activePercentage;
+    }
+
+    res.status(200).json({
+      totalSites,
+      activeSites,
+      terminatedSites,
+      activePercentage,
+      terminatedPercentage,
+      trendValue: "0%", // You can later make this dynamic if you track changes
+      isPositiveTrend: true
+    });
+  } catch (error) {
+    console.error('Error fetching WiFi stats:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
