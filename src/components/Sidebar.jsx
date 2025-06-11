@@ -5,14 +5,39 @@ import FreeWifi from '../assets/FreeWifi.png';
 import Dashboard from '../assets/Dashboard.png';
 import MapMarker from '../assets/MapMarker.png';
 import AddLocation from '../assets/AddLocation.png';
-import Settings from '../assets/Settings.png';
+import Logout from '../assets/logout.png';
 import Playground from '../assets/Playground.png';
 import { DogIcon } from 'lucide-react';
+
+const useAuth = () => {
+  const navigate = useNavigate();
+
+  const logout = async () => {
+    try {
+      console.log("Attempting to log out ...");
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      localStorage.removeItem('authToken');
+      sessionStorage.removeItem('userSession');
+
+      console.log("Logout Succesful.");
+
+      navigate('/Signin');
+    } catch (error) {
+      console.error("Logout failed:", error);
+      alert("Failed to logout. Please try again.");
+    }
+  };
+
+  return {logout};
+}
 
 const Sidebar = ({ activeTab, setActiveTab }) => {
   const [hoveredItem, setHoveredItem] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
+
+  const {logout} = useAuth();
 
   useEffect(() => {
     const path = location.pathname.split('/')[1] || 'dashboard';
@@ -23,18 +48,17 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
     { id: 'logo', label: 'DICT Logo', icon: DICTLogo, type: 'logo' },
     { id: 'playground', label: 'Playground', icon: Playground, path: '/playground', type: 'title' },
     { id: 'wifi', label: 'Free WiFi', icon: FreeWifi, path: '/wifi', type: 'title' },
-
     { id: 'dashboard', label: 'Dashboard', icon: Dashboard, path: '/dashboard', section: 'main' },
     { id: 'map', label: 'Map', icon: MapMarker, path: '/map', section: 'main' },
-
     { id: 'add', label: 'Add Location', icon: AddLocation, path: '/add-wifi-site', section: 'bottom' },
-
-    { id: 'settings', label: 'Settings', icon: Settings, path: '/settings', section: 'bottom' }
+    { id: 'logout', label: 'Logout', icon: Logout, path: '/login', section: 'bottom' }
   ];
 
-  const handleNavigation = (item) => {
+  const handleNavigation = async (item) => {
     setActiveTab(item.id);
-    if (item.path) {
+    if (item.path === 'logout') {
+      await logout();
+    } else if (item.path) {
       navigate(item.path);
     }
   };
@@ -51,8 +75,8 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
       <div
         key={item.id}
         className={`relative w-full flex flex-col items-center py-3 cursor-pointer transition-all duration-200
-                   ${isActive ? 'bg-blue-900' : 'hover:bg-blue-700'}
-                   ${item.type === 'title' ? 'mb-4' : ''}`}
+                  ${isActive ? 'bg-blue-900' : 'hover:bg-blue-700'}
+                  ${item.type === 'title' ? 'mb-4' : ''}`}
         onClick={() => handleNavigation(item)}
         onMouseEnter={() => setHoveredItem(item.id)}
         onMouseLeave={() => setHoveredItem(null)}
@@ -60,7 +84,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
         <img
           src={item.icon}
           alt={item.label}
-          className="w-6 h-6 mb-1" 
+          className="w-6 h-6 mb-1"
         />
 
         {/* {shouldShowLabel && (
@@ -80,7 +104,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
   return (
     <div className="bg-blue-800 text-white w-16 flex flex-col h-full overflow-hidden shadow-black-100">
 
-      <div className="bg-white h-40"> 
+      <div className="bg-white h-40">
         <div className="w-full flex justify-center py-3">
           <div className="bg-white rounded-full p-1">
             <img
