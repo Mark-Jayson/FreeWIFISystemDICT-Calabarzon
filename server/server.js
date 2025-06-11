@@ -550,6 +550,67 @@ app.get('/api/expiring-contracts', async (req, res) => {
   }
 });
 
+app.get('/api/yearly-activations', async (req, res) => {
+  try {
+    const result = await pool.query(`SELECT activation_date FROM public.site`);
+
+    const yearCounts = {};
+    const yearRange = Array.from({ length: 10 }, (_, i) => 2016 + i); // [2016..2025]
+    yearRange.forEach(y => yearCounts[y] = 0);
+
+    const monthMap = {
+      jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+      jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11
+    };
+
+    let noDate = 0;
+
+    for (const row of result.rows) {
+      const raw = row.activation_date;
+
+      if (!raw) {
+        noDate++;
+        continue;
+      }
+
+      const parts = raw.toString().trim().split(/[-\/]/); // e.g. "20-Mar" or "19-Mar-20"
+
+      let year = null;
+
+      if (parts.length === 2) {
+        // "20-Mar" → March 2020
+        const [yy, monStr] = parts;
+        const month = monthMap[monStr.toLowerCase()];
+        year = parseInt(yy.length === 2 ? `20${yy}` : yy); // support "20" or "2020"
+      } else if (parts.length === 3) {
+        // "19-Mar-20" → March 19, 2020
+        const [dayStr, monStr, yy] = parts;
+        const month = monthMap[monStr.toLowerCase()];
+        year = parseInt(yy.length === 2 ? `20${yy}` : yy);
+      }
+
+      if (year && yearCounts.hasOwnProperty(year)) {
+        yearCounts[year]++;
+      }
+    }
+
+    const formatted = Object.entries(yearCounts).map(([year, count]) => ({
+      year,
+      value: count
+    }));
+
+    res.json({
+      yearlyData: formatted,
+      noDate
+    });
+
+  } catch (err) {
+    console.error('Error in /api/yearly-activations:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
