@@ -67,123 +67,159 @@ const MainDashboard = () => {
     setMarkers([]);
   };
 
-  // Handle search from MapToolbar
-  const handleSearch = (query) => {
-    setSearchQuery(query);
-    setSelectedCity(null);
-    setSelectedLocation(null);
-    clearNavigationStack();
-    
-    // Create sample panelData for the search - in real app this would come from API
-    const samplePanelData = {
-      provinceName: 'Batangas',
-      provincialID: 'P-04',
-      freeWiFiSites: 150,
-      governor: 'Hermilando I. Mandanas',
-      totalAPSites: 500,
-      digitizationRate: 75,
-      siteTypes: [
-        { type: "Municipal", count: 34 },
-        { type: "Hospitals", count: 12 },
-        { type: "Fire Stations", count: 8 },
-        { type: "Public Market", count: 15 },
-        { type: "Schools", count: 45 },
-        { type: "Parks", count: 36 }
-      ],
-      cities: [
-        {
-          name: 'Sto. Tomas City',
-          provinceName: 'Batangas',
-          totalSites: 41,
-          mayor: 'Art Jun Maligalig',
-          totalAPSites: 125,
-          digitizationRate: 25,
-          siteTypes: [
-            { type: "School", count: 20 },
-            { type: "Hospital", count: 12 },
-            { type: "Fire Station", count: 3 },
-            { type: "Public Market", count: 7 },
-            { type: "Barangay", count: 15 },
-            { type: "Park", count: 6 }
-          ],
-          freeWifiLocations: [
-            { 
-              name: "BatState - College of Science Building", 
-              type: "School", 
-              sites: 11,
-              location: "Batangas State University - Alangilan",
-              locID: "L3-4335",
-              category: "SUCs",
-              address: "0234 Mababang Parang, Batangas City, Batangas",
-              congressional: "IV",
-              latitude: "12.8797",
-              longitude: "16.8797",
-              technology: "LEO",
-              procurement: "Central",
-              cmsProvider: "HTECH Inc.",
-              linkProvider: "Converge Technologies",
-              bandwidth: "30 MB/S",
-              project: "DICT Calabarzon",
-              contractStatus: "Active",
-              activationDate: "January 3, 2022",
-              endOfContract: "March 30, 2028",
-              apSites: [
-                { name: "BatStateU Building 1", technology: "LEO", status: "Active", site_id: "S001" },
-                { name: "BatStateU Building 2", technology: "LEO", status: "Active", site_id: "S002" },
-                { name: "BatStateU Building 3", technology: "LEO", status: "Active", site_id: "S003" },
-                { name: "BatStateU Building 4", technology: "LEO", status: "Active", site_id: "S004" }
-              ]
-            },
-            { 
-              name: "PUP Sto. Tomas Campus", 
-              type: "School", 
-              sites: 11,
-              location: "PUP Sto. Tomas",
-              locID: "L3-4336",
-              category: "SUCs",
-              address: "National Highway, Sto. Tomas, Batangas",
-              congressional: "IV",
-              latitude: "14.1234",
-              longitude: "121.1456",
-              technology: "VSAT",
-              procurement: "Regional",
-              cmsProvider: "HTECH Inc.",
-              linkProvider: "PLDT",
-              bandwidth: "50 MB/S",
-              project: "DICT Calabarzon",
-              contractStatus: "Active",
-              activationDate: "June 15, 2022",
-              endOfContract: "June 15, 2025",
-              apSites: [
-                { name: "PUP Main Building", technology: "VSAT", status: "Active", site_id: "S005" },
-                { name: "PUP Library", technology: "VSAT", status: "Active", site_id: "S006" },
-                { name: "PUP Gymnasium", technology: "VSAT", status: "Active", site_id: "S007" }
-              ]
-            }
-          ]
-        },
-        {
-          name: 'Batangas City',
-          provinceName: 'Batangas',
-          totalSites: 67,
-          mayor: 'Beverley Rose A. Dimacuha',
-          totalAPSites: 200,
-          digitizationRate: 45,
-          siteTypes: [
-            { type: "School", count: 30 },
-            { type: "Hospital", count: 15 },
-            { type: "Fire Station", count: 5 },
-            { type: "Public Market", count: 10 },
-            { type: "Barangay", count: 20 },
-            { type: "Park", count: 8 }
-          ],
-          freeWifiLocations: []
-        }
-      ]
-    };
-    
-    setPanelData(samplePanelData);
-    pushToNavigationStack('info');
+  // Handle search from MapToolbar - MODIFIED
+  // This function now expects an object that might contain specific location data
+  // or a general search query.
+  const handleSearch = async (searchParams) => {
+    // If searchParams is an object with a loc_id, it means a specific location was selected from search results
+    if (searchParams && searchParams.loc_id) {
+      try {
+        console.log('Fetching location with sites for loc_id:', searchParams.loc_id);
+        const response = await fetch(`http://localhost:5000/api/location-with-sites/${searchParams.loc_id}`);
+        const fullData = await response.json();
+        console.log('Fetched full location data:', fullData);
+        // Create minimal city data for proper navigation
+        const cityData = {
+          name: fullData.locality || 'Unknown City',
+          provinceName: fullData.province || 'Unknown Province',
+          totalSites: 1, // Or calculate based on fullData.apSites if available
+          mayor: 'Unknown',
+          totalAPSites: fullData.apSites?.length || 0,
+          digitizationRate: 0,
+          siteTypes: [],
+          freeWifiLocations: [fullData]
+        };
+
+        handleLocationMarkerClick(fullData, cityData);
+        setSearchQuery(fullData.location_name); // Set search query to the selected location name
+      } catch (err) {
+        console.error('Error fetching location with sites after search:', err);
+        // Fallback to general search behavior if fetching specific location fails
+        setSearchQuery(searchParams.location_name || ''); // Use the location name from searchParams if available
+        setPanelData(null); // Clear any old panel data
+        clearNavigationStack();
+        pushToNavigationStack('info'); // This might not be desired, but keeps some panel open
+      }
+    } else {
+      // Original behavior for general search (e.g., typing in a province name)
+      const query = typeof searchParams === 'string' ? searchParams : '';
+      setSearchQuery(query);
+      setSelectedCity(null);
+      setSelectedLocation(null);
+      clearNavigationStack();
+
+      // Create sample panelData for the search - in real app this would come from API
+      // This is a placeholder for province-level data
+      const samplePanelData = {
+        provinceName: 'Batangas',
+        provincialID: 'P-04',
+        freeWiFiSites: 150,
+        governor: 'Hermilando I. Mandanas',
+        totalAPSites: 500,
+        digitizationRate: 75,
+        siteTypes: [
+          { type: "Municipal", count: 34 },
+          { type: "Hospitals", count: 12 },
+          { type: "Fire Stations", count: 8 },
+          { type: "Public Market", count: 15 },
+          { type: "Schools", count: 45 },
+          { type: "Parks", count: 36 }
+        ],
+        cities: [
+          {
+            name: 'Sto. Tomas City',
+            provinceName: 'Batangas',
+            totalSites: 41,
+            mayor: 'Art Jun Maligalig',
+            totalAPSites: 125,
+            digitizationRate: 25,
+            siteTypes: [
+              { type: "School", count: 20 },
+              { type: "Hospital", count: 12 },
+              { type: "Fire Station", count: 3 },
+              { type: "Public Market", count: 7 },
+              { type: "Barangay", count: 15 },
+              { type: "Park", count: 6 }
+            ],
+            freeWifiLocations: [
+              {
+                name: "BatState - College of Science Building",
+                type: "School",
+                sites: 11,
+                location: "Batangas State University - Alangilan",
+                locID: "L3-4335",
+                category: "SUCs",
+                address: "0234 Mababang Parang, Batangas City, Batangas",
+                congressional: "IV",
+                latitude: "12.8797",
+                longitude: "16.8797",
+                technology: "LEO",
+                procurement: "Central",
+                cmsProvider: "HTECH Inc.",
+                linkProvider: "Converge Technologies",
+                bandwidth: "30 MB/S",
+                project: "DICT Calabarzon",
+                contractStatus: "Active",
+                activationDate: "January 3, 2022",
+                endOfContract: "March 30, 2028",
+                apSites: [
+                  { name: "BatStateU Building 1", technology: "LEO", status: "Active", site_id: "S001" },
+                  { name: "BatStateU Building 2", technology: "LEO", status: "Active", site_id: "S002" },
+                  { name: "BatStateU Building 3", technology: "LEO", status: "Active", site_id: "S003" },
+                  { name: "BatStateU Building 4", technology: "LEO", status: "Active", site_id: "S004" }
+                ]
+              },
+              {
+                name: "PUP Sto. Tomas Campus",
+                type: "School",
+                sites: 11,
+                location: "PUP Sto. Tomas",
+                locID: "L3-4336",
+                category: "SUCs",
+                address: "National Highway, Sto. Tomas, Batangas",
+                congressional: "IV",
+                latitude: "14.1234",
+                longitude: "121.1456",
+                technology: "VSAT",
+                procurement: "Regional",
+                cmsProvider: "HTECH Inc.",
+                linkProvider: "PLDT",
+                bandwidth: "50 MB/S",
+                project: "DICT Calabarzon",
+                contractStatus: "Active",
+                activationDate: "June 15, 2022",
+                endOfContract: "June 15, 2025",
+                apSites: [
+                  { name: "PUP Main Building", technology: "VSAT", status: "Active", site_id: "S005" },
+                  { name: "PUP Library", technology: "VSAT", status: "Active", site_id: "S006" },
+                  { name: "PUP Gymnasium", technology: "VSAT", status: "Active", site_id: "S007" }
+                ]
+              }
+            ]
+          },
+          {
+            name: 'Batangas City',
+            provinceName: 'Batangas',
+            totalSites: 67,
+            mayor: 'Beverley Rose A. Dimacuha',
+            totalAPSites: 200,
+            digitizationRate: 45,
+            siteTypes: [
+              { type: "School", count: 30 },
+              { type: "Hospital", count: 15 },
+              { type: "Fire Station", count: 5 },
+              { type: "Public Market", count: 10 },
+              { type: "Barangay", count: 20 },
+              { type: "Park", count: 8 }
+            ],
+            freeWifiLocations: []
+          }
+        ]
+      };
+
+      setPanelData(samplePanelData);
+      pushToNavigationStack('info');
+    }
   };
 
   // Handle city click from InfoPanel
@@ -195,11 +231,11 @@ const MainDashboard = () => {
   // Handle marker click to show location info (from map markers)
   const handleLocationMarkerClick = (locationData, associatedCityData = null) => {
     setSelectedLocation(locationData);
-    
+
     // Create proper navigation stack: info -> city -> location
     if (associatedCityData) {
       setSelectedCity(associatedCityData);
-      
+
       // Create minimal province data for the info panel
       const minimalProvinceData = {
         provinceName: associatedCityData.provinceName,
@@ -218,7 +254,7 @@ const MainDashboard = () => {
         ],
         cities: [associatedCityData]
       };
-      
+
       setPanelData(minimalProvinceData);
       clearNavigationStack();
       pushToNavigationStack('info');
@@ -241,7 +277,7 @@ const MainDashboard = () => {
   const handleBack = () => {
     const currentStack = [...navigationStack];
     const currentPanel = currentStack.pop();
-    
+
     if (currentStack.length === 0) {
       // If stack is empty, close all panels
       setSelectedCity(null);
@@ -253,7 +289,7 @@ const MainDashboard = () => {
     }
 
     const previousPanel = currentStack[currentStack.length - 1];
-    
+
     switch (previousPanel) {
       case 'info':
         setSelectedCity(null);
@@ -268,7 +304,7 @@ const MainDashboard = () => {
         // This shouldn't happen in normal flow, but handle it
         break;
     }
-    
+
     setNavigationStack(currentStack);
   };
 
@@ -280,171 +316,143 @@ const MainDashboard = () => {
     setPanelData(null);
     clearNavigationStack();
   };
-const addFWSMarkers = async (mapInstance) => {
+  const addFWSMarkers = async (mapInstance) => {
     // Clear any existing markers on the map
     if (markers.length > 0) {
-        clearMarkers(''); // Assuming clearMarkers clears all markers when called with an empty string
+      clearMarkers(''); // Assuming clearMarkers clears all markers when called with an empty string
     }
 
     try {
-        // Fetch map pin data from the server endpoint.
-        // This endpoint returns site data joined with location data.
-        const response = await fetch('http://localhost:5000/api/map-pins');
-        const data = await response.json();
+      // Fetch map pin data from the server endpoint.
+      // This endpoint returns site data joined with location data.
+      const response = await fetch('http://localhost:5000/api/map-pins');
+      const data = await response.json();
 
-        // Initialize an empty array to store the new Mapbox GL JS marker objects.
-        const newMarkers = [];
-        // Use a Set to keep track of unique location IDs for which we've already created a marker.
-        // This ensures that if a location has multiple sites, only one marker is placed for that location.
-        const processedLocationIds = new Set();
+      // Initialize an empty array to store the new Mapbox GL JS marker objects.
+      const newMarkers = [];
+      // Use a Set to keep track of unique location IDs for which we've already created a marker.
+      // This ensures that if a location has multiple sites, only one marker is placed for that location.
+      const processedLocationIds = new Set();
 
-        // Iterate through each item received from the API.
-        // Each 'item' represents a site, but contains location details (latitude, longitude, location_id, isterminated).
-        data.forEach(item => {
-            // Check if a marker for this location_id has already been created.
-            // If it has, skip this item to avoid duplicate markers for the same location.
-            if (processedLocationIds.has(item.location_id)) {
-                return; // Skip to the next item in the loop
-            }
+      // Iterate through each item received from the API.
+      // Each 'item' represents a site, but contains location details (latitude, longitude, location_id, isterminated).
+      data.forEach(item => {
+        // Check if a marker for this location_id has already been created.
+        // If it has, skip this item to avoid duplicate markers for the same location.
+        if (processedLocationIds.has(item.location_id)) {
+          return; // Skip to the next item in the loop
+        }
 
-            // --- New functionality: Handle 'isterminated' property ---
-            // If the location is terminated (isterminated is true), skip creating a marker.
-            if (item.isterminated === true) {
-                console.log(`Skipping marker for terminated location: ${item.location_name} (ID: ${item.location_id})`);
-                return; // Skip this item
-            }
-            // --- End of new functionality ---
+        // --- New functionality: Handle 'isterminated' property ---
+        // If the location is terminated (isterminated is true), skip creating a marker.
+        if (item.isterminated === true) {
+          console.log(`Skipping marker for terminated location: ${item.location_name} (ID: ${item.location_id})`);
+          return; // Skip this item
+        }
+        // --- End of new functionality ---
 
-            // Add the current location_id to the set of processed IDs.
-            // This marks it as handled, so no further markers will be created for this location.
-            processedLocationIds.add(item.location_id);
+        // Add the current location_id to the set of processed IDs.
+        // This marks it as handled, so no further markers will be created for this location.
+        processedLocationIds.add(item.location_id);
 
-            // Parse latitude and longitude from the current item.
-            // These coordinates are from the 'location' table (l.latitude, l.longitude) as per your server query.
-            const lat = parseFloat(item.latitude);
-            const lng = parseFloat(item.longitude);
+        // Parse latitude and longitude from the current item.
+        // These coordinates are from the 'location' table (l.latitude, l.longitude) as per your server query.
+        const lat = parseFloat(item.latitude);
+        const lng = parseFloat(item.longitude);
 
-            // Validate latitude and longitude before creating a marker.
-            // Invalid coordinates can cause issues with map rendering.
-            if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
-                console.warn(
-                    `Skipping marker for location_id ${item.location_id || 'N/A'} ` +
-                    `(${item.location_name || 'Unnamed Location'}) due to invalid coordinates: ` +
-                    `Lat ${item.latitude}, Lng ${item.longitude}`
-                );
-                return; // Skip this item if coordinates are invalid
-            }
+        // Validate latitude and longitude before creating a marker.
+        // Invalid coordinates can cause issues with map rendering.
+        if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+          console.warn(
+            `Skipping marker for location_id ${item.location_id || 'N/A'} ` +
+            `(${item.location_name || 'Unnamed Location'}) due to invalid coordinates: ` +
+            `Lat ${item.latitude}, Lng ${item.longitude}`
+          );
+          return; // Skip this item if coordinates are invalid
+        }
 
-            // Determine marker color based on 'isterminated' status.
-            // If isterminated is false, the marker will be red. Otherwise, the default Mapbox blue.
-            // Note: If item.isterminated is undefined/null or not explicitly false, it will default to blue.
-            const markerColor = item.isterminated === false ? '#FF0000' : '#00FF00'; // Red for non-terminated, Blue otherwise
+        // Determine marker color based on 'isterminated' status.
+        // If isterminated is false, the marker will be red. Otherwise, the default Mapbox blue.
+        // Note: If item.isterminated is undefined/null or not explicitly false, it will default to blue.
+        const markerColor = item.isterminated === false ? '#FF0000' : '#00FF00'; // Red for non-terminated, Green otherwise
 
-            // Create a new Mapbox GL JS marker.
-            // Mapbox expects coordinates in [longitude, latitude] format.
-            const marker = new mapboxgl.Marker({ color: markerColor, scale: 1.0 })
-                .setLngLat([lng, lat])
-                .addTo(mapInstance); // Add the marker to the provided map instance.
+        // Create a new Mapbox GL JS marker.
+        // Mapbox expects coordinates in [longitude, latitude] format.
+        const marker = new mapboxgl.Marker({ color: markerColor, scale: 1.0 })
+          .setLngLat([lng, lat])
+          .addTo(mapInstance); // Add the marker to the provided map instance.
 
-            // Add a click event listener to the marker's DOM element.
-            marker.getElement().addEventListener('click', async () => {
-                try {
-                    // Ensure location_id is valid before making the API call for detailed data.
-                    if (item.location_id) {
-                        // Fetch detailed data for the clicked location using its location_id.
-                        const response = await fetch(`http://localhost:5000/api/location-with-sites/${item.location_id}`);
-                        const fullData = await response.json();
-                        // Set the selected location data, likely to update an info panel or similar UI element.
-                        
-                        const cityData = {
-                        name: fullData.locality || 'Unknown City',
-                        provinceName: fullData.province || 'Unknown Province',
-                        totalSites: 1,
-                        mayor: 'Unknown',
-                        totalAPSites: fullData.apSites?.length || 0,
-                        digitizationRate: 0,
-                        siteTypes: [],
-                        freeWifiLocations: [fullData]
-                      };
-                        
-                        handleLocationMarkerClick(fullData, cityData);
-                        setSearchQuery(item.location_name);
-                    } else {
-                        console.warn(
-                            `Cannot fetch location-with-sites: location_id is undefined for location ` +
-                            `${item.location_name || 'N/A'}`
-                        );
-                    }
-                } catch (err) {
-                    console.error('Error fetching location with sites:', err);
-                }
+        // Add a click event listener to the marker's DOM element.
+        // In the addFWSMarkers function, replace the marker click event listener with this:
 
-                // Clear related UI states, likely to hide other panels and show the selected location's details.
-                setSearchQuery(fullData); // Clear search query to hide a search results panel
-                setSelectedCity(null); // Clear any selected city state
-                setPanelData(fullData); // Clear generic panel data
-            });
+marker.getElement().addEventListener('click', async () => {
+  try {
+    // Ensure location_id is valid before making the API call for detailed data.
+    if (item.location_id) {
+      // Fetch detailed data for the clicked location using its location_id.
+      const response = await fetch(`http://localhost:5000/api/location-with-sites/${item.location_id}`);
+      const fullData = await response.json();
 
-            // Add the newly created valid marker to our array.
-            newMarkers.push(marker);
-        });
+      const cityData = {
+        name: fullData.locality || 'Unknown City',
+        provinceName: fullData.province || 'Unknown Province',
+        totalSites: 1,
+        mayor: 'Unknown',
+        totalAPSites: fullData.apSites?.length || 0,
+        digitizationRate: 0,
+        siteTypes: [],
+        freeWifiLocations: [fullData]
+      };
 
-        // Update the state variable that holds all current markers.
-        setMarkers(newMarkers);
-        console.log(`Added ${newMarkers.length} unique location markers from database`);
-    } catch (err) {
-        console.error('Failed to fetch map pins:', err);
+      // Create proper province data for the full navigation stack
+      const provinceData = {
+        provinceName: fullData.province || 'Unknown Province',
+        provincialID: 'P-04',
+        freeWiFiSites: 150,
+        governor: 'Unknown Governor',
+        totalAPSites: 500,
+        digitizationRate: 75,
+        siteTypes: [
+          { type: "Municipal", count: 34 },
+          { type: "Hospitals", count: 12 },
+          { type: "Fire Stations", count: 8 },
+          { type: "Public Market", count: 15 },
+          { type: "Schools", count: 45 },
+          { type: "Parks", count: 36 }
+        ],
+        cities: [cityData]
+      };
+
+      // Set up the proper navigation stack and data
+      setSearchQuery(fullData.location_name);
+      setPanelData(provinceData);
+      setSelectedCity(cityData);
+      
+      // Call handleLocationMarkerClick to set up the navigation properly
+      handleLocationMarkerClick(fullData, cityData);
+      
+    } else {
+      console.warn(
+        `Cannot fetch location-with-sites: location_id is undefined for location ` +
+        `${item.location_name || 'N/A'}`
+      );
     }
-};
+  } catch (err) {
+    console.error('Error fetching location with sites:', err);
+  }
+});
 
-  // Function to add FWS markers to the map
-  // const addFWSMarkers = async (mapInstance) => {
-  //   if (markers.length > 0) {
-  //     clearMarkers('');
-  //   }
+        // Add the newly created valid marker to our array.
+        newMarkers.push(marker);
+      });
 
-  //   try {
-  //     const response = await fetch('http://localhost:5000/api/map-pins');
-  //     const data = await response.json();
-
-  //     const newMarkers = data.map(site => {
-  //       const marker = new mapboxgl.Marker({ color: '#0066FF', scale: 1.2 })
-  //         .setLngLat([site.longitude, site.latitude])
-  //         .addTo(mapInstance);
-
-  //       marker.getElement().addEventListener('click', async () => {
-  //         try {
-  //           const response = await fetch(`http://localhost:5000/api/location-with-sites/${site.site_id}`);
-  //           const fullData = await response.json();
-            
-  //           // Create minimal city data for proper navigation
-  //           const cityData = {
-  //             name: fullData.locality || 'Unknown City',
-  //             provinceName: fullData.province || 'Unknown Province',
-  //             totalSites: 1,
-  //             mayor: 'Unknown',
-  //             totalAPSites: fullData.apSites?.length || 0,
-  //             digitizationRate: 0,
-  //             siteTypes: [],
-  //             freeWifiLocations: [fullData]
-  //           };
-
-  //           handleLocationMarkerClick(fullData, cityData);
-  //           setSearchQuery(site.location_name);
-  //         } catch (err) {
-  //           console.error('Error fetching location with sites:', err);
-  //         }
-  //       });
-
-  //       return marker;
-  //     });
-
-  //     setMarkers(newMarkers);
-  //     console.log(`Added ${newMarkers.length} markers from database`);
-  //   } catch (err) {
-  //     console.error('Failed to fetch map pins:', err);
-  //   }
-  // };
+      // Update the state variable that holds all current markers.
+      setMarkers(newMarkers);
+      console.log(`Added ${newMarkers.length} unique location markers from database`);
+    } catch (err) {
+      console.error('Failed to fetch map pins:', err);
+    }
+  };
 
   // Initialize and configure the Mapbox map
   useEffect(() => {
@@ -503,9 +511,9 @@ const addFWSMarkers = async (mapInstance) => {
 
             {/* Show InfoPanel when search is performed and it's the top panel */}
             {searchQuery && navigationStack[navigationStack.length - 1] === 'info' && (
-              <InfoPanel 
-                searchQuery={searchQuery} 
-                onCityClick={handleCityClickFromInfo} 
+              <InfoPanel
+                searchQuery={searchQuery}
+                onCityClick={handleCityClickFromInfo}
                 panelData={panelData}
                 onClose={handleInfoPanelClose}
               />
@@ -513,8 +521,8 @@ const addFWSMarkers = async (mapInstance) => {
 
             {/* Show CityInfoPanel when a city is selected and it's the top panel */}
             {selectedCity && navigationStack[navigationStack.length - 1] === 'city' && (
-              <CityInfoPanel 
-                cityData={selectedCity} 
+              <CityInfoPanel
+                cityData={selectedCity}
                 onBack={handleBack}
                 onLocationClick={handleLocationClickFromCity}
               />
@@ -522,8 +530,8 @@ const addFWSMarkers = async (mapInstance) => {
 
             {/* Show LocationInfoPanel when a location is selected and it's the top panel */}
             {selectedLocation && navigationStack[navigationStack.length - 1] === 'location' && (
-              <LocationInfoPanel 
-                locationData={selectedLocation} 
+              <LocationInfoPanel
+                locationData={selectedLocation}
                 onBack={handleBack}
               />
             )}
@@ -568,7 +576,7 @@ const addFWSMarkers = async (mapInstance) => {
         {activeTab === 'map' && (
           <MapToolbar
             mapInstance={map}
-            onSearch={handleSearch}
+            onSearch={handleSearch} // This prop now accepts an object for specific location clicks
           />
         )}
         {renderContent()}

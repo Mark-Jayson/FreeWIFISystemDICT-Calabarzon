@@ -411,7 +411,7 @@ app.get('/api/location-with-sites/:site_id', async (req, res) => {
         l.longitude 
       FROM public.site s
       JOIN public.location l ON s.location_id = l.loc_id
-      WHERE s.site_id = $1
+      WHERE l.loc_id = $1
     `, [site_id]);
 
     if (locationResult.rows.length === 0) {
@@ -421,15 +421,13 @@ app.get('/api/location-with-sites/:site_id', async (req, res) => {
     const locationData = locationResult.rows[0];
 
     const sitesResult = await pool.query(`
-      SELECT 
-        s.site_id,
-        s.site_name,
-        s.contract_status AS status,
-        s.site_type AS technology
-      FROM public.site s
-      WHERE s.location_id = (
-        SELECT location_id FROM public.site WHERE site_id = $1
-      )
+     SELECT
+  s.site_id,
+  s.site_name,
+  s.contract_status AS status,
+  s.site_type AS technology
+FROM public.site s
+WHERE s.location_id = $1;
     `, [site_id]);
 
     res.status(200).json({

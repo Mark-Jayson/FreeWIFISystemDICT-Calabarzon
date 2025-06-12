@@ -2,14 +2,14 @@ import React, { useState, useRef, useEffect } from 'react';
 // COMMENTED OUT: Import from hardcoded JSON utils file
 // import { searchFWSLocations } from '../utils/fwsLocations';
 
-const MapToolbar = ({ mapInstance, setPanelData, onSearch }) => {
+const MapToolbar = ({ mapInstance, onSearch }) => { // Removed setPanelData from props
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const searchResultsRef = useRef(null);
   const [hoveredButton, setHoveredButton] = useState(null);
-  
+
   const filterItems = [
     { id: 'district', label: 'District' },
     { id: 'technology', label: 'Technology' },
@@ -39,18 +39,18 @@ const MapToolbar = ({ mapInstance, setPanelData, onSearch }) => {
     try {
       setIsSearching(true);
       const response = await fetch(`http://localhost:5000/api/location/search?query=${encodeURIComponent(query)}`);
-      
+
       if (!response.ok) {
         throw new Error('Search request failed');
       }
-      
+
       const data = await response.json();
       return data;
     } catch (error) {
       console.error('Error searching database:', error);
       return [];
     } finally {
-      setIsSearching(false); 
+      setIsSearching(false);
     }
   };
 
@@ -71,7 +71,7 @@ const MapToolbar = ({ mapInstance, setPanelData, onSearch }) => {
     setShowResults(results.length > 0);
   };
 
-  // Handle search result selection - UPDATED for database structure
+  // Handle search result selection - MODIFIED
   const handleResultClick = async (location) => {
     // Hide the search results dropdown
     setShowResults(false);
@@ -80,55 +80,34 @@ const MapToolbar = ({ mapInstance, setPanelData, onSearch }) => {
     setSearchTerm('');
 
     try {
-      // Get site data for this location from database
-      const siteResponse = await fetch(`http://localhost:5000/api/map-pins`);
-      const allSites = await siteResponse.json();
-      
-      // Find sites that match this location
-      const locationSites = allSites.filter(site => 
-        site.location_name === location.location_name && 
-        site.province === location.province
-      );
+      // Fetch map pin data for this location to get coordinates and ensure it's a valid location for map interaction
+      // This is necessary because the search results might not contain lat/lng directly
+      const response = await fetch(`http://localhost:5000/api/map-pins`);
+      const allSites = await response.json();
 
-      if (locationSites.length > 0 && mapInstance) {
-        // Use the first site's coordinates for map navigation
-        const firstSite = locationSites[0];
+      // Find a site that matches this location for coordinates
+      const targetSite = allSites.find(site => site.location_id === location.loc_id);
+
+      if (targetSite && mapInstance) {
         mapInstance.flyTo({
-          center: [firstSite.longitude, firstSite.latitude],
+          center: [parseFloat(targetSite.longitude), parseFloat(targetSite.latitude)],
           zoom: 15,
           essential: true
         });
       }
 
-      // Trigger search with the selected location's data
-      onSearch(location.location_name);
-
-      // UPDATED: Set panel data with database location information
-      if (setPanelData) {
-        const formattedData = formatLocationDataForInfoPanel(location, locationSites);
-        setPanelData(formattedData);
-      }
+      // Trigger search in MainDashboard, passing the full location object
+      // MainDashboard will then use this loc_id to fetch detailed data for LocationInfoPanel
+      onSearch(location);
 
     } catch (error) {
       console.error('Error handling result click:', error);
-      // Still trigger search even if other operations fail
-      onSearch(location.location_name);
+      // Even if map fly or data fetch fails, still try to trigger the onSearch to open a panel
+      // onSearch(location.location_name); // Fallback to sending just the name
     }
   };
 
-  // NEW: Format database location data for InfoPanel
-  const formatLocationDataForInfoPanel = (location, sites) => {
-    return {
-      location_name: location.location_name,
-      province: location.province,
-      locality: location.locality,
-      congressional_district: location.congressional_district,
-      category: location.category,
-      cluster: location.cluster,
-      totalSites: sites ? sites.length : 0,
-      sites: sites || []
-    };
-  };
+  // Removed formatLocationDataForInfoPanel as MapToolbar no longer sets panel data directly
 
   return (
     <div className="bg-white p-3 shadow-md flex items-center">
