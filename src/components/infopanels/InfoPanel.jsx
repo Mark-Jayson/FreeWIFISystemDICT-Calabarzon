@@ -145,7 +145,7 @@ const InfoPanel = ({ searchQuery, panelData, onClose, onCityClick }) => {
         </div>
       </div>
       
-      <style jsx>{`
+      <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 6px;
         }

@@ -280,55 +280,171 @@ const MainDashboard = () => {
     setPanelData(null);
     clearNavigationStack();
   };
-
-  // Function to add FWS markers to the map
-  const addFWSMarkers = async (mapInstance) => {
+const addFWSMarkers = async (mapInstance) => {
+    // Clear any existing markers on the map
     if (markers.length > 0) {
-      clearMarkers('');
+        clearMarkers(''); // Assuming clearMarkers clears all markers when called with an empty string
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/map-pins');
-      const data = await response.json();
+        // Fetch map pin data from the server endpoint.
+        // This endpoint returns site data joined with location data.
+        const response = await fetch('http://localhost:5000/api/map-pins');
+        const data = await response.json();
 
-      const newMarkers = data.map(site => {
-        const marker = new mapboxgl.Marker({ color: '#0066FF', scale: 1.2 })
-          .setLngLat([site.longitude, site.latitude])
-          .addTo(mapInstance);
+        // Initialize an empty array to store the new Mapbox GL JS marker objects.
+        const newMarkers = [];
+        // Use a Set to keep track of unique location IDs for which we've already created a marker.
+        // This ensures that if a location has multiple sites, only one marker is placed for that location.
+        const processedLocationIds = new Set();
 
-        marker.getElement().addEventListener('click', async () => {
-          try {
-            const response = await fetch(`http://localhost:5000/api/location-with-sites/${site.site_id}`);
-            const fullData = await response.json();
-            
-            // Create minimal city data for proper navigation
-            const cityData = {
-              name: fullData.locality || 'Unknown City',
-              provinceName: fullData.province || 'Unknown Province',
-              totalSites: 1,
-              mayor: 'Unknown',
-              totalAPSites: fullData.apSites?.length || 0,
-              digitizationRate: 0,
-              siteTypes: [],
-              freeWifiLocations: [fullData]
-            };
+        // Iterate through each item received from the API.
+        // Each 'item' represents a site, but contains location details (latitude, longitude, location_id, isterminated).
+        data.forEach(item => {
+            // Check if a marker for this location_id has already been created.
+            // If it has, skip this item to avoid duplicate markers for the same location.
+            if (processedLocationIds.has(item.location_id)) {
+                return; // Skip to the next item in the loop
+            }
 
-            handleLocationMarkerClick(fullData, cityData);
-            setSearchQuery(site.location_name);
-          } catch (err) {
-            console.error('Error fetching location with sites:', err);
-          }
+            // --- New functionality: Handle 'isterminated' property ---
+            // If the location is terminated (isterminated is true), skip creating a marker.
+            if (item.isterminated === true) {
+                console.log(`Skipping marker for terminated location: ${item.location_name} (ID: ${item.location_id})`);
+                return; // Skip this item
+            }
+            // --- End of new functionality ---
+
+            // Add the current location_id to the set of processed IDs.
+            // This marks it as handled, so no further markers will be created for this location.
+            processedLocationIds.add(item.location_id);
+
+            // Parse latitude and longitude from the current item.
+            // These coordinates are from the 'location' table (l.latitude, l.longitude) as per your server query.
+            const lat = parseFloat(item.latitude);
+            const lng = parseFloat(item.longitude);
+
+            // Validate latitude and longitude before creating a marker.
+            // Invalid coordinates can cause issues with map rendering.
+            if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
+                console.warn(
+                    `Skipping marker for location_id ${item.location_id || 'N/A'} ` +
+                    `(${item.location_name || 'Unnamed Location'}) due to invalid coordinates: ` +
+                    `Lat ${item.latitude}, Lng ${item.longitude}`
+                );
+                return; // Skip this item if coordinates are invalid
+            }
+
+            // Determine marker color based on 'isterminated' status.
+            // If isterminated is false, the marker will be red. Otherwise, the default Mapbox blue.
+            // Note: If item.isterminated is undefined/null or not explicitly false, it will default to blue.
+            const markerColor = item.isterminated === false ? '#FF0000' : '#00FF00'; // Red for non-terminated, Blue otherwise
+
+            // Create a new Mapbox GL JS marker.
+            // Mapbox expects coordinates in [longitude, latitude] format.
+            const marker = new mapboxgl.Marker({ color: markerColor, scale: 1.0 })
+                .setLngLat([lng, lat])
+                .addTo(mapInstance); // Add the marker to the provided map instance.
+
+            // Add a click event listener to the marker's DOM element.
+            marker.getElement().addEventListener('click', async () => {
+                try {
+                    // Ensure location_id is valid before making the API call for detailed data.
+                    if (item.location_id) {
+                        // Fetch detailed data for the clicked location using its location_id.
+                        const response = await fetch(`http://localhost:5000/api/location-with-sites/${item.location_id}`);
+                        const fullData = await response.json();
+                        // Set the selected location data, likely to update an info panel or similar UI element.
+                        
+                        const cityData = {
+                        name: fullData.locality || 'Unknown City',
+                        provinceName: fullData.province || 'Unknown Province',
+                        totalSites: 1,
+                        mayor: 'Unknown',
+                        totalAPSites: fullData.apSites?.length || 0,
+                        digitizationRate: 0,
+                        siteTypes: [],
+                        freeWifiLocations: [fullData]
+                      };
+                        
+                        handleLocationMarkerClick(fullData, cityData);
+                        setSearchQuery(item.location_name);
+                    } else {
+                        console.warn(
+                            `Cannot fetch location-with-sites: location_id is undefined for location ` +
+                            `${item.location_name || 'N/A'}`
+                        );
+                    }
+                } catch (err) {
+                    console.error('Error fetching location with sites:', err);
+                }
+
+                // Clear related UI states, likely to hide other panels and show the selected location's details.
+                setSearchQuery(fullData); // Clear search query to hide a search results panel
+                setSelectedCity(null); // Clear any selected city state
+                setPanelData(fullData); // Clear generic panel data
+            });
+
+            // Add the newly created valid marker to our array.
+            newMarkers.push(marker);
         });
 
-        return marker;
-      });
-
-      setMarkers(newMarkers);
-      console.log(`Added ${newMarkers.length} markers from database`);
+        // Update the state variable that holds all current markers.
+        setMarkers(newMarkers);
+        console.log(`Added ${newMarkers.length} unique location markers from database`);
     } catch (err) {
-      console.error('Failed to fetch map pins:', err);
+        console.error('Failed to fetch map pins:', err);
     }
-  };
+};
+
+  // Function to add FWS markers to the map
+  // const addFWSMarkers = async (mapInstance) => {
+  //   if (markers.length > 0) {
+  //     clearMarkers('');
+  //   }
+
+  //   try {
+  //     const response = await fetch('http://localhost:5000/api/map-pins');
+  //     const data = await response.json();
+
+  //     const newMarkers = data.map(site => {
+  //       const marker = new mapboxgl.Marker({ color: '#0066FF', scale: 1.2 })
+  //         .setLngLat([site.longitude, site.latitude])
+  //         .addTo(mapInstance);
+
+  //       marker.getElement().addEventListener('click', async () => {
+  //         try {
+  //           const response = await fetch(`http://localhost:5000/api/location-with-sites/${site.site_id}`);
+  //           const fullData = await response.json();
+            
+  //           // Create minimal city data for proper navigation
+  //           const cityData = {
+  //             name: fullData.locality || 'Unknown City',
+  //             provinceName: fullData.province || 'Unknown Province',
+  //             totalSites: 1,
+  //             mayor: 'Unknown',
+  //             totalAPSites: fullData.apSites?.length || 0,
+  //             digitizationRate: 0,
+  //             siteTypes: [],
+  //             freeWifiLocations: [fullData]
+  //           };
+
+  //           handleLocationMarkerClick(fullData, cityData);
+  //           setSearchQuery(site.location_name);
+  //         } catch (err) {
+  //           console.error('Error fetching location with sites:', err);
+  //         }
+  //       });
+
+  //       return marker;
+  //     });
+
+  //     setMarkers(newMarkers);
+  //     console.log(`Added ${newMarkers.length} markers from database`);
+  //   } catch (err) {
+  //     console.error('Failed to fetch map pins:', err);
+  //   }
+  // };
 
   // Initialize and configure the Mapbox map
   useEffect(() => {

@@ -118,8 +118,12 @@ async function createTablesIfNotExist() {
             locality VARCHAR(100),
             category VARCHAR(100),
             cluster VARCHAR(100),
+            latitude NUMERIC(9,6),
+            longitude NUMERIC(9,6),
+            isterminated BOOLEAN,
             CONSTRAINT unique_location_composite UNIQUE (province, locality, location_name)
-        );
+        
+            );
 
         CREATE TABLE IF NOT EXISTS public.site (
             site_id SERIAL PRIMARY KEY,
@@ -375,8 +379,9 @@ app.get('/api/map-pins', async (req, res) => {
         s.site_id,
         s.site_code,
         s.site_name,
-        s.latitude,
-        s.longitude,
+          s.location_id, 
+        l.latitude,
+        l.longitude,
         l.location_name,
         l.province,
         l.locality,
@@ -384,7 +389,7 @@ app.get('/api/map-pins', async (req, res) => {
         l.cluster
       FROM public.site s
       JOIN public.location l ON s.location_id = l.loc_id
-      WHERE s.latitude IS NOT NULL AND s.longitude IS NOT NULL
+     WHERE l.latitude IS NOT NULL AND l.longitude IS NOT NULL
     `);
 
 
@@ -402,8 +407,8 @@ app.get('/api/location-with-sites/:site_id', async (req, res) => {
     const locationResult = await pool.query(`
       SELECT 
         l.*,
-        s.latitude,
-        s.longitude
+        l.latitude,
+        l.longitude 
       FROM public.site s
       JOIN public.location l ON s.location_id = l.loc_id
       WHERE s.site_id = $1
