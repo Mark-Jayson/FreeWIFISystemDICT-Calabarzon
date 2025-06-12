@@ -27,7 +27,7 @@ function App() {
           <Route path="wifi" element={<WiFiList />} />
           <Route path="playground" element={<OtherPage />} />
           <Route path="add-wifi-site" element={<AddWifiSitePage />} />
-          <Route path="settings" element={<MainDashboard />} />
+          <Route path="logout" element={<MainDashboard />} />
         </Route>
       </Routes>
     </Router>

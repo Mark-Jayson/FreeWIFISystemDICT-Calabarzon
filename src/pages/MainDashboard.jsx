@@ -553,13 +553,6 @@ marker.getElement().addEventListener('click', async () => {
             <div className="bg-white p-4 rounded shadow">Wi-Fi sites content will appear here</div>
           </div>
         );
-      case 'settings':
-        return (
-          <div className="flex-1 p-6">
-            <h1 className="text-2xl font-bold mb-4">Settings</h1>
-            <div className="bg-white p-4 rounded shadow">Settings content will appear here</div>
-          </div>
-        );
       default:
         return (
           <div className="flex-1 p-6">

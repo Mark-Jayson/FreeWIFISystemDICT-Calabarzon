@@ -1,18 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import CityInfoPanel from "./CityInfoPanel";
+import congressionalDistricts from "../../data/congressional-district.json";
+import governorAndMayors from "../../data/govrmayr.json";
+
 
 const InfoPanel = ({ searchQuery, panelData, onClose, onCityClick }) => {
   const [showPanel, setShowPanel] = useState(false);
   const [provinceData, setProvinceData] = useState(null);
+  const [governorName, setGovernorName] = useState('');
 
-  useEffect(() => {
-    if (searchQuery && searchQuery.trim() !== '') {
-      // In a real app, you would fetch data based on the search query
-      // For now, we'll just show the sample data
-      setProvinceData(panelData);
-      setShowPanel(true);
+useEffect(() => {
+  if (searchQuery && searchQuery.trim() !== '') {
+    setProvinceData(panelData);
+    setShowPanel(true);
+
+    console.log('Received panelData:', panelData);
+    console.log('Province Name from panelData:', panelData?.provinceName);
+
+    if (panelData?.provinceName) {
+      // FIX: Changed from govMayorsData to governorAndMayors
+      const provinceInfo = governorAndMayors[panelData.provinceName];
+      console.log('Province Info from JSON:', provinceInfo);
+
+      if (provinceInfo) {
+        if (Array.isArray(provinceInfo)) {
+          console.log('Governor from array:', provinceInfo[0]?.Governor);
+          setGovernorName(provinceInfo[0]?.Governor || 'N/A');
+        } else if (typeof provinceInfo === 'object' && provinceInfo !== null) {
+          console.log('Governor from object:', provinceInfo.Governor);
+          setGovernorName(provinceInfo.Governor || 'N/A');
+        } else {
+          setGovernorName('N/A');
+        }
+      } else {
+        setGovernorName('N/A');
+      }
     }
-  }, [searchQuery, panelData]);
+  }
+}, [searchQuery, panelData]);
 
   const handleClosePanel = () => {
     setShowPanel(false);
@@ -22,7 +47,6 @@ const InfoPanel = ({ searchQuery, panelData, onClose, onCityClick }) => {
   };
   
   const handleCityClick = (city) => {
-    // Use the parent's onCityClick handler to maintain proper navigation
     if (onCityClick) {
       onCityClick(city);
     }
@@ -62,7 +86,7 @@ const InfoPanel = ({ searchQuery, panelData, onClose, onCityClick }) => {
           </div>
           <div className="w-1/2 py-3 pl-3 border-l border-gray-200">
             <div className="text-xs text-gray-500">Governor</div>
-            <div className="font-medium mt-1">{provinceData?.governor}</div>
+            <div className="font-medium mt-1">{governorName}</div> {/* Display the governor's name here */}
           </div>
         </div>
         
