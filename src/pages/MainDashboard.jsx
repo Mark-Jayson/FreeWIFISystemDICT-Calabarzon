@@ -9,48 +9,60 @@ import 'mapbox-gl/dist/mapbox-gl.css';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
 
 // Constants for map initialization
-const INITIAL_CENTER = [121.2, 14.1];  // Initial center coordinates (Philippines)
-const INITIAL_ZOOM = 8.8;              // Initial zoom level
-const PHILIPPINES_BOUNDS = [           // Boundary coordinates for Philippines
-  [114.0952145, 4.5873032],            // Southwest corner (min longitude, min latitude)
-  [126.8039607, 21.1217806],           // Northeast corner (max longitude, max latitude)
+const INITIAL_CENTER = [121.2, 14.1];
+const INITIAL_ZOOM = 8.8;
+const PHILIPPINES_BOUNDS = [
+  [114.0952145, 4.5873032],
+  [126.8039607, 21.1217806],
 ];
 
 const MainDashboard = () => {
-  // Get the current location to determine active tab
   const location = useLocation();
   const currentPath = location.pathname.split('/')[1];
 
-  // UI state
-  const [activeTab, setActiveTab] = useState(currentPath || 'map');  // Default to map if no path
-  const [selectedCity, setSelectedCity] = useState(null);            // City data when a city is selected
-  const [selectedLocation, setSelectedLocation] = useState(null);    // Location data when a location is selected
-  const [searchQuery, setSearchQuery] = useState('');                // Search query from toolbar
+  // UI state - Navigation stack to track panel hierarchy
+  const [navigationStack, setNavigationStack] = useState([]);
+  const [activeTab, setActiveTab] = useState(currentPath || 'map');
+  const [selectedCity, setSelectedCity] = useState(null);
+  const [selectedLocation, setSelectedLocation] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
   const [markers, setMarkers] = useState([]);
-  const [panelData, setPanelData] = useState(null);                  // Panel data for InfoPanel
+  const [panelData, setPanelData] = useState(null);
 
   // Map state
-  const [map, setMap] = useState(null);                          // Mapbox map instance
-  const mapRef = useRef(null);                                   // Ref to store map instance (for cleanup)
-  const mapContainerRef = useRef(null);                          // Ref to the DOM element for map container
-  const [error, setError] = useState(null);                      // Error state for map initialization
-  const [center, setCenter] = useState(INITIAL_CENTER);          // Current map center coordinates
-  const [zoom, setZoom] = useState(INITIAL_ZOOM);                // Current map zoom level
-  const [mapInitialized, setMapInitialized] = useState(false);   // Flag to track if map is fully loaded
+  const [map, setMap] = useState(null);
+  const mapRef = useRef(null);
+  const mapContainerRef = useRef(null);
+  const [error, setError] = useState(null);
+  const [center, setCenter] = useState(INITIAL_CENTER);
+  const [zoom, setZoom] = useState(INITIAL_ZOOM);
+  const [mapInitialized, setMapInitialized] = useState(false);
 
   // Update active tab when location changes
   useEffect(() => {
     setActiveTab(currentPath || 'map');
   }, [currentPath]);
 
-  // Fixed clearMarkers function - removed + symbols and defined query parameter
+  // Navigation helper functions
+  const pushToNavigationStack = (panel) => {
+    setNavigationStack(prev => [...prev, panel]);
+  };
+
+  const popFromNavigationStack = () => {
+    setNavigationStack(prev => prev.slice(0, -1));
+  };
+
+  const clearNavigationStack = () => {
+    setNavigationStack([]);
+  };
+
+  // Fixed clearMarkers function
   const clearMarkers = (query) => {
     setSearchQuery(query);
-    // Clear any selected city or location when performing a new search
     setSelectedCity(null);
     setSelectedLocation(null);
+    clearNavigationStack();
 
-    // Remove existing markers from the map
     markers.forEach(marker => marker.remove());
     setMarkers([]);
   };
@@ -58,65 +70,219 @@ const MainDashboard = () => {
   // Handle search from MapToolbar
   const handleSearch = (query) => {
     setSearchQuery(query);
-    // Clear any selected city or location when performing a new search
     setSelectedCity(null);
     setSelectedLocation(null);
+    clearNavigationStack();
+    
+    // Create sample panelData for the search - in real app this would come from API
+    const samplePanelData = {
+      provinceName: 'Batangas',
+      provincialID: 'P-04',
+      freeWiFiSites: 150,
+      governor: 'Hermilando I. Mandanas',
+      totalAPSites: 500,
+      digitizationRate: 75,
+      siteTypes: [
+        { type: "Municipal", count: 34 },
+        { type: "Hospitals", count: 12 },
+        { type: "Fire Stations", count: 8 },
+        { type: "Public Market", count: 15 },
+        { type: "Schools", count: 45 },
+        { type: "Parks", count: 36 }
+      ],
+      cities: [
+        {
+          name: 'Sto. Tomas City',
+          provinceName: 'Batangas',
+          totalSites: 41,
+          mayor: 'Art Jun Maligalig',
+          totalAPSites: 125,
+          digitizationRate: 25,
+          siteTypes: [
+            { type: "School", count: 20 },
+            { type: "Hospital", count: 12 },
+            { type: "Fire Station", count: 3 },
+            { type: "Public Market", count: 7 },
+            { type: "Barangay", count: 15 },
+            { type: "Park", count: 6 }
+          ],
+          freeWifiLocations: [
+            { 
+              name: "BatState - College of Science Building", 
+              type: "School", 
+              sites: 11,
+              location: "Batangas State University - Alangilan",
+              locID: "L3-4335",
+              category: "SUCs",
+              address: "0234 Mababang Parang, Batangas City, Batangas",
+              congressional: "IV",
+              latitude: "12.8797",
+              longitude: "16.8797",
+              technology: "LEO",
+              procurement: "Central",
+              cmsProvider: "HTECH Inc.",
+              linkProvider: "Converge Technologies",
+              bandwidth: "30 MB/S",
+              project: "DICT Calabarzon",
+              contractStatus: "Active",
+              activationDate: "January 3, 2022",
+              endOfContract: "March 30, 2028",
+              apSites: [
+                { name: "BatStateU Building 1", technology: "LEO", status: "Active", site_id: "S001" },
+                { name: "BatStateU Building 2", technology: "LEO", status: "Active", site_id: "S002" },
+                { name: "BatStateU Building 3", technology: "LEO", status: "Active", site_id: "S003" },
+                { name: "BatStateU Building 4", technology: "LEO", status: "Active", site_id: "S004" }
+              ]
+            },
+            { 
+              name: "PUP Sto. Tomas Campus", 
+              type: "School", 
+              sites: 11,
+              location: "PUP Sto. Tomas",
+              locID: "L3-4336",
+              category: "SUCs",
+              address: "National Highway, Sto. Tomas, Batangas",
+              congressional: "IV",
+              latitude: "14.1234",
+              longitude: "121.1456",
+              technology: "VSAT",
+              procurement: "Regional",
+              cmsProvider: "HTECH Inc.",
+              linkProvider: "PLDT",
+              bandwidth: "50 MB/S",
+              project: "DICT Calabarzon",
+              contractStatus: "Active",
+              activationDate: "June 15, 2022",
+              endOfContract: "June 15, 2025",
+              apSites: [
+                { name: "PUP Main Building", technology: "VSAT", status: "Active", site_id: "S005" },
+                { name: "PUP Library", technology: "VSAT", status: "Active", site_id: "S006" },
+                { name: "PUP Gymnasium", technology: "VSAT", status: "Active", site_id: "S007" }
+              ]
+            }
+          ]
+        },
+        {
+          name: 'Batangas City',
+          provinceName: 'Batangas',
+          totalSites: 67,
+          mayor: 'Beverley Rose A. Dimacuha',
+          totalAPSites: 200,
+          digitizationRate: 45,
+          siteTypes: [
+            { type: "School", count: 30 },
+            { type: "Hospital", count: 15 },
+            { type: "Fire Station", count: 5 },
+            { type: "Public Market", count: 10 },
+            { type: "Barangay", count: 20 },
+            { type: "Park", count: 8 }
+          ],
+          freeWifiLocations: []
+        }
+      ]
+    };
+    
+    setPanelData(samplePanelData);
+    pushToNavigationStack('info');
   };
 
-  // Handle marker click to show city info
-  const handleMarkerClick = (cityData) => {
+  // Handle city click from InfoPanel
+  const handleCityClickFromInfo = (cityData) => {
     setSelectedCity(cityData);
-    setSelectedLocation(null); // Clear any selected location when selecting a city
+    pushToNavigationStack('city');
   };
 
-  // Handle marker click to show location info
-  const handleLocationMarkerClick = (locationData) => {
+  // Handle marker click to show location info (from map markers)
+  const handleLocationMarkerClick = (locationData, associatedCityData = null) => {
     setSelectedLocation(locationData);
-    setSelectedCity(null); // Clear any selected city when selecting a location
-  };
-
-  // Handle closing the location info panel
-  const handleCloseLocationPanel = () => {
-    setSelectedLocation(null);
-    // Keep selectedCity and panelData so we can navigate back to CityInfoPanel
-  };
-
-  // Handle closing the city info panel
-  const handleCloseCityPanel = () => {
-    setSelectedCity(null);
-    // Keep panelData and searchQuery so we can navigate back to InfoPanel
-  };
-
-  // Function to fetch city and province data for proper navigation hierarchy
-  const fetchHierarchyData = async (locationData) => {
-    try {
-      // Extract city/municipality name from the location data
-      const cityName = locationData.locality || locationData.city_name;
-      const provinceName = locationData.province;
-
-      if (!cityName || !provinceName) {
-        console.warn('Missing city or province information:', { cityName, provinceName });
-        return null;
-      }
-
-      // Fetch province data (you might need to adjust this endpoint)
-      const provinceResponse = await fetch(`http://localhost:5000/api/province/${provinceName}`);
-      const provinceData = await provinceResponse.json();
-
-      // Fetch city data (you might need to adjust this endpoint)
-      const cityResponse = await fetch(`http://localhost:5000/api/city/${cityName}`);
-      const cityData = await cityResponse.json();
-
-      return { provinceData, cityData };
-    } catch (error) {
-      console.error('Error fetching hierarchy data:', error);
-      return null;
+    
+    // Create proper navigation stack: info -> city -> location
+    if (associatedCityData) {
+      setSelectedCity(associatedCityData);
+      
+      // Create minimal province data for the info panel
+      const minimalProvinceData = {
+        provinceName: associatedCityData.provinceName,
+        provincialID: 'P-04',
+        freeWiFiSites: 150,
+        governor: 'Hermilando I. Mandanas',
+        totalAPSites: 500,
+        digitizationRate: 75,
+        siteTypes: [
+          { type: "Municipal", count: 34 },
+          { type: "Hospitals", count: 12 },
+          { type: "Fire Stations", count: 8 },
+          { type: "Public Market", count: 15 },
+          { type: "Schools", count: 45 },
+          { type: "Parks", count: 36 }
+        ],
+        cities: [associatedCityData]
+      };
+      
+      setPanelData(minimalProvinceData);
+      clearNavigationStack();
+      pushToNavigationStack('info');
+      pushToNavigationStack('city');
+      pushToNavigationStack('location');
+    } else {
+      // If no city data, just show location panel
+      clearNavigationStack();
+      pushToNavigationStack('location');
     }
+  };
+
+  // Handle location click from CityInfoPanel
+  const handleLocationClickFromCity = (locationData) => {
+    setSelectedLocation(locationData);
+    pushToNavigationStack('location');
+  };
+
+  // Generic back handler that uses the navigation stack
+  const handleBack = () => {
+    const currentStack = [...navigationStack];
+    const currentPanel = currentStack.pop();
+    
+    if (currentStack.length === 0) {
+      // If stack is empty, close all panels
+      setSelectedCity(null);
+      setSelectedLocation(null);
+      setSearchQuery('');
+      setPanelData(null);
+      clearNavigationStack();
+      return;
+    }
+
+    const previousPanel = currentStack[currentStack.length - 1];
+    
+    switch (previousPanel) {
+      case 'info':
+        setSelectedCity(null);
+        setSelectedLocation(null);
+        // Keep searchQuery and panelData to show InfoPanel
+        break;
+      case 'city':
+        setSelectedLocation(null);
+        // Keep selectedCity to show CityInfoPanel
+        break;
+      case 'location':
+        // This shouldn't happen in normal flow, but handle it
+        break;
+    }
+    
+    setNavigationStack(currentStack);
+  };
+
+  // Handle close from InfoPanel (X button)
+  const handleInfoPanelClose = () => {
+    setSelectedCity(null);
+    setSelectedLocation(null);
+    setSearchQuery('');
+    setPanelData(null);
+    clearNavigationStack();
   };
 
   // Function to add FWS markers to the map
   const addFWSMarkers = async (mapInstance) => {
-
     if (markers.length > 0) {
       clearMarkers('');
     }
@@ -132,38 +298,25 @@ const MainDashboard = () => {
 
         marker.getElement().addEventListener('click', async () => {
           try {
-            // Fetch the location data with associated sites
             const response = await fetch(`http://localhost:5000/api/location-with-sites/${site.site_id}`);
-            const fullLocationData = await response.json();
-
-            // Fetch hierarchy data (province and city) for proper navigation
-            const hierarchyData = await fetchHierarchyData(fullLocationData);
+            const fullData = await response.json();
             
-            if (hierarchyData) {
-              // Set the province data for InfoPanel
-              setPanelData(hierarchyData.provinceData);
-              
-              // Set the city data for CityInfoPanel
-              setSelectedCity(hierarchyData.cityData);
-              
-              // Set search query to show InfoPanel
-              setSearchQuery(fullLocationData.location_name || site.location_name);
-            }
+            // Create minimal city data for proper navigation
+            const cityData = {
+              name: fullData.locality || 'Unknown City',
+              provinceName: fullData.province || 'Unknown Province',
+              totalSites: 1,
+              mayor: 'Unknown',
+              totalAPSites: fullData.apSites?.length || 0,
+              digitizationRate: 0,
+              siteTypes: [],
+              freeWifiLocations: [fullData]
+            };
 
-            // Set the location data for LocationInfoPanel
-            setSelectedLocation(fullLocationData);
-
+            handleLocationMarkerClick(fullData, cityData);
+            setSearchQuery(site.location_name);
           } catch (err) {
             console.error('Error fetching location with sites:', err);
-            // Fallback: still show location panel even if hierarchy fetch fails
-            try {
-              const response = await fetch(`http://localhost:5000/api/location-with-sites/${site.site_id}`);
-              const fullLocationData = await response.json();
-              setSelectedLocation(fullLocationData);
-              setSearchQuery(site.location_name);
-            } catch (fallbackErr) {
-              console.error('Fallback fetch also failed:', fallbackErr);
-            }
           }
         });
 
@@ -177,142 +330,128 @@ const MainDashboard = () => {
     }
   };
 
-// Initialize and configure the Mapbox map
-useEffect(() => {
-  if (activeTab !== 'map') return;
+  // Initialize and configure the Mapbox map
+  useEffect(() => {
+    if (activeTab !== 'map') return;
 
-  // Step 1: Set up the Mapbox access token from environment variables
-  try {
-    // Get the Mapbox access token from Vite environment variables
-    mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
-    if (!mapboxgl.accessToken) {
-      throw new Error('Mapbox access token is missing');
+    try {
+      mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
+      if (!mapboxgl.accessToken) {
+        throw new Error('Mapbox access token is missing');
+      }
+    } catch (err) {
+      console.error("mapbox error", err);
+      setError("Failed to set Mapbox access token");
+
+      const container = document.getElementById('map-container');
+      if (container) {
+        container.innerHTML = '<div class="flex items-center justify-center h-full bg-gray-100">Map Placeholder (MapBox not configured)</div>';
+      }
+      return;
     }
-  } catch (err) {
-    console.error("mapbox error", err);
-    setError("Failed to set Mapbox access token");
 
-    // Fallback to placeholder if map initialization fails
-    const container = document.getElementById('map-container');
-    if (container) {
-      container.innerHTML = '<div class="flex items-center justify-center h-full bg-gray-100">Map Placeholder (MapBox not configured)</div>';
-    }
-    return;
-  }
+    const mapInstance = new mapboxgl.Map({
+      container: mapContainerRef.current,
+      center: center,
+      zoom: zoom,
+      style: 'mapbox://styles/mapbox/streets-v12',
+      maxBounds: PHILIPPINES_BOUNDS
+    });
 
-  // Step 2: Initialize the Mapbox map instance
-  const mapInstance = new mapboxgl.Map({
-    container: mapContainerRef.current,  // DOM element to render the map in
-    center: center,                      // Initial center position
-    zoom: zoom,                          // Initial zoom level
-    style: 'mapbox://styles/mapbox/streets-v12', // Map style to use
-    maxBounds: PHILIPPINES_BOUNDS        // Restrict panning to these boundaries
-  });
+    mapRef.current = mapInstance;
+    mapInstance.addControl(new mapboxgl.NavigationControl(), 'bottom-left');
 
-  // Store the map instance in the ref for cleanup when component unmounts
-  mapRef.current = mapInstance;
+    mapInstance.on('load', () => {
+      console.log("Map loaded successfully");
+      addFWSMarkers(mapInstance);
+      setMap(mapInstance);
+      setMapInitialized(true);
+      console.log("Map instance set in state:", mapInstance);
+    });
 
-  // Step 3: Add navigation controls (zoom in/out, rotate, etc.)
-  mapInstance.addControl(new mapboxgl.NavigationControl(), 'bottom-left');
+    return () => {
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+    };
+  }, [activeTab, center, zoom]);
 
-  // Step 4: Wait for the map to load before adding markers and updating state
-  mapInstance.on('load', () => {
-    console.log("Map loaded successfully");
+  // Render appropriate content based on active tab
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'map':
+        return (
+          <div className="flex-1 relative">
+            <div id="map-container" className="w-full h-full" ref={mapContainerRef}></div>
 
-    // IMPORTANT: Call addFWSMarkers to display WiFi site markers from JSON data
-    addFWSMarkers(mapInstance);
+            {/* Show InfoPanel when search is performed and it's the top panel */}
+            {searchQuery && navigationStack[navigationStack.length - 1] === 'info' && (
+              <InfoPanel 
+                searchQuery={searchQuery} 
+                onCityClick={handleCityClickFromInfo} 
+                panelData={panelData}
+                onClose={handleInfoPanelClose}
+              />
+            )}
 
-    // IMPORTANT: Only set the map state AFTER map is fully loaded
-    // This ensures MapToolbar receives a fully initialized map instance
-    setMap(mapInstance);
-    setMapInitialized(true);
-    console.log("Map instance set in state:", mapInstance);
-  });
+            {/* Show CityInfoPanel when a city is selected and it's the top panel */}
+            {selectedCity && navigationStack[navigationStack.length - 1] === 'city' && (
+              <CityInfoPanel 
+                cityData={selectedCity} 
+                onBack={handleBack}
+                onLocationClick={handleLocationClickFromCity}
+              />
+            )}
 
-  // Step 5: Cleanup function to remove the map when the component unmounts
-  // This prevents memory leaks
-  return () => {
-    if (mapRef.current) {
-      mapRef.current.remove();  // Remove the map from the DOM
-      mapRef.current = null;    // Clear the reference
+            {/* Show LocationInfoPanel when a location is selected and it's the top panel */}
+            {selectedLocation && navigationStack[navigationStack.length - 1] === 'location' && (
+              <LocationInfoPanel 
+                locationData={selectedLocation} 
+                onBack={handleBack}
+              />
+            )}
+          </div>
+        );
+      case 'dashboard':
+        return (
+          <div className="flex-1 p-6">
+            <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="bg-white p-4 rounded shadow">Dashboard content will appear here</div>
+            </div>
+          </div>
+        );
+      case 'wifi':
+        return (
+          <div className="flex-1 p-6">
+            <h1 className="text-2xl font-bold mb-4">Free Wi-Fi Sites</h1>
+            <div className="bg-white p-4 rounded shadow">Wi-Fi sites content will appear here</div>
+          </div>
+        );
+      default:
+        return (
+          <div className="flex-1 p-6">
+            <h1 className="text-2xl font-bold mb-4">Page Not Found</h1>
+            <p>The requested page could not be found.</p>
+          </div>
+        );
     }
   };
-}, [activeTab, center, zoom]); // Run when activeTab, center, or zoom changes
 
-// Render appropriate content based on active tab
-const renderContent = () => {
-  switch (activeTab) {
-    case 'map':
-      return (
-        <div className="flex-1 relative">
-          {/* Map container - this div is where Mapbox will render the map */}
-          <div id="map-container" className="w-full h-full" ref={mapContainerRef}></div>
-
-          {/* Show the info panel when search is performed but no city/location is selected */}
-          {searchQuery && !selectedCity && !selectedLocation && (
-            <InfoPanel searchQuery={searchQuery} onCityClick={handleMarkerClick} panelData={panelData} />
-          )}
-
-          {/* Show the city info panel when a city is selected but no location is selected */}
-          {selectedCity && !selectedLocation && (
-            <CityInfoPanel cityData={selectedCity} onBack={handleCloseCityPanel} />
-          )}
-
-          {/* Show the location info panel when a location is selected */}
-          {selectedLocation && (
-            <LocationInfoPanel locationData={selectedLocation} onBack={handleCloseLocationPanel} />
-          )}
-        </div>
-      );
-    case 'dashboard':
-      return (
-        <div className="flex-1 p-6">
-          <h1 className="text-2xl font-bold mb-4">Dashboard</h1>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="bg-white p-4 rounded shadow">Dashboard content will appear here</div>
-          </div>
-        </div>
-      );
-    case 'wifi':
-      return (
-        <div className="flex-1 p-6">
-          <h1 className="text-2xl font-bold mb-4">Free Wi-Fi Sites</h1>
-          <div className="bg-white p-4 rounded shadow">Wi-Fi sites content will appear here</div>
-        </div>
-      );
-    case 'settings':
-      return (
-        <div className="flex-1 p-6">
-          <h1 className="text-2xl font-bold mb-4">Settings</h1>
-          <div className="bg-white p-4 rounded shadow">Settings content will appear here</div>
-        </div>
-      );
-    default:
-      return (
-        <div className="flex-1 p-6">
-          <h1 className="text-2xl font-bold mb-4">Page Not Found</h1>
-          <p>The requested page could not be found.</p>
-        </div>
-      );
-  }
-};
-
-return (
-  <div className="flex h-screen w-full">
-    <div className="flex-1 flex flex-col">
-      {/* Only show MapToolbar when in map view */}
-      {activeTab === 'map' && (
-        <MapToolbar
-          mapInstance={map}
-          onSearch={handleSearch}
-        />
-      )}
-
-      {/* Dynamic content based on active tab */}
-      {renderContent()}
+  return (
+    <div className="flex h-screen w-full">
+      <div className="flex-1 flex flex-col">
+        {activeTab === 'map' && (
+          <MapToolbar
+            mapInstance={map}
+            onSearch={handleSearch}
+          />
+        )}
+        {renderContent()}
+      </div>
     </div>
-  </div>
-);
+  );
 };
 
 export default MainDashboard;

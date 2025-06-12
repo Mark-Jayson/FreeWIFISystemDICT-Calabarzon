@@ -396,10 +396,10 @@ app.get('/api/map-pins', async (req, res) => {
 });
 
 app.get('/api/location-with-sites/:site_id', async (req, res) => {
-  const { site_id } = req.params;
+    const { site_id } = req.params;
 
-  try {
-    const locationResult = await pool.query(`
+    try {
+        const locationResult = await pool.query(`
       SELECT 
         l.*,
         s.latitude,
@@ -409,13 +409,13 @@ app.get('/api/location-with-sites/:site_id', async (req, res) => {
       WHERE s.site_id = $1
     `, [site_id]);
 
-    if (locationResult.rows.length === 0) {
-      return res.status(404).json({ error: 'Location not found for the given site ID' });
-    }
+        if (locationResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Location not found for the given site ID' });
+        }
 
-    const locationData = locationResult.rows[0];
+        const locationData = locationResult.rows[0];
 
-    const sitesResult = await pool.query(`
+        const sitesResult = await pool.query(`
       SELECT 
         s.site_id,
         s.site_name,
@@ -427,23 +427,23 @@ app.get('/api/location-with-sites/:site_id', async (req, res) => {
       )
     `, [site_id]);
 
-    res.status(200).json({
-      ...locationData,
-      apSites: sitesResult.rows
-    });
+        res.status(200).json({
+            ...locationData,
+            apSites: sitesResult.rows
+        });
 
-  } catch (err) {
-    console.error('Error fetching location with sites:', err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
+    } catch (err) {
+        console.error('Error fetching location with sites:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
 
 app.get('/api/site/:id', async (req, res) => {
-  const { id } = req.params;
+    const { id } = req.params;
 
-  try {
-    const result = await pool.query(`
+    try {
+        const result = await pool.query(`
       SELECT 
         s.*, 
         l.location_name
@@ -452,16 +452,165 @@ app.get('/api/site/:id', async (req, res) => {
       WHERE s.site_id = $1
     `, [id]);
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Site not found' });
-    }
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Site not found' });
+        }
 
-    res.status(200).json(result.rows[0]);
+        res.status(200).json(result.rows[0]);
+    } catch (err) {
+        console.error('Error fetching site:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+app.get('/api/wifi-stats', async (req, res) => {
+    try {
+        const totalResult = await pool.query('SELECT COUNT(*) FROM public.site');
+        const activeResult = await pool.query("SELECT COUNT(*) FROM public.site WHERE contract_status = 'ACTIVE'");
+        const terminatedResult = await pool.query("SELECT COUNT(*) FROM public.site WHERE contract_status = 'TERMINATED'");
+
+        const totalSites = parseInt(totalResult.rows[0].count);
+        const activeSites = parseInt(activeResult.rows[0].count);
+        const terminatedSites = parseInt(terminatedResult.rows[0].count);
+
+        // Calculate percentages with rounding correction to ensure 100%
+        let activePercentage = 0;
+        let terminatedPercentage = 0;
+        if (totalSites > 0) {
+            activePercentage = Math.round((activeSites / totalSites) * 100);
+            terminatedPercentage = 100 - activePercentage;
+        }
+
+        res.status(200).json({
+            totalSites,
+            activeSites,
+            terminatedSites,
+            activePercentage,
+            terminatedPercentage,
+            trendValue: "0%", // You can later make this dynamic if you track changes
+            isPositiveTrend: true
+        });
+    } catch (error) {
+        console.error('Error fetching WiFi stats:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+app.get('/api/expiring-contracts', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT site_name, end_of_contract
+      FROM public.site
+      WHERE end_of_contract IS NOT NULL
+    `);
+
+    const monthMap = {
+      jan: '01', feb: '02', mar: '03', apr: '04',
+      may: '05', jun: '06', jul: '07', aug: '08',
+      sep: '09', oct: '10', nov: '11', dec: '12'
+    };
+
+    const today = new Date();
+
+    const parsedContracts = result.rows.map(row => {
+      const raw = row.end_of_contract?.trim();
+      const parts = raw.split('-'); // e.g., '30-Mar-25'
+
+      if (parts.length !== 3) return null;
+
+      const [dayStr, monthStr, yearStr] = parts;
+      const day = parseInt(dayStr);
+      const month = monthMap[monthStr.toLowerCase()];
+      const year = parseInt(yearStr);
+
+      if (!month || isNaN(day) || isNaN(year)) return null;
+
+      const fullYear = year < 100 ? 2000 + year : year;
+      const dateStr = `${fullYear}-${month}-${String(day).padStart(2, '0')}`;
+      const parsed = new Date(dateStr);
+
+      return !isNaN(parsed)
+        ? { site: row.site_name, parsed, iso: dateStr }
+        : null;
+    });
+
+    const upcomingContracts = parsedContracts
+      .filter(entry => entry && entry.parsed > today) // 💡 only future dates
+      .sort((a, b) => a.parsed - b.parsed)
+      .slice(0, 10)
+      .map(entry => ({
+        site: entry.site,
+        date: entry.iso
+      }));
+
+    res.status(200).json(upcomingContracts);
   } catch (err) {
-    console.error('Error fetching site:', err);
+    console.error('Error fetching expiring contracts:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+app.get('/api/yearly-activations', async (req, res) => {
+  try {
+    const result = await pool.query(`SELECT activation_date FROM public.site`);
+
+    const yearCounts = {};
+    const yearRange = Array.from({ length: 10 }, (_, i) => 2016 + i); // [2016..2025]
+    yearRange.forEach(y => yearCounts[y] = 0);
+
+    const monthMap = {
+      jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+      jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11
+    };
+
+    let noDate = 0;
+
+    for (const row of result.rows) {
+      const raw = row.activation_date;
+
+      if (!raw) {
+        noDate++;
+        continue;
+      }
+
+      const parts = raw.toString().trim().split(/[-\/]/); // e.g. "20-Mar" or "19-Mar-20"
+
+      let year = null;
+
+      if (parts.length === 2) {
+        // "20-Mar" → March 2020
+        const [yy, monStr] = parts;
+        const month = monthMap[monStr.toLowerCase()];
+        year = parseInt(yy.length === 2 ? `20${yy}` : yy); // support "20" or "2020"
+      } else if (parts.length === 3) {
+        // "19-Mar-20" → March 19, 2020
+        const [dayStr, monStr, yy] = parts;
+        const month = monthMap[monStr.toLowerCase()];
+        year = parseInt(yy.length === 2 ? `20${yy}` : yy);
+      }
+
+      if (year && yearCounts.hasOwnProperty(year)) {
+        yearCounts[year]++;
+      }
+    }
+
+    const formatted = Object.entries(yearCounts).map(([year, count]) => ({
+      year,
+      value: count
+    }));
+
+    res.json({
+      yearlyData: formatted,
+      noDate
+    });
+
+  } catch (err) {
+    console.error('Error in /api/yearly-activations:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

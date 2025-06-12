@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import SiteInfoPanel from "./SiteInfoPanel";
 
 const LocationInfoPanel = ({ locationData, onBack }) => {
   const [selectedSite, setSelectedSite] = useState(null);
 
+  // Reset selectedSite whenever locationData changes
+  useEffect(() => {
+    setSelectedSite(null);
+  }, [locationData]);
+
   const handleBackToLocation = () => {
     setSelectedSite(null);
-  };
-
-  const handleBackToCity = () => {
-    // When going back from LocationInfoPanel we go to CityInfoPanel
-    onBack();
   };
 
   if (!locationData) {
@@ -58,7 +58,7 @@ const LocationInfoPanel = ({ locationData, onBack }) => {
       <div className="fixed top-[108px] right-4 bg-white rounded-lg shadow-lg w-80 z-50 max-h-[75vh] flex flex-col">
         <div className="p-4 pb-0 relative border-b border-gray-100">
           <button
-            onClick={selectedSite ? handleBackToLocation : handleBackToCity}
+            onClick={onBack}
             className="absolute top-2 left-2 text-gray-400 hover:text-gray-600 z-10"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -69,7 +69,7 @@ const LocationInfoPanel = ({ locationData, onBack }) => {
           <div className="flex items-center mb-2 mt-3 pl-6">
             <div className="w-8 h-8 rounded-lg bg-red-100 mr-3 flex items-center justify-center">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
             </div>
             <div>
