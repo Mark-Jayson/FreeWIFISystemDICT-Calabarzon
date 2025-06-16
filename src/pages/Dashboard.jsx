@@ -17,6 +17,7 @@ const Dashboard = () => {
   const [yearlyActivationData, setYearlyActivationData] = useState([]);
   const [noDateCount, setNoDateCount] = useState(0);
   const [siteTypeData, setSiteTypeData] = useState([]);
+  const [topLGUs, setTopLGUs] = useState([]);
 
   const [wifiStats, setWifiStats] = useState({
     totalSites: 0,
@@ -51,7 +52,7 @@ const Dashboard = () => {
 
   const fetchExpiringContracts = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/expiring-contracts');
+      const res = await fetch(`http://localhost:5000/api/expiring-contracts?province=${selectedProvince}`);
       if (!res.ok) throw new Error(res.status);
       setExpiringContracts(await res.json());
     } catch (err) {
@@ -60,9 +61,10 @@ const Dashboard = () => {
     }
   };
 
+
   const fetchYearlyActivations = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/yearly-activations');
+      const res = await fetch(`http://localhost:5000/api/yearly-activations?province=${selectedProvince}`);
       if (!res.ok) throw new Error(res.status);
       const data = await res.json();
       setYearlyActivationData(data.yearlyData);
@@ -75,7 +77,7 @@ const Dashboard = () => {
 
   const fetchSiteTypes = async () => {
     try {
-      const res = await fetch('http://localhost:5000/api/site-types');
+      const res = await fetch(`http://localhost:5000/api/site-types?province=${selectedProvince}`);
       if (!res.ok) throw new Error(res.status);
       const data = await res.json();
       const transformed = data.map((item) => ({
@@ -90,15 +92,26 @@ const Dashboard = () => {
     }
   };
 
-  useEffect(() => {
-    fetchWifiStats(selectedProvince);
-  }, [selectedProvince]);
+  const fetchTopLGUs = async () => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/top-lgus?province=${selectedProvince}`);
+      if (!res.ok) throw new Error(res.status);
+      const data = await res.json();
+      setTopLGUs(data);
+    } catch (err) {
+      console.error('Top LGU error:', err);
+      setTopLGUs([]);
+    }
+  };
 
   useEffect(() => {
+    fetchWifiStats(selectedProvince);
     fetchExpiringContracts();
     fetchYearlyActivations();
+    fetchTopLGUs();
     fetchSiteTypes();
-  }, []);
+  }, [selectedProvince]);
+
 
   const currentData = provinceData[selectedProvince];
 
@@ -157,8 +170,8 @@ const Dashboard = () => {
               description={currentData.digitization.description}
             />
             <TopLGUListCard
-              title="LGUs with most Free WiFi Location"
-              data={currentData.lguData}
+              title="Top LGU per Province with Most Free WiFi"
+              data={topLGUs}
             />
           </div>
 

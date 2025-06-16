@@ -1,20 +1,26 @@
-// components/dashboard/Header.jsx
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown } from 'lucide-react';
 
 const Header = ({ region, onProvinceSelect, selectedProvince }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [provinces, setProvinces] = useState([]);
   const dropdownRef = useRef(null);
-  
-  // List of provinces in Calabarzon
-  const provinces = [
-    { id: 'all', name: 'Region IV - A Calabarzon' },
-    { id: 'cavite', name: 'Cavite' },
-    { id: 'laguna', name: 'Laguna' },
-    { id: 'batangas', name: 'Batangas' },
-    { id: 'rizal', name: 'Rizal' },
-    { id: 'quezon', name: 'Quezon' }
-  ];
+
+  // Fetch provinces from the database
+  useEffect(() => {
+    const fetchProvinces = async () => {
+      try {
+        const res = await fetch('http://localhost:5000/api/provinces');
+        if (!res.ok) throw new Error('Failed to fetch provinces');
+        const data = await res.json();
+        setProvinces(data);
+      } catch (err) {
+        console.error('Error fetching provinces:', err);
+      }
+    };
+
+    fetchProvinces();
+  }, []);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -23,17 +29,14 @@ const Header = ({ region, onProvinceSelect, selectedProvince }) => {
         setIsOpen(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Get current displayed province name
   const getCurrentProvinceName = () => {
-    const currentProvince = provinces.find(p => p.id === selectedProvince);
-    return currentProvince ? currentProvince.name : region;
+    const current = provinces.find(p => p.id === selectedProvince);
+    return current ? current.name : region;
   };
 
   return (
@@ -46,7 +49,7 @@ const Header = ({ region, onProvinceSelect, selectedProvince }) => {
           >
             {getCurrentProvinceName()} <ChevronDown className="w-4 h-4" />
           </button>
-          
+
           {isOpen && (
             <div className="absolute top-full left-0 mt-1 bg-white border rounded-md shadow-lg z-10 w-64">
               {provinces.map(province => (

@@ -42,28 +42,33 @@ const LocationTypeGrid = ({ title, subtitle, data }) => {
   const goNext = () => setPage((prev) => Math.min(prev + 1, totalPages - 1));
 
   return (
-    <div className="bg-white rounded-lg shadow p-4 h-full">
-      <div className="text-sm font-medium mb-1">{title}</div>
-      {subtitle && <div className="text-xs text-gray-600 mb-2">{subtitle}</div>}
+    <div className="bg-white rounded-lg shadow p-4 h-full flex flex-col justify-between">
+      <div>
+        <div className="text-sm font-medium mb-1">{title}</div>
+        {subtitle && <div className="text-xs text-gray-600 mb-2">{subtitle}</div>}
 
-      <div className="grid grid-cols-3 gap-2 mt-4">
-        {pageData.map((item, index) => (
-          <div key={index} className="flex flex-col items-center p-1">
-            <div className="flex justify-center items-center w-8 h-8 mb-1">
-              <span className="text-lg">{item.icon}</span>
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-4">
+          {pageData.map((item, index) => (
+            <div
+              key={index}
+              className="flex flex-col items-center justify-center text-center"
+            >
+              <div className="w-10 h-10 flex items-center justify-center text-2xl mb-1">
+                <span>{item.icon}</span>
+              </div>
+              <div className="text-sm font-medium">{item.value}</div>
+              <div className="text-xs text-gray-600">{item.name}</div>
             </div>
-            <div className="text-sm font-medium">{item.value}</div>
-            <div className="text-xs text-gray-600 text-center">{item.name}</div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
 
-      {/* Pagination Controls */}
-      <div className="flex justify-center items-center gap-2 mt-4 text-xs">
+      {/* Pagination - centered and spaced lower */}
+      <div className="flex justify-center items-center gap-3 mt-6 text-xs">
         <button
           onClick={goPrev}
           disabled={page === 0}
-          className={`px-2 py-1 border rounded ${
+          className={`px-3 py-1 rounded border ${
             page === 0 ? 'text-gray-400 border-gray-300' : 'text-blue-600 border-blue-400'
           }`}
         >
@@ -75,7 +80,7 @@ const LocationTypeGrid = ({ title, subtitle, data }) => {
         <button
           onClick={goNext}
           disabled={page >= totalPages - 1}
-          className={`px-2 py-1 border rounded ${
+          className={`px-3 py-1 rounded border ${
             page >= totalPages - 1 ? 'text-gray-400 border-gray-300' : 'text-blue-600 border-blue-400'
           }`}
         >
