@@ -616,6 +616,21 @@ app.get('/api/yearly-activations', async (req, res) => {
   }
 });
 
+app.get('/api/site-types', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT site_type, COUNT(*) as count
+      FROM public.site
+      GROUP BY site_type
+      ORDER BY count DESC
+    `);
+
+    res.status(200).json(result.rows);
+  } catch (err) {
+    console.error('Error fetching site types:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 // Start server
 const PORT = process.env.PORT || 5000;
