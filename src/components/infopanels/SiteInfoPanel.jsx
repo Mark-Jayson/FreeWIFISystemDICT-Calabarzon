@@ -33,6 +33,8 @@ const SiteInfoPanel = ({ siteData, onBack }) => {
       return 'text-green-600';
     } else if (status === 'TERMINATED') {
       return 'text-red-600';
+    } else if (status === 'FOR RENEWAL') {
+      return 'text-yellow-600';
     }
     return ''; // Default or no special color
   };
@@ -77,7 +79,7 @@ const SiteInfoPanel = ({ siteData, onBack }) => {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .custom-scrollbar::-webkit-scrollbar {
           width: 6px;
         }
