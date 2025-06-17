@@ -349,18 +349,24 @@ app.post('/api/location', async (req, res) => {
 });
 
 // Get all WiFi sites with location data
+// Get all WiFi sites with location data
 app.get('/api/wifisites', async (req, res) => {
     try {
         const query = `
             SELECT 
-                a.site_id, a.site_name, a.contract_status, a.project, a.procurement,
-                a.technology, a.link_provider, a.bandwidth, a.isp_provider, 
-                a.activation_date, a.end_of_contract,
-                l.location_id, l.province, l.congressional_district, l.locality,
-                l.location_name, l.site_name as location_site_type, l.category, l.longitude, l.latitude
+                s.site_id, 
+                s.site_name, 
+                s.contract_status, 
+                s.bandwidth, 
+                s.link_provider, 
+                s.activation_date, 
+                s.end_of_contract,
+                l.location_name, 
+                l.province, 
+                l.locality
             FROM 
-                public.apsites a
-            JOIN public.location l ON a.location_id = l.loc_id
+                public.site s
+            JOIN public.location l ON s.location_id = l.loc_id
         `;
 
         const result = await pool.query(query);
@@ -375,21 +381,21 @@ app.get('/api/map-pins', async (req, res) => {
 
     try {
         const result = await pool.query(`
-      SELECT 
-        s.site_id,
-        s.site_code,
-        s.site_name,
-          s.location_id, 
-        l.latitude,
-        l.longitude,
-        l.location_name,
-        l.province,
-        l.locality,
-        l.category,
-        l.cluster
-      FROM public.site s
-      JOIN public.location l ON s.location_id = l.loc_id
-     WHERE l.latitude IS NOT NULL AND l.longitude IS NOT NULL
+        SELECT 
+            s.site_id,
+            s.site_code,
+            s.site_name,
+            s.location_id, 
+            l.latitude,
+            l.longitude,
+            l.location_name,
+            l.province,
+            l.locality,
+            l.category,
+            l.cluster
+    FROM public.site s
+    JOIN public.location l ON s.location_id = l.loc_id
+    WHERE l.latitude IS NOT NULL AND l.longitude IS NOT NULL
     `);
 
 
@@ -405,13 +411,13 @@ app.get('/api/location-with-sites/:site_id', async (req, res) => {
 
     try {
         const locationResult = await pool.query(`
-      SELECT 
-        l.*,
-        l.latitude,
-        l.longitude 
-      FROM public.site s
-      JOIN public.location l ON s.location_id = l.loc_id
-      WHERE l.loc_id = $1
+        SELECT 
+            l.*,
+            l.latitude,
+            l.longitude 
+    FROM public.site s
+    JOIN public.location l ON s.location_id = l.loc_id
+    WHERE l.loc_id = $1
     `, [site_id]);
 
         if (locationResult.rows.length === 0) {
@@ -422,17 +428,15 @@ app.get('/api/location-with-sites/:site_id', async (req, res) => {
 
 
         const sitesResult = await pool.query(`
-     SELECT
-  s.site_id,
-  s.site_name,
-  s.contract_status AS status,
-  s.site_type AS technology
-FROM public.site s
-WHERE s.location_id = $1;
+        SELECT
+            s.site_id,
+            s.site_name,
+            s.contract_status AS status,
+            s.site_type AS technology
+    FROM public.site s
+    WHERE s.location_id = $1;
 
- 
     `, [site_id]);
-
         res.status(200).json({
             ...locationData,
             apSites: sitesResult.rows
@@ -444,18 +448,17 @@ WHERE s.location_id = $1;
     }
 });
 
-
 app.get('/api/site/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        const result = await pool.query(`
-      SELECT 
-        s.*, 
-        l.location_name
-      FROM public.site s
-      JOIN public.location l ON s.location_id = l.loc_id
-      WHERE s.site_id = $1
+        const result = await pool.query(`     
+            SELECT 
+            s.*, 
+            l.location_name
+    FROM public.site s
+    JOIN public.location l ON s.location_id = l.loc_id
+    WHERE s.site_id = $1
     `, [id]);
 
         if (result.rows.length === 0) {
