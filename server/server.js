@@ -722,7 +722,6 @@ app.get('/api/expiring-contracts', async (req, res) => {
             const fullYear = year < 100 ? 2000 + year : year;
             const dateStr = `${fullYear}-${month}-${String(day).padStart(2, '0')}`;
             const parsed = new Date(dateStr);
-
             return !isNaN(parsed)
                 ? { site: row.site_name, parsed, iso: dateStr }
                 : null;
@@ -956,120 +955,6 @@ app.get('/api/location-distribution', async (req, res) => {
   }
 });
 
-
-// Haversine distance function (calculates distance in km)
-function haversineDistance(lat1, lon1, lat2, lon2) {
-    const R = 6371; // Radius of Earth in kilometers
-    const dLat = (lat2 - lat1) * Math.PI / 180;
-    const dLon = (lon2 - lon1) * Math.PI / 180;
-    const a =
-        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    const distance = R * c; // Distance in km
-    return distance;
-} 
-
-app.post('/api/update-location-coordinates', async (req, res) => {
-    const MAPBOX_ACCESS_TOKEN = process.env.MAPBOX_ACCESS_TOKEN;
-    if (!MAPBOX_ACCESS_TOKEN) {
-        return res.status(500).json({ error: 'Mapbox Access Token not configured in environment variables.' });
-    }
-
-    const allowedProvinces = [
-        'Laguna', 'Cavite', 'Batangas', 'Rizal', 'Quezon'
-    ].map(p => p.toLowerCase()); // Convert to lowercase for case-insensitive comparison
-
-    let updatedCount = 0;
-    let newCoordinatesAddedCount = 0;
-    let errors = [];
-    let outsideProvinceCount = 0;
-    let noSuitableFeatureFoundCount = 0; // New counter
-
-    try {
-        // Fetch all locations
-        const locationsResult = await pool.query(
-            'SELECT loc_id, location_name, locality, province, latitude, longitude FROM public.location'
-        );
-        const locations = locationsResult.rows;
-
-        for (const location of locations) {
-            const { loc_id, location_name, locality, province, latitude, longitude } = location;
-
-            // Construct search query for Mapbox
-            const searchQuery = `${location_name}, ${locality || ''}, ${province || ''}`.trim();
-            if (!searchQuery) {
-                errors.push(`Skipping loc_id ${loc_id}: Insufficient information for geocoding.`);
-                continue;
-            }
-
-            try {
-                // Call Mapbox Geocoding API
-                const mapboxUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?access_token=${MAPBOX_ACCESS_TOKEN}`;
-                const mapboxResponse = await axios.get(mapboxUrl);
-
-                let suitableFeature = null;
-
-                if (mapboxResponse.data.features && mapboxResponse.data.features.length > 0) {
-                    // Iterate through Mapbox results to find one in an allowed province
-                    for (const feature of mapboxResponse.data.features) {
-                        const context = feature.context || [];
-                        const mapboxProvince = context.find(c => c.id.startsWith('region.'))?.text;
-
-                        if (mapboxProvince && allowedProvinces.includes(mapboxProvince.toLowerCase())) {
-                            suitableFeature = feature;
-                            break; // Found a suitable feature, stop iterating
-                        }
-                    }
-
-                    if (suitableFeature) {
-                        const [newLon, newLat] = suitableFeature.center; // Mapbox returns [longitude, latitude]
-                        let shouldUpdate = false;
-
-                        if (latitude === null || longitude === null) {
-                            // If coordinates are blank, just add them
-                            shouldUpdate = true;
-                            newCoordinatesAddedCount++;
-                        } 
-
-                        if (shouldUpdate) {
-                            await pool.query(
-                                'UPDATE public.location SET latitude = $1, longitude = $2 WHERE loc_id = $3',
-                                [newLat, newLon, loc_id]
-                            );
-                            console.log(`Updated loc_id ${loc_id}: New coordinates (${newLat}, ${newLon}) from suitable Mapbox feature.`);
-                        } else {
-                            console.log(`Loc_id ${loc_id}: Coordinates within 5km, no update needed.`);
-                        }
-                    } else {
-                        console.log(`No suitable Mapbox result found within allowed provinces for loc_id ${loc_id}: ${searchQuery}`);
-                        noSuitableFeatureFoundCount++;
-                        errors.push(`No suitable Mapbox result found within allowed provinces for loc_id ${loc_id}: ${searchQuery}`);
-                    }
-                } else {
-                    errors.push(`No Mapbox results for loc_id ${loc_id}: ${searchQuery}`);
-                }
-            } catch (mapboxError) {
-                console.error(`Error geocoding loc_id ${loc_id} (${searchQuery}):`, mapboxError.message);
-                errors.push(`Mapbox API error for loc_id ${loc_id}: ${mapboxError.message}`);
-            }
-        }
-
-        res.status(200).json({
-            message: 'Location coordinates update process completed.',
-            updatedCount: updatedCount,
-            newCoordinatesAdded: newCoordinatesAddedCount,
-            outsideProvinceCount: noSuitableFeatureFoundCount, // Renamed to reflect comprehensive skipping
-            errors: errors.length > 0 ? errors : null,
-            totalProcessed: locations.length
-        });
-
-    } catch (error) {
-        console.error('Error in /api/update-location-coordinates:', error);
-        res.status(500).json({ error: 'Internal server error during coordinate update process.' });
-    }
-});
 
 // Start server
 const PORT = process.env.PORT || 5000;
