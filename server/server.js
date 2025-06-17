@@ -3,7 +3,7 @@ const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
 const cors = require('cors');
 require('dotenv').config();
-
+const axios = require('axios');
 const app = express();
 
 // Middleware
@@ -104,8 +104,7 @@ app.post('/api/login', async (req, res) => {
         console.error('Error during login:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
-}
-);
+});
 
 async function createTablesIfNotExist() {
     const createTablesQuery = `
@@ -196,7 +195,7 @@ app.get('/api/location/search', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
-
+ 
 // Get location by ID
 app.get('/api/locations/:id', async (req, res) => {
     try {
@@ -309,7 +308,7 @@ app.post('/api/location', async (req, res) => {
             $12, $13, $14, $15
         ) RETURNING site_id
         `;
-
+ 
         const siteValues = [
             locId,
             sideCode,
@@ -400,8 +399,162 @@ app.get('/api/map-pins', async (req, res) => {
     }
 });
 
-app.get('/api/location-with-sites/:site_id', async (req, res) => {
-    const { site_id } = req.params;
+app.get('/api/getLocationsOfProvince/:locality', async (req, res) => {
+  const { locality } = req.params;
+
+  try {
+    const result = await pool.query(`
+      SELECT
+        l.*
+      FROM
+        public.location l
+      WHERE
+        l.locality = $1
+    `, [locality]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'No locations found for the specified locality.' });
+    }
+
+    res.status(200).json(result.rows);
+
+  } catch (error) {
+    console.error('Error fetching locations by locality:', error);
+    res.status(500).json({ error: 'Internal server error while fetching locations.' });
+  }
+});
+
+app.get('/api/getLocationsOfProvince/:locality', async (req, res) => {
+  const { locality } = req.params;
+
+  try {
+    const result = await pool.query(`
+      SELECT
+        l.*
+      FROM
+        public.site s
+      JOIN
+        public.location l ON s.location_id = l.loc_id
+      WHERE
+        l.locality = $1
+    `, [locality]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'No locations found for the specified locality.' });
+    }
+
+    res.status(200).json(result.rows);
+
+  } catch (error) {
+    console.error('Error fetching locations by locality:', error);
+    res.status(500).json({ error: 'Internal server error while fetching locations.' });
+  }
+});
+
+// NEW ENDPOINT: Get the total number of sites for a given locality
+app.get('/api/sitesByLocality/:locality', async (req, res) => {
+    const { locality } = req.params; // Extract locality from URL parameters
+
+    try {
+        // SQL query to select all site rows associated with the given locality
+        // It joins 'public.Site' and 'public.Location' tables on their respective IDs
+        // and filters by the 'locality' column from 'public.Location'.
+        const sitesResult = await pool.query(`
+            SELECT
+                s.site_id,          
+                s.site_name,       
+                s.location_id,       
+                l.locality,         
+                l.province           
+            FROM
+                public.site s
+            JOIN
+                public.Location l ON s.location_id = l.loc_id
+            WHERE
+                l.locality = $1;
+        `, [locality]);
+
+        const sites = sitesResult.rows; // Array of site objects
+
+        // The total number of sites is simply the count of rows returned by the query
+        const totalSitesCount = sites.length;
+
+
+res.status(200).json({ sites, totalSitesCount: parseInt(totalSitesCount, 10) });
+
+        // Send a successful JSON response with the sites data and their total count
+            // res.status(200).json(sitesResult.rows);
+    } catch (error) {
+        console.error(`Error fetching sites for locality "${locality}":`, error);
+        // Send an error response in case of any server-side issues
+        res.status(500).json({ error: 'Internal server error while fetching sites by locality.' });
+    }
+});
+// ////////////////////////////////
+// app.get('/api/getTotalSitesByLocality/:locality', async (req, res) => {''
+
+//   const { locality } = req.params;
+
+
+
+//   try {
+
+//     // Query to count the number of distinct locations that belong to the given locality
+
+//     // and are also associated with an entry in the 'public.site' table.
+
+//     // We use COUNT(DISTINCT l.loc_id) to ensure each unique location is counted once,
+
+//     // even if it might be referenced multiple times in the 'site' table (though less common).
+
+//     const result = await pool.query(`
+
+//       SELECT
+
+//         COUNT(DISTINCT l.loc_id) AS total_sites_count
+
+//       FROM
+
+//         public.location l
+
+//       JOIN
+
+//         public.site s ON l.loc_id = s.location_id
+
+//       WHERE
+
+//         l.locality = $1
+
+//     `, [locality]);
+
+
+
+//     // The result will always have at least one row, even if the count is 0.
+
+//     const totalSitesCount = result.rows[0].total_sites_count;
+
+
+
+//     // Send the count as a JSON response
+
+//     res.status(200).json({ locality, totalSitesCount: parseInt(totalSitesCount, 10) });
+
+
+
+//   } catch (error) {
+
+//     console.error('Error counting sites by locality:', error);
+
+//     res.status(500).json({ error: 'Internal server error while fetching site count.' });
+
+//   }
+
+// });
+
+
+/////////////////////////////////
+app.get('/api/location-with-sites/:location_id', async (req, res) => {
+    const { location_id } = req.params;
 
     try {
         const locationResult = await pool.query(`
@@ -412,7 +565,7 @@ app.get('/api/location-with-sites/:site_id', async (req, res) => {
       FROM public.site s
       JOIN public.location l ON s.location_id = l.loc_id
       WHERE l.loc_id = $1
-    `, [site_id]);
+    `, [location_id]);
 
         if (locationResult.rows.length === 0) {
             return res.status(404).json({ error: 'Location not found for the given site ID' });
@@ -429,9 +582,7 @@ app.get('/api/location-with-sites/:site_id', async (req, res) => {
   s.site_type AS technology
 FROM public.site s
 WHERE s.location_id = $1;
-
- 
-    `, [site_id]);
+ `, [location_id]);
 
         res.status(200).json({
             ...locationData,
@@ -443,6 +594,10 @@ WHERE s.location_id = $1;
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
+
+
+
 
 
 app.get('/api/site/:id', async (req, res) => {
@@ -567,7 +722,6 @@ app.get('/api/expiring-contracts', async (req, res) => {
             const fullYear = year < 100 ? 2000 + year : year;
             const dateStr = `${fullYear}-${month}-${String(day).padStart(2, '0')}`;
             const parsed = new Date(dateStr);
-
             return !isNaN(parsed)
                 ? { site: row.site_name, parsed, iso: dateStr }
                 : null;

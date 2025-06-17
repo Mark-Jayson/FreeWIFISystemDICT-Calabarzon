@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 // COMMENTED OUT: Import from hardcoded JSON utils file
 // import { searchFWSLocations } from '../utils/fwsLocations';
 
-const MapToolbar = ({ mapInstance, onSearch }) => { // Removed setPanelData from props
+const MapToolbar = ({ mapInstance, onSearch, onReset }) => { // Added onReset prop
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
@@ -107,7 +107,27 @@ const MapToolbar = ({ mapInstance, onSearch }) => { // Removed setPanelData from
     }
   };
 
-  // Removed formatLocationDataForInfoPanel as MapToolbar no longer sets panel data directly
+  // NEW: Handle reset button click
+  const handleReset = () => {
+    // Clear search input and results
+    setSearchTerm('');
+    setSearchResults([]);
+    setShowResults(false);
+
+    // Reset map to initial position and zoom
+    if (mapInstance) {
+      mapInstance.flyTo({
+        center: [121.2, 14.1], // INITIAL_CENTER from MainDashboard
+        zoom: 8.8, // INITIAL_ZOOM from MainDashboard
+        essential: true
+      });
+    }
+
+    // Call the reset function from MainDashboard to clear all panels and state
+    if (onReset) {
+      onReset();
+    }
+  };
 
   return (
     <div className="bg-white p-3 shadow-md flex items-center">
@@ -173,6 +193,17 @@ const MapToolbar = ({ mapInstance, onSearch }) => { // Removed setPanelData from
           </div>
         )}
       </div>
+
+      {/* NEW: Reset Button */}
+      <button
+        onClick={handleReset}
+        className={`px-3 py-2 mr-4 bg-red-500 text-white rounded-full text-xs whitespace-nowrap transition-all duration-200 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300 ${hoveredButton === 'reset' ? 'bg-red-600' : ''}`}
+        onMouseEnter={() => setHoveredButton('reset')}
+        onMouseLeave={() => setHoveredButton(null)}
+        title="Reset map view and clear all panels"
+      >
+        Reset
+      </button>
 
       <div className="text-gray-700 mr-2 text-sm whitespace-nowrap">
         Filters
