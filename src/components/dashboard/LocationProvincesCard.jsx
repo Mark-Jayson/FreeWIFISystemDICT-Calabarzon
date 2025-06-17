@@ -10,21 +10,21 @@ const LocationProvincesCard = ({ locationCount, trendValue, provincesData }) => 
         <div>
           <div className="text-sm font-medium mb-1">No. of location with Free WiFi sites</div>
           <div className="text-4xl font-bold text-blue-950">{locationCount}</div>
-          
+
           <div className="flex items-center text-xs mt-1 text-green-600">
             <span className="mr-1">↑</span> {trendValue}
           </div>
         </div>
       </div>
-      
+
       <div>
         <div className="text-sm font-medium mb-4">Distribution per Province</div>
         <div className="flex justify-between items-center">
           <div className="flex flex-col text-sm gap-2">
             {provincesData.map((entry, index) => (
               <div key={index} className="flex items-center gap-2">
-                <span 
-                  className="w-3 h-3 rounded-full" 
+                <span
+                  className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: entry.color }}
                 ></span>
                 <span className="text-gray-700">{entry.name}</span>

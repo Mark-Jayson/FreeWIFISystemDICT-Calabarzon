@@ -348,7 +348,6 @@ app.post('/api/location', async (req, res) => {
 });
 
 // Get all WiFi sites with location data
-// Get all WiFi sites with location data
 app.get('/api/wifisites', async (req, res) => {
     try {
         const query = `
@@ -496,100 +495,42 @@ res.status(200).json({ sites, totalSitesCount: parseInt(totalSitesCount, 10) });
         res.status(500).json({ error: 'Internal server error while fetching sites by locality.' });
     }
 });
-// ////////////////////////////////
-// app.get('/api/getTotalSitesByLocality/:locality', async (req, res) => {''
-
-//   const { locality } = req.params;
 
 
-
-//   try {
-
-//     // Query to count the number of distinct locations that belong to the given locality
-
-//     // and are also associated with an entry in the 'public.site' table.
-
-//     // We use COUNT(DISTINCT l.loc_id) to ensure each unique location is counted once,
-
-//     // even if it might be referenced multiple times in the 'site' table (though less common).
-
-//     const result = await pool.query(`
-
-//       SELECT
-
-//         COUNT(DISTINCT l.loc_id) AS total_sites_count
-
-//       FROM
-
-//         public.location l
-
-//       JOIN
-
-//         public.site s ON l.loc_id = s.location_id
-
-//       WHERE
-
-//         l.locality = $1
-
-//     `, [locality]);
-
-
-
-//     // The result will always have at least one row, even if the count is 0.
-
-//     const totalSitesCount = result.rows[0].total_sites_count;
-
-
-
-//     // Send the count as a JSON response
-
-//     res.status(200).json({ locality, totalSitesCount: parseInt(totalSitesCount, 10) });
-
-
-
-//   } catch (error) {
-
-//     console.error('Error counting sites by locality:', error);
-
-//     res.status(500).json({ error: 'Internal server error while fetching site count.' });
-
-//   }
-
-// });
-
-
-/////////////////////////////////
 app.get('/api/location-with-sites/:location_id', async (req, res) => {
     const { location_id } = req.params;
 
     try {
+        // Corrected query to use location_id and join on loc_id
         const locationResult = await pool.query(`
         SELECT 
             l.*,
             l.latitude,
             l.longitude 
-    FROM public.site s
-    JOIN public.location l ON s.location_id = l.loc_id
-    WHERE l.loc_id = $1
-    `, [site_id]);
+        FROM public.location l
+        WHERE l.loc_id = $1
+        `, [location_id]); // Use location_id directly, not site_id
 
         if (locationResult.rows.length === 0) {
-            return res.status(404).json({ error: 'Location not found for the given site ID' });
+            return res.status(404).json({ error: 'Location not found for the given location ID' });
         }
 
         const locationData = locationResult.rows[0];
 
-
+        // Corrected query to fetch sites for the given location_id
         const sitesResult = await pool.query(`
         SELECT
             s.site_id,
+            s.site_code,
             s.site_name,
             s.contract_status AS status,
-            s.site_type AS technology
-    FROM public.site s
-    WHERE s.location_id = $1;
+            s.site_type AS technology,
+            s.latitude,
+            s.longitude
+        FROM public.site s
+        WHERE s.location_id = $1;
+        `, [locationData.loc_id]); // Use loc_id from the fetched location data
 
-    `, [site_id]);
         res.status(200).json({
             ...locationData,
             apSites: sitesResult.rows
@@ -710,9 +651,17 @@ app.get('/api/expiring-contracts', async (req, res) => {
 
         const parsedContracts = result.rows.map(row => {
             const raw = row.end_of_contract?.trim();
+            if (!raw) return null; // Handle null or empty string for end_of_contract
             const parts = raw.split('-'); // e.g., '30-Mar-25'
 
-            if (parts.length !== 3) return null;
+            if (parts.length !== 3) {
+                 // Try parsing if it's already in ISO format (YYYY-MM-DD)
+                const isoParsed = new Date(raw);
+                if (!isNaN(isoParsed) && isoParsed.toISOString().slice(0, 10) === raw) {
+                    return { site: row.site_name, parsed: isoParsed, iso: raw };
+                }
+                return null;
+            }
 
             const [dayStr, monthStr, yearStr] = parts;
             const day = parseInt(dayStr);
@@ -782,31 +731,66 @@ app.get('/api/yearly-activations', async (req, res) => {
                 noDate++;
                 continue;
             }
+            
+            // Attempt to parse as Date object if it's already one
+            if (raw instanceof Date) {
+                const year = raw.getFullYear();
+                if (year && yearCounts.hasOwnProperty(year)) {
+                    yearCounts[year]++;
+                }
+                continue;
+            }
 
-            const parts = raw.toString().trim().split(/[-\/]/); // e.g. "20-Mar" or "19-Mar-20"
+            const parts = raw.toString().trim().split(/[-\/]/); // e.g. "20-Mar" or "19-Mar-20" or "2023-01-15"
 
             let year = null;
 
             if (parts.length === 2) {
                 // "20-Mar" → March 2020
-                const [yy, monStr] = parts;
+                const [dayOrYearStr, monStr] = parts;
                 const month = monthMap[monStr.toLowerCase()];
-                year = parseInt(yy.length === 2 ? `20${yy}` : yy); // support "20" or "2020"
+                let parsedYear = parseInt(dayOrYearStr);
+
+                // This part is tricky if "20-Mar" can mean 2020 or 20th of March in current year
+                // Assuming "YY-MMM" format implies year first (e.g., "20-Mar" is Mar 2020)
+                year = parsedYear < 100 ? (2000 + parsedYear) : parsedYear; // Adjust to full year
+                if (month === undefined) { // If 'Mar' is actually a year like '20' and '20' is a month
+                    // This scenario needs better logic if inputs are ambiguous like '20-03'
+                    // For now, assume 'YY-MMM' always means YY is the year.
+                     year = parseInt(dayOrYearStr.length === 2 ? `20${dayOrYearStr}` : dayOrYearStr);
+                }
+
+
             } else if (parts.length === 3) {
-                // "19-Mar-20" → March 19, 2020
-                const [dayStr, monStr, yy] = parts;
-                const month = monthMap[monStr.toLowerCase()];
-                year = parseInt(yy.length === 2 ? `20${yy}` : yy);
+                // "19-Mar-20" → March 19, 2020 (day-month-year)
+                // "2023-01-15" (year-month-day)
+                const [p1, p2, p3] = parts;
+
+                // Check for YYYY-MM-DD format
+                if (p1.length === 4 && p2.length <= 2 && p3.length <= 2) {
+                    year = parseInt(p1);
+                } else { // Assume DD-Mon-YY format
+                    const monStr = p2;
+                    const yy = p3;
+                    const month = monthMap[monStr.toLowerCase()];
+                    year = parseInt(yy.length === 2 ? `20${yy}` : yy);
+                }
             }
 
             if (year && yearCounts.hasOwnProperty(year)) {
                 yearCounts[year]++;
+            } else if (year) {
+                // If year is outside the predefined range but valid, count it
+                yearCounts[year] = (yearCounts[year] || 0) + 1;
             }
         }
 
-        const formatted = Object.entries(yearCounts).map(([year, count]) => ({
+        // Sort years for consistent output, especially if new years were added
+        const sortedYears = Object.keys(yearCounts).sort((a, b) => parseInt(a) - parseInt(b));
+
+        const formatted = sortedYears.map((year) => ({
             year,
-            value: count
+            value: yearCounts[year]
         }));
 
         res.json({
@@ -955,6 +939,82 @@ app.get('/api/location-distribution', async (req, res) => {
     console.error('Error fetching location distribution:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
+});
+
+// NEW ENDPOINT: Fetch key metrics like GIDA, ELCAC, and Digitization status
+app.get('/api/key-metrics', async (req, res) => {
+    const { province } = req.query;
+
+    try {
+        let whereClause = '';
+        const values = [];
+
+        if (province && province !== 'all') {
+            whereClause = 'WHERE l.province ILIKE $1';
+            values.push(province);
+        }
+
+        // Fetch GIDA count
+        // **IMPORTANT**: Replace 'GIDA' with the actual value in your 'category' or 'cluster' column
+        // that identifies GIDA locations/sites.
+        const gidaResult = await pool.query(
+            `SELECT COUNT(DISTINCT l.loc_id) FROM public.location l
+            JOIN public.site s ON l.loc_id = s.location_id
+             ${whereClause} AND l.category = 'GIDA'`, // Adjust 'l.category' and 'GIDA' as per your schema
+            values
+        );
+        const gidaCount = parseInt(gidaResult.rows[0].count);
+
+        // Fetch ELCAC count
+        // **IMPORTANT**: Replace 'ELCAC' with the actual value in your 'category' or 'cluster' column
+        // that identifies ELCAC locations/sites.
+        const elcacResult = await pool.query(
+            `SELECT COUNT(DISTINCT l.loc_id) FROM public.location l
+            JOIN public.site s ON l.loc_id = s.location_id
+             ${whereClause} AND l.category = 'ELCAC'`, // Adjust 'l.category' and 'ELCAC' as per your schema
+            values
+        );
+        const elcacCount = parseInt(elcacResult.rows[0].count);
+
+        // Fetch Digitization data (e.g., based on active sites with a specific site_type)
+        // **IMPORTANT**: Define what "digitization" means. This example assumes sites with 'site_type' = 'Digital'.
+        // Adjust 's.site_type' and 'Digital' to match your criteria.
+        const totalDigitizationCandidatesResult = await pool.query(
+            `SELECT COUNT(DISTINCT s.site_id) FROM public.site s
+            JOIN public.location l ON s.location_id = l.loc_id
+             ${whereClause} AND s.site_type = 'Digital'`, // Example condition, replace 'Digital' with actual criteria
+            values
+        );
+        const activeDigitizationResult = await pool.query(
+            `SELECT COUNT(DISTINCT s.site_id) FROM public.site s
+            JOIN public.location l ON s.location_id = l.loc_id
+             ${whereClause} AND s.site_type = 'Digital' AND s.contract_status = 'ACTIVE'`, // Example condition
+            values
+        );
+
+        const totalDigitizationCount = parseInt(totalDigitizationCandidatesResult.rows[0].count);
+        const activeDigitizationCount = parseInt(activeDigitizationResult.rows[0].count);
+
+        let digitizationPercentage = 0;
+        if (totalDigitizationCount > 0) {
+            digitizationPercentage = Math.round((activeDigitizationCount / totalDigitizationCount) * 100);
+        }
+
+        res.status(200).json({
+            gidaCount,
+            elcacCount,
+            digitization: {
+                percentage: digitizationPercentage,
+                totalCount: totalDigitizationCount,
+                activeCount: activeDigitizationCount,
+                description: 'Sites contributing to digitization efforts', // Customize this description
+            },
+        });
+
+    } catch (error) {
+        console.error('Error fetching key metrics:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
 

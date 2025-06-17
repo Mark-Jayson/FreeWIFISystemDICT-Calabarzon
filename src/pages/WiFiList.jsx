@@ -12,18 +12,11 @@ const WifiList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage] = useState(50);
 
-  const [error, setError] = useState(null);
-
-  // For Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage] = useState(50);
-
   useEffect(() => {
     const fetchWifiSites = async () => {
-    const fetchWifiSites = async () => {
       setLoading(true);
+      setError(null); // Reset error state before fetching
 
-      setError(null);
       try {
         const response = await fetch('http://localhost:5000/api/wifisites');
         if (!response.ok) {
@@ -33,35 +26,11 @@ const WifiList = () => {
         const formattedData = data.map(item => ({
           id: item.site_id,
           siteName: item.site_name,
-          location: item.location_name, 
-          status: item.contract_status || 'UNKNOWN', 
-          lastUpdated: item.activation_date ? new Date(item.activation_date).toLocaleDateString() : 'N/A', 
+          location: item.location_name,
+          status: item.contract_status || 'UNKNOWN',
+          lastUpdated: item.activation_date ? new Date(item.activation_date).toLocaleDateString() : 'N/A',
           bandwidth: item.bandwidth ? `${item.bandwidth} Mbps` : 'N/A',
-          provider: item.link_provider || 'N/A' 
-        }));
-        setWifiData(formattedData);
-      } catch (e) {
-        console.error("Failed to fetch WiFi sites:", e);
-        setError("Failed to load WiFi sites. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-
-      setError(null);
-      try {
-        const response = await fetch('http://localhost:5000/api/wifisites');
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        const formattedData = data.map(item => ({
-          id: item.site_id,
-          siteName: item.site_name,
-          location: item.location_name, 
-          status: item.contract_status || 'UNKNOWN', 
-          lastUpdated: item.activation_date ? new Date(item.activation_date).toLocaleDateString() : 'N/A', 
-          bandwidth: item.bandwidth ? `${item.bandwidth} Mbps` : 'N/A',
-          provider: item.link_provider || 'N/A' 
+          provider: item.link_provider || 'N/A'
         }));
         setWifiData(formattedData);
       } catch (e) {
@@ -73,9 +42,7 @@ const WifiList = () => {
     };
 
     fetchWifiSites();
-
-    fetchWifiSites();
-  }, []);
+  }, []); // Empty dependency array means this runs once on mount
 
   // For Filter and Search Logic
   const filteredData = wifiData.filter(item => {
@@ -88,7 +55,7 @@ const WifiList = () => {
     return matchesSearch && matchesFilter;
   });
 
-  
+
   // Pagination logic
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -105,22 +72,20 @@ const WifiList = () => {
         pageNumbers.push(i);
       }
     } else {
-      
       let displayStart;
       let displayEnd;
       const halfVisible = Math.floor(maxVisiblePages / 2);
       if (currentPage <= halfVisible + 1) {
         // Current page is near the beginning
         displayStart = 1;
-        displayEnd = maxVisiblePages - 2; e
+        displayEnd = maxVisiblePages - 2;
       } else if (currentPage >= totalPages - halfVisible) {
         // Current page is near the end
-        displayStart = totalPages - (maxVisiblePages - 2); 
+        displayStart = totalPages - (maxVisiblePages - 2);
         displayEnd = totalPages;
-
       } else {
         // Current page is in the middle
-        displayStart = currentPage - halfVisible + 1; 
+        displayStart = currentPage - halfVisible + 1;
         displayEnd = currentPage + halfVisible - 1;
       }
 
@@ -129,7 +94,7 @@ const WifiList = () => {
           if (displayStart > 2) pageNumbers.push('...');
       }
       for (let i = displayStart; i <= displayEnd; i++) {
-        if (i !== 1 && i !== totalPages) { 
+        if (i !== 1 && i !== totalPages) {
             pageNumbers.push(i);
           }
       }
@@ -162,13 +127,11 @@ const WifiList = () => {
       case 'active': return 'bg-green-100 text-green-800';
       case 'terminated': return 'bg-red-100 text-red-800';
       case 'for renewal': return 'bg-yellow-100 text-yellow-800';
-      case 'terminated': return 'bg-red-100 text-red-800';
-      case 'for renewal': return 'bg-yellow-100 text-yellow-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
-  
-  
+
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -180,22 +143,7 @@ const WifiList = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center p-6 bg-white rounded-lg shadow-md">
-            <p className="text-red-600 text-lg">{error}</p>
-            <button
-              onClick={() => window.location.reload()}
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                Retry
-              </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
+  // Only one error display block is needed
   if (error) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -221,8 +169,8 @@ const WifiList = () => {
               <Wifi className="w-8 h-8 text-blue-600 mr-3" />
               <h1 className="text-3xl font-bold text-gray-900">WiFi List</h1>
             </div>
+            {/* Only one total sites display needed */}
             <div className="text-sm text-gray-500">
-              Total Sites: {wifiData.length} | Active: {wifiData.filter(item => item.status === 'ACTIVE').length}
               Total Sites: {wifiData.length} | Active: {wifiData.filter(item => item.status === 'ACTIVE').length}
             </div>
           </div>
@@ -256,9 +204,6 @@ const WifiList = () => {
                 <option value="ACTIVE">Active</option>
                 <option value="TERMINATED">Terminated</option>
                 <option value="FOR RENEWAL">For Renewal</option>
-                <option value="ACTIVE">Active</option>
-                <option value="TERMINATED">Terminated</option>
-                <option value="FOR RENEWAL">For Renewal</option>
               </select>
             </div>
           </div>
@@ -268,12 +213,11 @@ const WifiList = () => {
         <div className="bg-white shadow rounded-lg overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-xl font-semibold text-gray-900">Free WiFi Sites</h2>
+            {/* Only one showing count needed */}
             <p className="text-sm text-gray-500 mt-1">
-              Showing {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredData.length)} of {filteredData.length} sites
               Showing {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredData.length)} of {filteredData.length} sites
             </p>
           </div>
-
 
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -295,7 +239,6 @@ const WifiList = () => {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {currentItems.map((site) => (
-                {currentItems.map((site) => (
                   <tr key={site.id} className="hover:bg-gray-50 transition-colors duration-150">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -311,12 +254,9 @@ const WifiList = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm text-gray-500">{site.bandwidth}</div>
                       <div className="text-sm text-gray-500">{site.provider}</div>
-                      <div className="text-sm text-gray-500">{site.bandwidth}</div>
-                      <div className="text-sm text-gray-500">{site.provider}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(site.status)}`}>
                         <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(site.status)}`}>
                           {site.status}
                         </span>
@@ -341,8 +281,6 @@ const WifiList = () => {
               <p className="mt-1 text-sm text-gray-500">
                 {searchTerm || filterStatus !== 'all'
                   ? 'Try adjusting your search or filter criteria.'
-                {searchTerm || filterStatus !== 'all'
-                  ? 'Try adjusting your search or filter criteria.'
                   : 'No WiFi sites have been configured yet.'}
               </p>
             </div>
@@ -354,38 +292,6 @@ const WifiList = () => {
               className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6"
               aria-label="Pagination"
             >
-
-              <div className="flex-1 flex items-center justify-between">
-                <div className="relative z-0 inline-flex shadow-sm rounded-md -space-x-px">
-                  <button
-                    onClick={() => paginate(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <span className="sr-only">Previous</span>
-                    <ChevronLeft className="h-5 w-5" aria-hidden="true" />
-                  </button>
-                  {renderPageNumbers()}
-                  <button
-                    onClick={() => paginate(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <span className="sr-only">Next</span>
-                    <ChevronRight className="h-5 w-5" aria-hidden="true" />
-                  </button>
-                </div>
-              </div>
-            </nav>
-          )}
-
-          {/* For Pagination Controls */}
-          {totalPages > 1 && (
-            <nav
-              className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6"
-              aria-label="Pagination"
-            >
-
               <div className="flex-1 flex items-center justify-between">
                 <div className="relative z-0 inline-flex shadow-sm rounded-md -space-x-px">
                   <button

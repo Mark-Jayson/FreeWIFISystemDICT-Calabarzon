@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import Header from '../components/dashboard/Header';
 import FreeWifiStatCard from '../components/dashboard/FreeWifiStatCard';
 import DigitizationCard from '../components/dashboard/DigitizationCard';
-// import KeyMetricCard from '../components/dashboard/KeyMetricCard';
+import KeyMetricCard from '../components/dashboard/KeyMetricCard';
 import LocationProvincesCard from '../components/dashboard/LocationProvincesCard';
-// import WifiTechnologyBar from '../components/dashboard/WifiTechnologyBar';
+import WifiTechnologyBar from '../components/dashboard/WifiTechnologyBar';
 import LocationTypeGrid from '../components/dashboard/LocationTypeGrid';
 import TopLGUListCard from '../components/dashboard/TopLGUListCard';
 import ExpiringContractsTable from '../components/dashboard/ExpiringContractsTable';
@@ -30,8 +30,6 @@ const Dashboard = () => {
     loading: true,
     error: null,
   });
-
-  /* ----------------  DATA FETCH HELPERS  ---------------- */
 
   const handleProvinceSelect = (provinceId) => setSelectedProvince(provinceId);
 
@@ -77,7 +75,6 @@ const Dashboard = () => {
     }
   };
 
-
   const fetchSiteTypes = async () => {
     try {
       const res = await fetch(`http://localhost:5000/api/site-types?province=${selectedProvince}`);
@@ -116,16 +113,39 @@ const Dashboard = () => {
   }, [selectedProvince]);
 
 
-  /* ----------------  RENDER  ---------------- */
+  const currentData = provinceData[selectedProvince];
 
   return (
     <div className="flex-1 bg-blue-50 overflow-y-auto">
       <Header
-        region="Region IV – A Calabarzon"
+        region="Region IV – A Calabarzon"
         onProvinceSelect={handleProvinceSelect}
         selectedProvince={selectedProvince}
       />
-
+      <div className="px-6 pb-6">
+        <div className="grid grid-cols-3 gap-4">
+          {/* ----------  COLUMN 1  ---------- */}
+          <div className="flex flex-col gap-4">
+            <LocationProvincesCard
+              locationCount={currentData.locationCount}
+              trendValue={currentData.trendValue}
+              provincesData={currentData.provincesData}
+            />
+            <WifiTechnologyBar data={currentData.wifiTechData} />
+            <LocationTypeGrid
+              title={
+                selectedProvince === 'all'
+                  ? 'Free WiFi Sites location per location types in Calabarzon'
+                  : `Free WiFi Sites location per location types in ${currentData.provincesData[0].name}`
+              }
+              subtitle={
+                selectedProvince === 'all'
+                  ? null
+                  : `Free WiFi sites location per location types in ${currentData.provincesData[0].name}`
+              }
+              data={siteTypeData}
+            />
+          </div>
 
           {/* ----------  COLUMN 2  ---------- */}
           <div className="flex flex-col gap-4">
@@ -155,17 +175,22 @@ const Dashboard = () => {
             />
           </div>
 
-          <div className="bg-white rounded-lg shadow p-4 h-full">
-            <YearlyActivationChart
-              title="No. of WiFi Activated per Year of Activation"
-              data={yearlyActivationData}
-              highlightYear="2023"
-              noDateCount={noDateCount}
-            />
+          {/* ----------  COLUMN 3  ---------- */}
+          <div className="flex flex-col gap-4">
+            <div className="bg-white rounded-lg shadow p-4">
+              <ExpiringContractsTable contracts={expiringContracts} />
+            </div>
 
-            {/* single line INSIDE the card, below the chart */}
-            <div className="mt-4 text-center text-sm text-gray-700">
-              <strong>WiFi activated without date:</strong> {noDateCount}
+            <div className="bg-white rounded-lg shadow p-4 h-full">
+              <YearlyActivationChart
+                title="No. of WiFi Activated per Year of Activation"
+                data={yearlyActivationData}
+                highlightYear="2023"
+                noDateCount={noDateCount}
+              />
+              <div className="mt-4 text-center text-sm text-gray-700">
+                <strong>WiFi activated without date:</strong> {noDateCount}
+              </div>
             </div>
           </div>
         </div>
