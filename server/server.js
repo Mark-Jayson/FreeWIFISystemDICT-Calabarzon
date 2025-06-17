@@ -195,7 +195,7 @@ app.get('/api/location/search', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
- 
+
 // Get location by ID
 app.get('/api/locations/:id', async (req, res) => {
     try {
@@ -308,7 +308,7 @@ app.post('/api/location', async (req, res) => {
             $12, $13, $14, $15
         ) RETURNING site_id
         `;
- 
+
         const siteValues = [
             locId,
             sideCode,
@@ -405,10 +405,10 @@ app.get('/api/map-pins', async (req, res) => {
 });
 
 app.get('/api/getLocationsOfProvince/:locality', async (req, res) => {
-  const { locality } = req.params;
+    const { locality } = req.params;
 
-  try {
-    const result = await pool.query(`
+    try {
+        const result = await pool.query(`
       SELECT
         l.*
       FROM
@@ -417,23 +417,23 @@ app.get('/api/getLocationsOfProvince/:locality', async (req, res) => {
         l.locality = $1
     `, [locality]);
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'No locations found for the specified locality.' });
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'No locations found for the specified locality.' });
+        }
+
+        res.status(200).json(result.rows);
+
+    } catch (error) {
+        console.error('Error fetching locations by locality:', error);
+        res.status(500).json({ error: 'Internal server error while fetching locations.' });
     }
-
-    res.status(200).json(result.rows);
-
-  } catch (error) {
-    console.error('Error fetching locations by locality:', error);
-    res.status(500).json({ error: 'Internal server error while fetching locations.' });
-  }
 });
 
 app.get('/api/getLocationsOfProvince/:locality', async (req, res) => {
-  const { locality } = req.params;
+    const { locality } = req.params;
 
-  try {
-    const result = await pool.query(`
+    try {
+        const result = await pool.query(`
       SELECT
         l.*
       FROM
@@ -444,16 +444,16 @@ app.get('/api/getLocationsOfProvince/:locality', async (req, res) => {
         l.locality = $1
     `, [locality]);
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'No locations found for the specified locality.' });
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'No locations found for the specified locality.' });
+        }
+
+        res.status(200).json(result.rows);
+
+    } catch (error) {
+        console.error('Error fetching locations by locality:', error);
+        res.status(500).json({ error: 'Internal server error while fetching locations.' });
     }
-
-    res.status(200).json(result.rows);
-
-  } catch (error) {
-    console.error('Error fetching locations by locality:', error);
-    res.status(500).json({ error: 'Internal server error while fetching locations.' });
-  }
 });
 
 // NEW ENDPOINT: Get the total number of sites for a given locality
@@ -485,10 +485,10 @@ app.get('/api/sitesByLocality/:locality', async (req, res) => {
         const totalSitesCount = sites.length;
 
 
-res.status(200).json({ sites, totalSitesCount: parseInt(totalSitesCount, 10) });
+        res.status(200).json({ sites, totalSitesCount: parseInt(totalSitesCount, 10) });
 
         // Send a successful JSON response with the sites data and their total count
-            // res.status(200).json(sitesResult.rows);
+        // res.status(200).json(sitesResult.rows);
     } catch (error) {
         console.error(`Error fetching sites for locality "${locality}":`, error);
         // Send an error response in case of any server-side issues
@@ -594,23 +594,44 @@ app.get('/api/wifi-stats', async (req, res) => {
             values
         );
 
+        const forRenewalResult = await pool.query(
+            `SELECT COUNT(*) FROM public.site s JOIN public.location l ON s.location_id = l.loc_id ${whereClause} AND s.contract_status = 'FOR RENEWAL'`,
+            values
+        );
+
+        const unknownResult = await pool.query(
+            `SELECT COUNT(*) FROM public.site s JOIN public.location l ON s.location_id = l.loc_id ${whereClause} AND (s.contract_status IS NULL OR s.contract_status NOT IN ('ACTIVE', 'TERMINATED', 'FOR RENEWAL'))`,
+            values
+        );
+
         const totalSites = parseInt(totalResult.rows[0].count);
         const activeSites = parseInt(activeResult.rows[0].count);
         const terminatedSites = parseInt(terminatedResult.rows[0].count);
+        const forRenewalSites = parseInt(forRenewalResult.rows[0].count);
+        const unknownSites = parseInt(unknownResult.rows[0].count);
 
         let activePercentage = 0;
         let terminatedPercentage = 0;
+        let forRenewalPercentage = 0;
+        let unknownPercentage = 0;
+
         if (totalSites > 0) {
             activePercentage = Math.round((activeSites / totalSites) * 100);
-            terminatedPercentage = 100 - activePercentage;
+            terminatedPercentage = Math.round((terminatedSites / totalSites) * 100);
+            forRenewalPercentage = Math.round((forRenewalSites / totalSites) * 100);
+            unknownPercentage = 100 - (activePercentage + terminatedPercentage + forRenewalPercentage);
         }
 
         res.status(200).json({
             totalSites,
             activeSites,
             terminatedSites,
+            forRenewalSites,
+            unknownSites,
             activePercentage,
             terminatedPercentage,
+            forRenewalPercentage,
+            unknownPercentage,
             trendValue: "0%",
             isPositiveTrend: true,
         });
@@ -655,7 +676,7 @@ app.get('/api/expiring-contracts', async (req, res) => {
             const parts = raw.split('-'); // e.g., '30-Mar-25'
 
             if (parts.length !== 3) {
-                 // Try parsing if it's already in ISO format (YYYY-MM-DD)
+                // Try parsing if it's already in ISO format (YYYY-MM-DD)
                 const isoParsed = new Date(raw);
                 if (!isNaN(isoParsed) && isoParsed.toISOString().slice(0, 10) === raw) {
                     return { site: row.site_name, parsed: isoParsed, iso: raw };
@@ -731,7 +752,7 @@ app.get('/api/yearly-activations', async (req, res) => {
                 noDate++;
                 continue;
             }
-            
+
             // Attempt to parse as Date object if it's already one
             if (raw instanceof Date) {
                 const year = raw.getFullYear();
@@ -757,7 +778,7 @@ app.get('/api/yearly-activations', async (req, res) => {
                 if (month === undefined) { // If 'Mar' is actually a year like '20' and '20' is a month
                     // This scenario needs better logic if inputs are ambiguous like '20-03'
                     // For now, assume 'YY-MMM' always means YY is the year.
-                     year = parseInt(dayOrYearStr.length === 2 ? `20${dayOrYearStr}` : dayOrYearStr);
+                    year = parseInt(dayOrYearStr.length === 2 ? `20${dayOrYearStr}` : dayOrYearStr);
                 }
 
 
@@ -910,35 +931,65 @@ app.get('/api/provinces', async (req, res) => {
 });
 
 app.get('/api/location-distribution', async (req, res) => {
-  try {
-    const totalResult = await pool.query(`
+    const { province } = req.query;
+
+    try {
+        if (province && province !== 'all') {
+            const totalResult = await pool.query(`
+        SELECT COUNT(DISTINCT l.loc_id) AS total_locations
+        FROM public.location l
+        JOIN public.site s ON l.loc_id = s.location_id
+        WHERE l.province ILIKE $1
+      `, [province]);
+
+            const perLocalityResult = await pool.query(`
+        SELECT INITCAP(TRIM(l.locality)) AS name,
+               COUNT(DISTINCT l.loc_id) AS location_count
+        FROM public.location l
+        JOIN public.site s ON l.loc_id = s.location_id
+        WHERE l.province ILIKE $1 AND l.locality IS NOT NULL
+        GROUP BY name
+        ORDER BY location_count DESC
+      `, [province]);
+
+            return res.status(200).json({
+                total: parseInt(totalResult.rows[0].total_locations),
+                provinces: perLocalityResult.rows.map((row) => ({
+                    name: row.name,
+                    count: parseInt(row.location_count),
+                })),
+            });
+        }
+
+        // Default case: Region IV‑A (all provinces)
+        const totalResult = await pool.query(`
       SELECT COUNT(DISTINCT l.loc_id) AS total_locations
       FROM public.location l
       JOIN public.site s ON l.loc_id = s.location_id
       WHERE l.province IN ('Cavite', 'Laguna', 'Batangas', 'Rizal', 'Quezon')
     `);
 
-    const perProvinceResult = await pool.query(`
-      SELECT INITCAP(TRIM(l.province)) AS province,
+        const perProvinceResult = await pool.query(`
+      SELECT INITCAP(TRIM(l.province)) AS name,
              COUNT(DISTINCT l.loc_id) AS location_count
       FROM public.location l
       JOIN public.site s ON l.loc_id = s.location_id
       WHERE l.province IN ('Cavite', 'Laguna', 'Batangas', 'Rizal', 'Quezon')
-      GROUP BY province
+      GROUP BY name
       ORDER BY location_count DESC
     `);
 
-    res.status(200).json({
-      total: parseInt(totalResult.rows[0].total_locations),
-      provinces: perProvinceResult.rows.map((row) => ({
-        name: row.province,
-        count: parseInt(row.location_count),
-      })),
-    });
-  } catch (err) {
-    console.error('Error fetching location distribution:', err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
+        res.status(200).json({
+            total: parseInt(totalResult.rows[0].total_locations),
+            provinces: perProvinceResult.rows.map((row) => ({
+                name: row.name,
+                count: parseInt(row.location_count),
+            })),
+        });
+    } catch (err) {
+        console.error('Error fetching location distribution:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
 // NEW ENDPOINT: Fetch key metrics like GIDA, ELCAC, and Digitization status

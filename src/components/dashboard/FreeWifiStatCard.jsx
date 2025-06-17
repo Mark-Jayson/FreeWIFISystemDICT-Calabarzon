@@ -1,37 +1,36 @@
 import React from 'react';
 
-const FreeWifiStatCard = ({ 
-  title = "Free WiFi Sites", 
+const FreeWifiStatCard = ({
+  title = "Free WiFi Sites",
   totalSites = 0,
   activeSites = 0,
   terminatedSites = 0,
+  forRenewalSites = 0,
+  unknownSites = 0,
   trendValue = "0%",
   isPositiveTrend = false,
   loading = false,
-  error = null
+  error = null,
 }) => {
-  // Normalize nulls
   const safeTotalSites = totalSites ?? 0;
-  const safeActiveSites = activeSites ?? 0;
-  const safeTerminatedSites = terminatedSites ?? 0;
+  const safeActive = activeSites ?? 0;
+  const safeTerminated = terminatedSites ?? 0;
+  const safeRenewal = forRenewalSites ?? 0;
+  const safeUnknown = unknownSites ?? Math.max(safeTotalSites - (safeActive + safeTerminated + safeRenewal), 0);
 
-  // Calculate unknown sites
-  const calculatedKnown = safeActiveSites + safeTerminatedSites;
-  const safeNullSites = safeTotalSites > calculatedKnown ? safeTotalSites - calculatedKnown : 0;
-
-  // Calculate percentages
   let activePercentage = 0;
   let terminatedPercentage = 0;
-  let nullPercentage = 0;
+  let renewalPercentage = 0;
+  let unknownPercentage = 0;
 
   if (safeTotalSites > 0) {
-    activePercentage = Math.round((safeActiveSites / safeTotalSites) * 100);
-    terminatedPercentage = Math.round((safeTerminatedSites / safeTotalSites) * 100);
-    nullPercentage = 100 - (activePercentage + terminatedPercentage);
-    if (nullPercentage < 0) nullPercentage = 0;
+    activePercentage = Math.round((safeActive / safeTotalSites) * 100);
+    terminatedPercentage = Math.round((safeTerminated / safeTotalSites) * 100);
+    renewalPercentage = Math.round((safeRenewal / safeTotalSites) * 100);
+    unknownPercentage = 100 - (activePercentage + terminatedPercentage + renewalPercentage);
+    if (unknownPercentage < 0) unknownPercentage = 0;
   }
 
-  // Loading state
   if (loading) {
     return (
       <div className="bg-white rounded-lg shadow p-4 h-full">
@@ -45,23 +44,10 @@ const FreeWifiStatCard = ({
         </div>
         <div className="text-xs text-gray-600 mb-2">Total Sites: Loading...</div>
         <div className="flex h-6 rounded-sm overflow-hidden mb-2 bg-gray-200 animate-pulse"></div>
-        <div className="flex justify-between text-sm text-gray-400">
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 bg-gray-300 rounded-full"></span>
-            <span>Loading...</span>
-            <span>Active</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 bg-gray-300 rounded-full"></span>
-            <span>Loading...</span>
-            <span>Terminated</span>
-          </div>
-        </div>
       </div>
     );
   }
 
-  // Error state
   if (error) {
     return (
       <div className="bg-white rounded-lg shadow p-4 h-full">
@@ -102,51 +88,42 @@ const FreeWifiStatCard = ({
         Total Sites: {safeTotalSites.toLocaleString()}
       </div>
 
-      {/* Progress Bar */}
+      {/* Progress bar */}
       <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden mb-2 relative flex">
-        {safeTotalSites > 0 ? (
-          <>
-            {activePercentage > 0 && (
-              <div
-                className="h-full bg-green-500"
-                style={{ width: `${activePercentage}%` }}
-              />
-            )}
-            {terminatedPercentage > 0 && (
-              <div
-                className="h-full bg-red-500"
-                style={{ width: `${terminatedPercentage}%` }}
-              />
-            )}
-            {nullPercentage > 0 && (
-              <div
-                className="h-full bg-black"
-                style={{ width: `${nullPercentage}%` }}
-              />
-            )}
-          </>
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-500 text-xs">
-            No data available
-          </div>
+        {activePercentage > 0 && (
+          <div className="h-full bg-green-500" style={{ width: `${activePercentage}%` }} />
+        )}
+        {terminatedPercentage > 0 && (
+          <div className="h-full bg-red-500" style={{ width: `${terminatedPercentage}%` }} />
+        )}
+        {renewalPercentage > 0 && (
+          <div className="h-full bg-yellow-400" style={{ width: `${renewalPercentage}%` }} />
+        )}
+        {unknownPercentage > 0 && (
+          <div className="h-full bg-gray-100" style={{ width: `${unknownPercentage}%` }} />
         )}
       </div>
 
       {/* Legend */}
-      <div className="flex justify-between text-sm text-gray-700 mt-1">
+      <div className="flex justify-between text-sm text-gray-700 mt-1 flex-wrap gap-y-1">
         <div className="flex items-center gap-2">
           <span className="w-3 h-3 bg-green-500 rounded-full"></span>
-          <span className="font-medium">{safeActiveSites.toLocaleString()}</span>
+          <span className="font-medium">{safeActive.toLocaleString()}</span>
           <span>Active</span>
         </div>
         <div className="flex items-center gap-2">
           <span className="w-3 h-3 bg-red-500 rounded-full"></span>
-          <span className="font-medium">{safeTerminatedSites.toLocaleString()}</span>
+          <span className="font-medium">{safeTerminated.toLocaleString()}</span>
           <span>Terminated</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="w-3 h-3 bg-black rounded-full"></span>
-          <span className="font-medium">{safeNullSites.toLocaleString()}</span>
+          <span className="w-3 h-3 bg-yellow-400 rounded-full"></span>
+          <span className="font-medium">{safeRenewal.toLocaleString()}</span>
+          <span>For Renewal</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 bg-gray-100 rounded-full"></span>
+          <span className="font-medium">{safeUnknown.toLocaleString()}</span>
           <span>Unknown</span>
         </div>
       </div>

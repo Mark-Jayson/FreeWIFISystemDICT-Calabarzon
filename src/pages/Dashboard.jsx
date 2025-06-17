@@ -9,7 +9,6 @@ import LocationTypeGrid from '../components/dashboard/LocationTypeGrid';
 import TopLGUListCard from '../components/dashboard/TopLGUListCard';
 import ExpiringContractsTable from '../components/dashboard/ExpiringContractsTable';
 import YearlyActivationChart from '../components/dashboard/YearlyActivationChart';
-import { provinceData } from '../utils/provinceData';
 
 const Dashboard = () => {
   const [selectedProvince, setSelectedProvince] = useState('all');
@@ -18,13 +17,22 @@ const Dashboard = () => {
   const [noDateCount, setNoDateCount] = useState(0);
   const [siteTypeData, setSiteTypeData] = useState([]);
   const [topLGUs, setTopLGUs] = useState([]);
+  const [locationDistribution, setLocationDistribution] = useState({
+    locationCount: 0,
+    provincesData: [],
+    trendValue: '0%',
+  });
 
   const [wifiStats, setWifiStats] = useState({
     totalSites: 0,
     activeSites: 0,
     terminatedSites: 0,
+    forRenewalSites: 0,
+    unknownSites: 0,
     activePercentage: 0,
     terminatedPercentage: 0,
+    forRenewalPercentage: 0,
+    unknownPercentage: 0,
     trendValue: '0%',
     isPositiveTrend: true,
     loading: true,
@@ -60,7 +68,6 @@ const Dashboard = () => {
       setExpiringContracts([]);
     }
   };
-
 
   const fetchYearlyActivations = async () => {
     try {
@@ -104,16 +111,59 @@ const Dashboard = () => {
     }
   };
 
+  const fetchLocationDistribution = async () => {
+    try {
+      const res = await fetch('http://localhost:5000/api/location-distribution');
+      if (!res.ok) throw new Error(res.status);
+      const data = await res.json();
+
+      const colorPalette = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd'];
+      const allProvinces = data.provinces.map((p, idx) => ({
+        name: p.name,
+        value: p.count,
+        color: colorPalette[idx % colorPalette.length],
+      }));
+
+      let filteredProvinces;
+      let locationCount;
+
+      if (selectedProvince === 'all') {
+        filteredProvinces = allProvinces;
+        locationCount = data.total;
+      } else {
+        const match = allProvinces.find(
+          (p) => p.name.toLowerCase() === selectedProvince.toLowerCase()
+        );
+        const count = match?.value || 0;
+        locationCount = count;
+        filteredProvinces = count > 0
+          ? [{ name: match.name, value: count, color: match.color }, {
+              name: 'Other',
+              value: data.total - count,
+              color: '#f0f0f0',
+            }]
+          : [];
+      }
+
+      setLocationDistribution({
+        locationCount,
+        provincesData: filteredProvinces,
+        trendValue: '0%',
+      });
+    } catch (err) {
+      console.error('Location distribution error:', err);
+      setLocationDistribution({ locationCount: 0, provincesData: [], trendValue: '0%' });
+    }
+  };
+
   useEffect(() => {
     fetchWifiStats(selectedProvince);
     fetchExpiringContracts();
     fetchYearlyActivations();
     fetchTopLGUs();
     fetchSiteTypes();
+    fetchLocationDistribution();
   }, [selectedProvince]);
-
-
-  const currentData = provinceData[selectedProvince];
 
   return (
     <div className="flex-1 bg-blue-50 overflow-y-auto">
@@ -124,63 +174,52 @@ const Dashboard = () => {
       />
       <div className="px-6 pb-6">
         <div className="grid grid-cols-3 gap-4">
-          {/* ----------  COLUMN 1  ---------- */}
           <div className="flex flex-col gap-4">
             <LocationProvincesCard
-              locationCount={currentData.locationCount}
-              trendValue={currentData.trendValue}
-              provincesData={currentData.provincesData}
+              locationCount={locationDistribution.locationCount}
+              trendValue={locationDistribution.trendValue}
+              provincesData={locationDistribution.provincesData}
             />
-            <WifiTechnologyBar data={currentData.wifiTechData} />
+            <WifiTechnologyBar data={[]} />
             <LocationTypeGrid
               title={
                 selectedProvince === 'all'
                   ? 'Free WiFi Sites location per location types in Calabarzon'
-                  : `Free WiFi Sites location per location types in ${currentData.provincesData[0].name}`
+                  : `Free WiFi Sites location per location types in ${selectedProvince}`
               }
-              subtitle={
-                selectedProvince === 'all'
-                  ? null
-                  : `Free WiFi sites location per location types in ${currentData.provincesData[0].name}`
-              }
+              subtitle={selectedProvince === 'all' ? null : ''}
               data={siteTypeData}
             />
           </div>
-
-          {/* ----------  COLUMN 2  ---------- */}
           <div className="flex flex-col gap-4">
             <FreeWifiStatCard
               title="Total No. of FreeWiFi Sites"
               totalSites={wifiStats.totalSites}
               activeSites={wifiStats.activeSites}
               terminatedSites={wifiStats.terminatedSites}
+              forRenewalSites={wifiStats.forRenewalSites}
+              unknownSites={wifiStats.unknownSites}
               trendValue={wifiStats.trendValue}
               isPositiveTrend={wifiStats.isPositiveTrend}
               loading={wifiStats.loading}
               error={wifiStats.error}
             />
-            <KeyMetricCard
-              gidaCount={currentData.gidaCount}
-              elcacCount={currentData.elcacCount}
-            />
+            <KeyMetricCard gidaCount={0} elcacCount={0} />
             <DigitizationCard
-              percentage={currentData.digitization.percentage}
-              totalCount={currentData.digitization.totalCount}
-              activeCount={currentData.digitization.activeCount}
-              description={currentData.digitization.description}
+              percentage={0}
+              totalCount={0}
+              activeCount={0}
+              description="Digitization metrics pending"
             />
             <TopLGUListCard
               title="Top LGU per Province with Most Free WiFi"
               data={topLGUs}
             />
           </div>
-
-          {/* ----------  COLUMN 3  ---------- */}
           <div className="flex flex-col gap-4">
             <div className="bg-white rounded-lg shadow p-4">
               <ExpiringContractsTable contracts={expiringContracts} />
             </div>
-
             <div className="bg-white rounded-lg shadow p-4 h-full">
               <YearlyActivationChart
                 title="No. of WiFi Activated per Year of Activation"
