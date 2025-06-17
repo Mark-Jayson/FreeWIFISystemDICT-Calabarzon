@@ -1,116 +1,142 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Wifi, MapPin, Signal, Clock, Filter } from 'lucide-react';
+import { Search, Wifi, MapPin, Clock, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const WifiList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [wifiData, setWifiData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Mock data - replace this with your actual database call
-  const mockWifiData = [
-    {
-      id: 1,
-      siteName: 'Barangay Hall - San Antonio',
-      location: 'San Antonio, Paranaque City',
-      ipAddress: '192.168.1.100',
-      status: 'Active',
-      signalStrength: 'Strong',
-      connectedUsers: 45,
-      lastUpdated: '2025-06-13 10:30 AM',
-      bandwidth: '100 Mbps',
-      provider: 'PLDT'
-    },
-    {
-      id: 2,
-      siteName: 'Public Plaza - BF Homes',
-      location: 'BF Homes, Paranaque City',
-      ipAddress: '192.168.1.101',
-      status: 'Active',
-      signalStrength: 'Good',
-      connectedUsers: 23,
-      lastUpdated: '2025-06-13 10:25 AM',
-      bandwidth: '50 Mbps',
-      provider: 'Globe'
-    },
-    {
-      id: 3,
-      siteName: 'Community Center - Tambo',
-      location: 'Tambo, Paranaque City',
-      ipAddress: '192.168.1.102',
-      status: 'Inactive',
-      signalStrength: 'Weak',
-      connectedUsers: 0,
-      lastUpdated: '2025-06-12 03:15 PM',
-      bandwidth: '25 Mbps',
-      provider: 'Converge'
-    },
-    {
-      id: 4,
-      siteName: 'Municipal Library',
-      location: 'City Center, Paranaque City',
-      ipAddress: '192.168.1.103',
-      status: 'Active',
-      signalStrength: 'Strong',
-      connectedUsers: 78,
-      lastUpdated: '2025-06-13 10:45 AM',
-      bandwidth: '200 Mbps',
-      provider: 'PLDT'
-    },
-    {
-      id: 5,
-      siteName: 'Barangay Covered Court - La Huerta',
-      location: 'La Huerta, Paranaque City',
-      ipAddress: '192.168.1.104',
-      status: 'Maintenance',
-      signalStrength: 'Good',
-      connectedUsers: 12,
-      lastUpdated: '2025-06-13 09:00 AM',
-      bandwidth: '75 Mbps',
-      provider: 'Globe'
-    }
-  ];
+  // For Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage] = useState(50);
 
-  // Simulate loading data (replace with actual API call)
   useEffect(() => {
-    const loadData = async () => {
+    const fetchWifiSites = async () => {
       setLoading(true);
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setWifiData(mockWifiData);
-      setLoading(false);
+
+      setError(null);
+      try {
+        const response = await fetch('http://localhost:5000/api/wifisites');
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        const formattedData = data.map(item => ({
+          id: item.site_id,
+          siteName: item.site_name,
+          location: item.location_name, 
+          status: item.contract_status || 'UNKNOWN', 
+          lastUpdated: item.activation_date ? new Date(item.activation_date).toLocaleDateString() : 'N/A', 
+          bandwidth: item.bandwidth ? `${item.bandwidth} Mbps` : 'N/A',
+          provider: item.link_provider || 'N/A' 
+        }));
+        setWifiData(formattedData);
+      } catch (e) {
+        console.error("Failed to fetch WiFi sites:", e);
+        setError("Failed to load WiFi sites. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
     };
-    
-    loadData();
+
+    fetchWifiSites();
   }, []);
 
-  // Filter and search logic
+ // Filter and search logic
   const filteredData = wifiData.filter(item => {
-    const matchesSearch = item.siteName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         item.location.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === 'all' || item.status.toLowerCase() === filterStatus.toLowerCase();
+    const siteNameMatch = item.siteName?.toLowerCase().includes(searchTerm.toLowerCase());
+    const locationMatch = item.location?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = siteNameMatch || locationMatch;
+    // --- IMPORTANT FIX HERE: Added .trim() for robust string comparison ---
+    const itemStatus = item.status?.toLowerCase().trim();
+    const matchesFilter = filterStatus === 'all' || itemStatus === filterStatus.toLowerCase().trim();
     return matchesSearch && matchesFilter;
   });
+
+  
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  // Unified handler for search and filter changes to reset pagination
+  const handleFilterChange = (setter, value) => {
+    setter(value);
+    setCurrentPage(1); // Reset to first page whenever search or filter changes
+  };
+
+  // Function to render page numbers with ellipsis
+  const renderPageNumbers = () => {
+    const pageNumbers = [];
+    const maxVisiblePages = 9; // Max number of page buttons to show
+    if (totalPages <= maxVisiblePages) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+    
+      const pagesToShowBeforeAndAfterCurrent = Math.floor((maxVisiblePages - 1) / 2);
+      let startPage = Math.max(1, currentPage - pagesToShowBeforeAndAfterCurrent);
+      let endPage = Math.min(totalPages, currentPage + pagesToShowBeforeAndAfterCurrent);
+      // Adjust start/end to ensure maxVisiblePages are shown if totalPages allows
+      if (endPage - startPage + 1 < maxVisiblePages) {
+        if (startPage === 1) { // Pinned to start, expand end
+          endPage = Math.min(totalPages, maxVisiblePages);
+        } else if (endPage === totalPages) { // Pinned to end, expand start
+          startPage = Math.max(1, totalPages - maxVisiblePages + 1);
+        }
+      }
+      
+
+      // Always show first page if not already in range
+      if (startPage > 1) {
+        pageNumbers.push(1);
+        if (startPage > 2) pageNumbers.push('...'); // Add ellipsis if gap after 1st page
+      }
+
+      // Add pages within the calculated range
+      for (let i = startPage; i <= endPage; i++) {
+        pageNumbers.push(i);
+      }
+
+      // Always show last page if not already in range
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) pageNumbers.push('...'); // Add ellipsis if gap before last page
+        pageNumbers.push(totalPages);
+      }
+    }
+    return pageNumbers.map((number, index) =>
+      number === '...' ? (
+        <span key={`ellipsis-${index}`} className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+          ...
+        </span>
+      ) : (
+        <button
+          key={number}
+          onClick={() => paginate(number)}
+          className={`relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50
+            ${number === currentPage ? 'z-10 bg-blue-600 border-blue-600 text-white' : ''}
+          `}
+        >
+          {number}
+        </button>
+      )
+    );
+  };
 
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
       case 'active': return 'bg-green-100 text-green-800';
-      case 'inactive': return 'bg-red-100 text-red-800';
-      case 'maintenance': return 'bg-yellow-100 text-yellow-800';
+      case 'terminated': return 'bg-red-100 text-red-800';
+      case 'for renewal': return 'bg-yellow-100 text-yellow-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
-
-  const getSignalIcon = (strength) => {
-    const baseClass = "w-4 h-4";
-    switch (strength.toLowerCase()) {
-      case 'strong': return <Signal className={`${baseClass} text-green-600`} />;
-      case 'good': return <Signal className={`${baseClass} text-yellow-600`} />;
-      case 'weak': return <Signal className={`${baseClass} text-red-600`} />;
-      default: return <Signal className={`${baseClass} text-gray-600`} />;
-    }
-  };
-
+  
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -118,6 +144,21 @@ const WifiList = () => {
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600 text-lg">Loading WiFi Sites...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-center p-6 bg-white rounded-lg shadow-md">
+            <p className="text-red-600 text-lg">{error}</p>
+            <button
+              onClick={() => window.location.reload()}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                Retry
+              </button>
+          </div>
       </div>
     );
   }
@@ -133,7 +174,7 @@ const WifiList = () => {
               <h1 className="text-3xl font-bold text-gray-900">WiFi List</h1>
             </div>
             <div className="text-sm text-gray-500">
-              Total Sites: {wifiData.length} | Active: {wifiData.filter(item => item.status === 'Active').length}
+              Total Sites: {wifiData.length} | Active: {wifiData.filter(item => item.status === 'ACTIVE').length}
             </div>
           </div>
 
@@ -145,7 +186,7 @@ const WifiList = () => {
                 type="text"
                 placeholder="Search by site name or location..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => handleFilterChange(setSearchTerm, e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
@@ -153,13 +194,13 @@ const WifiList = () => {
               <Filter className="w-5 h-5 text-gray-400" />
               <select
                 value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
+                onChange={(e) => handleFilterChange(setFilterStatus, e.target.value)}
                 className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="all">All Status</option>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive</option>
-                <option value="maintenance">Maintenance</option>
+                <option value="ACTIVE">Active</option>
+                <option value="TERMINATED">Terminated</option>
+                <option value="FOR RENEWAL">For Renewal</option>
               </select>
             </div>
           </div>
@@ -170,10 +211,10 @@ const WifiList = () => {
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-xl font-semibold text-gray-900">Free WiFi Sites</h2>
             <p className="text-sm text-gray-500 mt-1">
-              Showing {filteredData.length} of {wifiData.length} sites
+              Showing {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredData.length)} of {filteredData.length} sites
             </p>
           </div>
-          
+
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -188,15 +229,12 @@ const WifiList = () => {
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Usage
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Last Updated
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredData.map((site) => (
+                {currentItems.map((site) => (
                   <tr key={site.id} className="hover:bg-gray-50 transition-colors duration-150">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
@@ -210,21 +248,15 @@ const WifiList = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">IP: {site.ipAddress}</div>
-                      <div className="text-sm text-gray-500">{site.bandwidth} • {site.provider}</div>
+                      <div className="text-sm text-gray-500">{site.bandwidth}</div>
+                      <div className="text-sm text-gray-500">{site.provider}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        {getSignalIcon(site.signalStrength)}
-                        <span className={`ml-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(site.status)}`}>
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(site.status)}`}>
                           {site.status}
                         </span>
                       </div>
-                      <div className="text-xs text-gray-500 mt-1">{site.signalStrength} Signal</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{site.connectedUsers} users</div>
-                      <div className="text-xs text-gray-500">Connected</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center text-sm text-gray-500">
@@ -243,11 +275,42 @@ const WifiList = () => {
               <Wifi className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-2 text-sm font-medium text-gray-900">No WiFi sites found</h3>
               <p className="mt-1 text-sm text-gray-500">
-                {searchTerm || filterStatus !== 'all' 
-                  ? 'Try adjusting your search or filter criteria.' 
+                {searchTerm || filterStatus !== 'all'
+                  ? 'Try adjusting your search or filter criteria.'
                   : 'No WiFi sites have been configured yet.'}
               </p>
             </div>
+          )}
+
+          {/* For Pagination Controls */}
+          {totalPages > 1 && (
+            <nav
+              className="flex items-center justify-between px-4 py-3 bg-white border-t border-gray-200 sm:px-6"
+              aria-label="Pagination"
+            >
+
+              <div className="flex-1 flex items-center justify-between">
+                <div className="relative z-0 inline-flex shadow-sm rounded-md -space-x-px">
+                  <button
+                    onClick={() => paginate(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span className="sr-only">Previous</span>
+                    <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+                  </button>
+                  {renderPageNumbers()}
+                  <button
+                    onClick={() => paginate(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span className="sr-only">Next</span>
+                    <ChevronRight className="h-5 w-5" aria-hidden="true" />
+                  </button>
+                </div>
+              </div>
+            </nav>
           )}
         </div>
       </div>
