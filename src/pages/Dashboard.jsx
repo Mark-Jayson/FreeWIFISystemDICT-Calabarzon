@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import Header from '../components/dashboard/Header';
 import FreeWifiStatCard from '../components/dashboard/FreeWifiStatCard';
 import DigitizationCard from '../components/dashboard/DigitizationCard';
-import KeyMetricCard from '../components/dashboard/KeyMetricCard';
+// import KeyMetricCard from '../components/dashboard/KeyMetricCard';
 import LocationProvincesCard from '../components/dashboard/LocationProvincesCard';
-import WifiTechnologyBar from '../components/dashboard/WifiTechnologyBar';
+// import WifiTechnologyBar from '../components/dashboard/WifiTechnologyBar';
 import LocationTypeGrid from '../components/dashboard/LocationTypeGrid';
 import TopLGUListCard from '../components/dashboard/TopLGUListCard';
 import ExpiringContractsTable from '../components/dashboard/ExpiringContractsTable';
@@ -90,7 +90,7 @@ const Dashboard = () => {
   return (
     <div className="flex-1 bg-blue-50 overflow-y-auto">
       <Header
-        region="Region IV – A Calabarzon"
+        region="Region IV – A Calabarzon"
         onProvinceSelect={handleProvinceSelect}
         selectedProvince={selectedProvince}
       />
@@ -122,14 +122,15 @@ const DashboardContent = ({
   return (
     <div className="px-6 pb-6">
       <div className="grid grid-cols-3 gap-4">
-        {/* ----------  COLUMN 1  ---------- */}
+        {/* ----------  COLUMN 1  ---------- */}
         <div className="flex flex-col gap-4">
           <LocationProvincesCard
             locationCount={currentData.locationCount}
             trendValue={currentData.trendValue}
             provincesData={currentData.provincesData}
           />
-          <WifiTechnologyBar data={currentData.wifiTechData} />
+          {/* COMMENTED OUT - WiFi Technology Bar */}
+          {/* <WifiTechnologyBar data={currentData.wifiTechData} /> */}
           <LocationTypeGrid
             title={
               selectedProvince === 'all'
@@ -145,7 +146,7 @@ const DashboardContent = ({
           />
         </div>
 
-        {/* ----------  COLUMN 2  ---------- */}
+        {/* ----------  COLUMN 2  ---------- */}
         <div className="flex flex-col gap-4">
           <FreeWifiStatCard
             title="Total No. of FreeWiFi Sites"
@@ -157,10 +158,11 @@ const DashboardContent = ({
             loading={wifiStats.loading}
             error={wifiStats.error}
           />
-          <KeyMetricCard
+          {/* COMMENTED OUT - Key Metric Card (GIDA/ELCAC) */}
+          {/* <KeyMetricCard
             gidaCount={currentData.gidaCount}
             elcacCount={currentData.elcacCount}
-          />
+          /> */}
           <DigitizationCard
             percentage={currentData.digitization.percentage}
             totalCount={currentData.digitization.totalCount}
@@ -173,7 +175,7 @@ const DashboardContent = ({
           />
         </div>
 
-        {/* ----------  COLUMN 3  ---------- */}
+        {/* ----------  COLUMN 3  ---------- */}
         <div className="flex flex-col gap-4">
           <div className="bg-white rounded-lg shadow p-4">
             <ExpiringContractsTable contracts={expiringContracts} />
@@ -186,7 +188,6 @@ const DashboardContent = ({
               highlightYear="2023"
               noDateCount={noDateCount}
             />
-
 
             {/* single line INSIDE the card, below the chart */}
             <div className="mt-4 text-center text-sm text-gray-700">
