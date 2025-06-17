@@ -44,14 +44,14 @@ const WifiList = () => {
     fetchWifiSites();
   }, []);
 
-  // For Filter and Search Logic
+ // Filter and search logic
   const filteredData = wifiData.filter(item => {
-    const siteNameSafe = item.siteName ? String(item.siteName).toLowerCase() : '';
-    const locationSafe = item.location ? String(item.location).toLowerCase() : '';
-    const matchesSearch = siteNameSafe.includes(searchTerm.toLowerCase()) ||
-                          locationSafe.includes(searchTerm.toLowerCase());
-    const itemStatusSafe = item.status ? String(item.status).toLowerCase() : '';
-    const matchesFilter = filterStatus === 'all' || itemStatusSafe === filterStatus.toLowerCase();
+    const siteNameMatch = item.siteName?.toLowerCase().includes(searchTerm.toLowerCase());
+    const locationMatch = item.location?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = siteNameMatch || locationMatch;
+    // --- IMPORTANT FIX HERE: Added .trim() for robust string comparison ---
+    const itemStatus = item.status?.toLowerCase().trim();
+    const matchesFilter = filterStatus === 'all' || itemStatus === filterStatus.toLowerCase().trim();
     return matchesSearch && matchesFilter;
   });
 
@@ -63,7 +63,13 @@ const WifiList = () => {
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
-  // Function to render page numbers with ellipsis for up to 9 numbers
+  // Unified handler for search and filter changes to reset pagination
+  const handleFilterChange = (setter, value) => {
+    setter(value);
+    setCurrentPage(1); // Reset to first page whenever search or filter changes
+  };
+
+  // Function to render page numbers with ellipsis
   const renderPageNumbers = () => {
     const pageNumbers = [];
     const maxVisiblePages = 9; // Max number of page buttons to show
@@ -72,37 +78,35 @@ const WifiList = () => {
         pageNumbers.push(i);
       }
     } else {
+    
+      const pagesToShowBeforeAndAfterCurrent = Math.floor((maxVisiblePages - 1) / 2);
+      let startPage = Math.max(1, currentPage - pagesToShowBeforeAndAfterCurrent);
+      let endPage = Math.min(totalPages, currentPage + pagesToShowBeforeAndAfterCurrent);
+      // Adjust start/end to ensure maxVisiblePages are shown if totalPages allows
+      if (endPage - startPage + 1 < maxVisiblePages) {
+        if (startPage === 1) { // Pinned to start, expand end
+          endPage = Math.min(totalPages, maxVisiblePages);
+        } else if (endPage === totalPages) { // Pinned to end, expand start
+          startPage = Math.max(1, totalPages - maxVisiblePages + 1);
+        }
+      }
       
-      let displayStart;
-      let displayEnd;
-      const halfVisible = Math.floor(maxVisiblePages / 2);
-      if (currentPage <= halfVisible + 1) {
-        // Current page is near the beginning
-        displayStart = 1;
-        displayEnd = maxVisiblePages - 2; e
-      } else if (currentPage >= totalPages - halfVisible) {
-        // Current page is near the end
-        displayStart = totalPages - (maxVisiblePages - 2); 
-        displayEnd = totalPages;
 
-      } else {
-        // Current page is in the middle
-        displayStart = currentPage - halfVisible + 1; 
-        displayEnd = currentPage + halfVisible - 1;
+      // Always show first page if not already in range
+      if (startPage > 1) {
+        pageNumbers.push(1);
+        if (startPage > 2) pageNumbers.push('...'); // Add ellipsis if gap after 1st page
       }
 
-      if (displayStart > 1) {
-          pageNumbers.push(1);
-          if (displayStart > 2) pageNumbers.push('...');
+      // Add pages within the calculated range
+      for (let i = startPage; i <= endPage; i++) {
+        pageNumbers.push(i);
       }
-      for (let i = displayStart; i <= displayEnd; i++) {
-        if (i !== 1 && i !== totalPages) { 
-            pageNumbers.push(i);
-          }
-      }
-      if (displayEnd < totalPages) {
-          if (displayEnd < totalPages - 1) pageNumbers.push('...');
-          pageNumbers.push(totalPages);
+
+      // Always show last page if not already in range
+      if (endPage < totalPages) {
+        if (endPage < totalPages - 1) pageNumbers.push('...'); // Add ellipsis if gap before last page
+        pageNumbers.push(totalPages);
       }
     }
     return pageNumbers.map((number, index) =>
@@ -182,10 +186,7 @@ const WifiList = () => {
                 type="text"
                 placeholder="Search by site name or location..."
                 value={searchTerm}
-                onChange={(e) => {
-                  setSearchTerm(e.target.value);
-                  setCurrentPage(1);
-                }}
+                onChange={(e) => handleFilterChange(setSearchTerm, e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
@@ -193,10 +194,7 @@ const WifiList = () => {
               <Filter className="w-5 h-5 text-gray-400" />
               <select
                 value={filterStatus}
-                onChange={(e) => {
-                  setFilterStatus(e.target.value);
-                  setCurrentPage(1);
-                }}
+                onChange={(e) => handleFilterChange(setFilterStatus, e.target.value)}
                 className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="all">All Status</option>
