@@ -3,7 +3,7 @@ import LocationInfoPanel from "./LocationInfoPanel";
 import congressionalDistricts from "../../data/congressional-district.json";
 import governorAndMayors from "../../data/govrmayr.json";
 
-const CityInfoPanel = ({ cityData, onBack, onLocationClick }) => {
+const CityInfoPanel = ({ cityData, onBack, onLocationClick }) => { // Destructure onLocationClick
   const [selectedLocation, setSelectedLocation] = useState(null);
   const [mayor, setMayor] = useState('N/A');
 
@@ -106,6 +106,8 @@ const CityInfoPanel = ({ cityData, onBack, onLocationClick }) => {
   } = cityData || {};
 
 useEffect(() => {
+
+  console.log("CityInfoPanel.jsx CityData Nig:", cityData);
   // Find the province in the governorAndMayors data
   const provinceData = governorAndMayors[provinceName];
 
@@ -133,9 +135,11 @@ useEffect(() => {
 }, [name, provinceName]);
 
 
-const handleLocationClick = (location) => {
-  setSelectedLocation(location);
-};
+ const handleLocationClick = (location) => {
+    // Instead of just setting selectedLocation locally, call the passed prop
+    onLocationClick(location);
+    console.log("Selected location:", location);
+  };
 
 const handleBackToCity = () => {
   setSelectedLocation(null);
@@ -170,7 +174,7 @@ const handleBackToCity = () => {
                 <div className="text-sm font-medium">{mayor}</div>
               </div>
             </div>
-          </div>
+          </div> 
         </div>
         
         <div className="flex-1 overflow-y-auto custom-scrollbar p-4 pt-3">
@@ -226,33 +230,33 @@ const handleBackToCity = () => {
             </div>
           </div>
           
-          <div className="mb-4 border-t border-gray-200 pt-3">
-            <div className="text-sm text-gray-500 mb-3">Some locations with Free WiFi Sites</div>
-            
-            {freeWifiLocations.map((location, index) => (
-              <div 
-                key={index} 
-                className="border border-gray-200 rounded-lg p-3 mb-3 cursor-pointer hover:shadow-md transition-all duration-200"
-                onClick={() => handleLocationClick(location)}
-              >
-                <div className="text-xs text-gray-500">Site Location</div>
-                <div className="text-sm font-medium mb-2">{location.name}</div>
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center">
-                    <div className="bg-orange-500 rounded-full p-2 mr-2">
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                      </svg>
-                    </div>
-                    <div className="text-xs text-gray-500">{location.sites} AP Sites</div>
+         <div className="mb-4 border-t border-gray-200 pt-3">
+          <div className="text-sm text-gray-500 mb-3">Some locations with Free WiFi Sites</div>
+
+          {freeWifiLocations.map((location, index) => (
+            <div
+              key={index}
+              className="border border-gray-200 rounded-lg p-3 mb-3 cursor-pointer hover:shadow-md transition-all duration-200"
+              onClick={() => handleLocationClick(location)} // This will now call handleLocationMarkerClick in MainDashboard
+            >
+              <div className="text-xs text-gray-500">Site Location</div>
+              <div className="text-sm font-medium mb-2">{location.location_name}</div>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center">
+                  <div className="bg-orange-500 rounded-full p-2 mr-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
                   </div>
+                  <div className="text-xs text-gray-500">{location.sites} AP Sites</div>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
+      </div>
         
-        <style jsx>{`
+        <style>{`
           .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
           }
@@ -270,7 +274,7 @@ const handleBackToCity = () => {
         `}</style>
       </div>
       
-      {selectedLocation && (
+       {selectedLocation && (
         <LocationInfoPanel locationData={selectedLocation} onBack={handleBackToCity} />
       )}
     </>

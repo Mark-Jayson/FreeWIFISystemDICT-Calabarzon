@@ -3,7 +3,7 @@ const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
 const cors = require('cors');
 require('dotenv').config();
-
+const axios = require('axios');
 const app = express();
 
 // Middleware
@@ -104,8 +104,7 @@ app.post('/api/login', async (req, res) => {
         console.error('Error during login:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
-}
-);
+});
 
 async function createTablesIfNotExist() {
     const createTablesQuery = `
@@ -196,7 +195,7 @@ app.get('/api/location/search', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
-
+ 
 // Get location by ID
 app.get('/api/locations/:id', async (req, res) => {
     try {
@@ -309,7 +308,7 @@ app.post('/api/location', async (req, res) => {
             $12, $13, $14, $15
         ) RETURNING site_id
         `;
-
+ 
         const siteValues = [
             locId,
             sideCode,
@@ -400,8 +399,162 @@ app.get('/api/map-pins', async (req, res) => {
     }
 });
 
-app.get('/api/location-with-sites/:site_id', async (req, res) => {
-    const { site_id } = req.params;
+app.get('/api/getLocationsOfProvince/:locality', async (req, res) => {
+  const { locality } = req.params;
+
+  try {
+    const result = await pool.query(`
+      SELECT
+        l.*
+      FROM
+        public.location l
+      WHERE
+        l.locality = $1
+    `, [locality]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'No locations found for the specified locality.' });
+    }
+
+    res.status(200).json(result.rows);
+
+  } catch (error) {
+    console.error('Error fetching locations by locality:', error);
+    res.status(500).json({ error: 'Internal server error while fetching locations.' });
+  }
+});
+
+app.get('/api/getLocationsOfProvince/:locality', async (req, res) => {
+  const { locality } = req.params;
+
+  try {
+    const result = await pool.query(`
+      SELECT
+        l.*
+      FROM
+        public.site s
+      JOIN
+        public.location l ON s.location_id = l.loc_id
+      WHERE
+        l.locality = $1
+    `, [locality]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'No locations found for the specified locality.' });
+    }
+
+    res.status(200).json(result.rows);
+
+  } catch (error) {
+    console.error('Error fetching locations by locality:', error);
+    res.status(500).json({ error: 'Internal server error while fetching locations.' });
+  }
+});
+
+// NEW ENDPOINT: Get the total number of sites for a given locality
+app.get('/api/sitesByLocality/:locality', async (req, res) => {
+    const { locality } = req.params; // Extract locality from URL parameters
+
+    try {
+        // SQL query to select all site rows associated with the given locality
+        // It joins 'public.Site' and 'public.Location' tables on their respective IDs
+        // and filters by the 'locality' column from 'public.Location'.
+        const sitesResult = await pool.query(`
+            SELECT
+                s.site_id,          
+                s.site_name,       
+                s.location_id,       
+                l.locality,         
+                l.province           
+            FROM
+                public.site s
+            JOIN
+                public.Location l ON s.location_id = l.loc_id
+            WHERE
+                l.locality = $1;
+        `, [locality]);
+
+        const sites = sitesResult.rows; // Array of site objects
+
+        // The total number of sites is simply the count of rows returned by the query
+        const totalSitesCount = sites.length;
+
+
+res.status(200).json({ sites, totalSitesCount: parseInt(totalSitesCount, 10) });
+
+        // Send a successful JSON response with the sites data and their total count
+            // res.status(200).json(sitesResult.rows);
+    } catch (error) {
+        console.error(`Error fetching sites for locality "${locality}":`, error);
+        // Send an error response in case of any server-side issues
+        res.status(500).json({ error: 'Internal server error while fetching sites by locality.' });
+    }
+});
+// ////////////////////////////////
+// app.get('/api/getTotalSitesByLocality/:locality', async (req, res) => {''
+
+//   const { locality } = req.params;
+
+
+
+//   try {
+
+//     // Query to count the number of distinct locations that belong to the given locality
+
+//     // and are also associated with an entry in the 'public.site' table.
+
+//     // We use COUNT(DISTINCT l.loc_id) to ensure each unique location is counted once,
+
+//     // even if it might be referenced multiple times in the 'site' table (though less common).
+
+//     const result = await pool.query(`
+
+//       SELECT
+
+//         COUNT(DISTINCT l.loc_id) AS total_sites_count
+
+//       FROM
+
+//         public.location l
+
+//       JOIN
+
+//         public.site s ON l.loc_id = s.location_id
+
+//       WHERE
+
+//         l.locality = $1
+
+//     `, [locality]);
+
+
+
+//     // The result will always have at least one row, even if the count is 0.
+
+//     const totalSitesCount = result.rows[0].total_sites_count;
+
+
+
+//     // Send the count as a JSON response
+
+//     res.status(200).json({ locality, totalSitesCount: parseInt(totalSitesCount, 10) });
+
+
+
+//   } catch (error) {
+
+//     console.error('Error counting sites by locality:', error);
+
+//     res.status(500).json({ error: 'Internal server error while fetching site count.' });
+
+//   }
+
+// });
+
+
+/////////////////////////////////
+app.get('/api/location-with-sites/:location_id', async (req, res) => {
+    const { location_id } = req.params;
 
     try {
         const locationResult = await pool.query(`
@@ -412,7 +565,7 @@ app.get('/api/location-with-sites/:site_id', async (req, res) => {
       FROM public.site s
       JOIN public.location l ON s.location_id = l.loc_id
       WHERE l.loc_id = $1
-    `, [site_id]);
+    `, [location_id]);
 
         if (locationResult.rows.length === 0) {
             return res.status(404).json({ error: 'Location not found for the given site ID' });
@@ -429,9 +582,7 @@ app.get('/api/location-with-sites/:site_id', async (req, res) => {
   s.site_type AS technology
 FROM public.site s
 WHERE s.location_id = $1;
-
- 
-    `, [site_id]);
+ `, [location_id]);
 
         res.status(200).json({
             ...locationData,
@@ -443,6 +594,10 @@ WHERE s.location_id = $1;
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
+
+
+
 
 
 app.get('/api/site/:id', async (req, res) => {
@@ -616,6 +771,120 @@ app.get('/api/yearly-activations', async (req, res) => {
   }
 });
 
+
+// Haversine distance function (calculates distance in km)
+function haversineDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Radius of Earth in kilometers
+    const dLat = (lat2 - lat1) * Math.PI / 180;
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    const distance = R * c; // Distance in km
+    return distance;
+} 
+
+app.post('/api/update-location-coordinates', async (req, res) => {
+    const MAPBOX_ACCESS_TOKEN = process.env.MAPBOX_ACCESS_TOKEN;
+    if (!MAPBOX_ACCESS_TOKEN) {
+        return res.status(500).json({ error: 'Mapbox Access Token not configured in environment variables.' });
+    }
+
+    const allowedProvinces = [
+        'Laguna', 'Cavite', 'Batangas', 'Rizal', 'Quezon'
+    ].map(p => p.toLowerCase()); // Convert to lowercase for case-insensitive comparison
+
+    let updatedCount = 0;
+    let newCoordinatesAddedCount = 0;
+    let errors = [];
+    let outsideProvinceCount = 0;
+    let noSuitableFeatureFoundCount = 0; // New counter
+
+    try {
+        // Fetch all locations
+        const locationsResult = await pool.query(
+            'SELECT loc_id, location_name, locality, province, latitude, longitude FROM public.location'
+        );
+        const locations = locationsResult.rows;
+
+        for (const location of locations) {
+            const { loc_id, location_name, locality, province, latitude, longitude } = location;
+
+            // Construct search query for Mapbox
+            const searchQuery = `${location_name}, ${locality || ''}, ${province || ''}`.trim();
+            if (!searchQuery) {
+                errors.push(`Skipping loc_id ${loc_id}: Insufficient information for geocoding.`);
+                continue;
+            }
+
+            try {
+                // Call Mapbox Geocoding API
+                const mapboxUrl = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?access_token=${MAPBOX_ACCESS_TOKEN}`;
+                const mapboxResponse = await axios.get(mapboxUrl);
+
+                let suitableFeature = null;
+
+                if (mapboxResponse.data.features && mapboxResponse.data.features.length > 0) {
+                    // Iterate through Mapbox results to find one in an allowed province
+                    for (const feature of mapboxResponse.data.features) {
+                        const context = feature.context || [];
+                        const mapboxProvince = context.find(c => c.id.startsWith('region.'))?.text;
+
+                        if (mapboxProvince && allowedProvinces.includes(mapboxProvince.toLowerCase())) {
+                            suitableFeature = feature;
+                            break; // Found a suitable feature, stop iterating
+                        }
+                    }
+
+                    if (suitableFeature) {
+                        const [newLon, newLat] = suitableFeature.center; // Mapbox returns [longitude, latitude]
+                        let shouldUpdate = false;
+
+                        if (latitude === null || longitude === null) {
+                            // If coordinates are blank, just add them
+                            shouldUpdate = true;
+                            newCoordinatesAddedCount++;
+                        } 
+
+                        if (shouldUpdate) {
+                            await pool.query(
+                                'UPDATE public.location SET latitude = $1, longitude = $2 WHERE loc_id = $3',
+                                [newLat, newLon, loc_id]
+                            );
+                            console.log(`Updated loc_id ${loc_id}: New coordinates (${newLat}, ${newLon}) from suitable Mapbox feature.`);
+                        } else {
+                            console.log(`Loc_id ${loc_id}: Coordinates within 5km, no update needed.`);
+                        }
+                    } else {
+                        console.log(`No suitable Mapbox result found within allowed provinces for loc_id ${loc_id}: ${searchQuery}`);
+                        noSuitableFeatureFoundCount++;
+                        errors.push(`No suitable Mapbox result found within allowed provinces for loc_id ${loc_id}: ${searchQuery}`);
+                    }
+                } else {
+                    errors.push(`No Mapbox results for loc_id ${loc_id}: ${searchQuery}`);
+                }
+            } catch (mapboxError) {
+                console.error(`Error geocoding loc_id ${loc_id} (${searchQuery}):`, mapboxError.message);
+                errors.push(`Mapbox API error for loc_id ${loc_id}: ${mapboxError.message}`);
+            }
+        }
+
+        res.status(200).json({
+            message: 'Location coordinates update process completed.',
+            updatedCount: updatedCount,
+            newCoordinatesAdded: newCoordinatesAddedCount,
+            outsideProvinceCount: noSuitableFeatureFoundCount, // Renamed to reflect comprehensive skipping
+            errors: errors.length > 0 ? errors : null,
+            totalProcessed: locations.length
+        });
+
+    } catch (error) {
+        console.error('Error in /api/update-location-coordinates:', error);
+        res.status(500).json({ error: 'Internal server error during coordinate update process.' });
+    }
+});
 
 // Start server
 const PORT = process.env.PORT || 5000;
