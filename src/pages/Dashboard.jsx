@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../components/dashboard/Header';
 import FreeWifiStatCard from '../components/dashboard/FreeWifiStatCard';
+import SitesStatusBar from '../components/dashboard/SitesStatusBar';
 import DigitizationCard from '../components/dashboard/DigitizationCard';
 import KeyMetricCard from '../components/dashboard/KeyMetricCard';
 import LocationProvincesCard from '../components/dashboard/LocationProvincesCard';
@@ -9,6 +10,10 @@ import LocationTypeGrid from '../components/dashboard/LocationTypeGrid';
 import TopLGUListCard from '../components/dashboard/TopLGUListCard';
 import ExpiringContractsTable from '../components/dashboard/ExpiringContractsTable';
 import YearlyActivationChart from '../components/dashboard/YearlyActivationChart';
+// Import the new components
+import RecentlyAddedSitesCard from '../components/dashboard/RecentlyAddedSitesCard';
+import RecentlyTerminatedSitesCard from '../components/dashboard/RecentlyTerminatedSitesCard';
+import RecentActivitySummaryCard from '../components/dashboard/RecentActivitySummaryCard';
 
 const Dashboard = () => {
   const [selectedProvince, setSelectedProvince] = useState('all');
@@ -17,6 +22,12 @@ const Dashboard = () => {
   const [noDateCount, setNoDateCount] = useState(0);
   const [siteTypeData, setSiteTypeData] = useState([]);
   const [topLGUs, setTopLGUs] = useState([]);
+  
+  // New state for recent sites
+  const [recentlyAddedSites, setRecentlyAddedSites] = useState([]);
+  const [recentlyTerminatedSites, setRecentlyTerminatedSites] = useState([]);
+  const [recentSitesLoading, setRecentSitesLoading] = useState(true);
+  
   const [locationDistribution, setLocationDistribution] = useState({
     locationCount: 0,
     provincesData: [],
@@ -39,6 +50,14 @@ const Dashboard = () => {
     error: null,
   });
 
+  // Add digitization stats state
+  const [digitizationStats, setDigitizationStats] = useState({
+    percentage: 0,
+    totalCount: 0,
+    activeCount: 0,
+    description: "WiFi Location Coverage in Calabarzon"
+  });
+
   const handleProvinceSelect = (provinceId) => setSelectedProvince(provinceId);
 
   const fetchWifiStats = async (province = 'all') => {
@@ -52,9 +71,54 @@ const Dashboard = () => {
       if (!res.ok) throw new Error(res.status);
       const data = await res.json();
       setWifiStats({ ...data, loading: false, error: null });
+      
+      // Update digitization stats based on wifi stats
+      setDigitizationStats({
+        percentage: data.activePercentage || 0,
+        totalCount: data.totalSites || 0,
+        activeCount: data.activeSites || 0,
+        description: province === 'all' 
+          ? "WiFi Location Coverage in Calabarzon"
+          : `WiFi Location Coverage in ${province}`
+      });
     } catch (err) {
       console.error('WiFi‑stats error:', err);
       setWifiStats((p) => ({ ...p, loading: false, error: 'Fetch failed' }));
+    }
+  };
+
+  // New function to fetch recently added sites
+  const fetchRecentlyAddedSites = async () => {
+    try {
+      setRecentSitesLoading(true);
+      const url = selectedProvince === 'all' 
+        ? 'http://localhost:5000/api/recently-added-sites'
+        : `http://localhost:5000/api/recently-added-sites?province=${selectedProvince}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setRecentlyAddedSites(data);
+    } catch (err) {
+      console.error('Recently added sites error:', err);
+      setRecentlyAddedSites([]);
+    }
+  };
+
+  // New function to fetch recently terminated sites
+  const fetchRecentlyTerminatedSites = async () => {
+    try {
+      const url = selectedProvince === 'all' 
+        ? 'http://localhost:5000/api/recently-terminated-sites'
+        : `http://localhost:5000/api/recently-terminated-sites?province=${selectedProvince}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setRecentlyTerminatedSites(data);
+    } catch (err) {
+      console.error('Recently terminated sites error:', err);
+      setRecentlyTerminatedSites([]);
+    } finally {
+      setRecentSitesLoading(false);
     }
   };
 
@@ -163,17 +227,30 @@ const Dashboard = () => {
     fetchTopLGUs();
     fetchSiteTypes();
     fetchLocationDistribution();
+    // Fetch recent sites data
+    fetchRecentlyAddedSites();
+    fetchRecentlyTerminatedSites();
   }, [selectedProvince]);
 
   return (
     <div className="flex-1 bg-blue-50 overflow-y-auto">
       <Header
-        region="Region IV – A Calabarzon"
+        region="Region IV – A Calabarzon"
         onProvinceSelect={handleProvinceSelect}
         selectedProvince={selectedProvince}
       />
       <div className="px-6 pb-6">
-        <div className="grid grid-cols-3 gap-4">
+        {/* Recent Activity Summary Row */}
+        <div className="mb-6">
+          <RecentActivitySummaryCard
+            recentlyAdded={recentlyAddedSites}
+            recentlyTerminated={recentlyTerminatedSites}
+            loading={recentSitesLoading}
+          />
+        </div>
+
+        <div className="grid grid-cols-3 gap-6">
+          {/* Left Column - Location & Infrastructure */}
           <div className="flex flex-col gap-4">
             <LocationProvincesCard
               locationCount={locationDistribution.locationCount}
@@ -191,6 +268,8 @@ const Dashboard = () => {
               data={siteTypeData}
             />
           </div>
+
+          {/* Middle Column - Stats & Metrics */}
           <div className="flex flex-col gap-4">
             <FreeWifiStatCard
               title="Total No. of FreeWiFi Sites"
@@ -204,23 +283,40 @@ const Dashboard = () => {
               loading={wifiStats.loading}
               error={wifiStats.error}
             />
+
             <KeyMetricCard gidaCount={0} elcacCount={0} />
+            
             <DigitizationCard
-              percentage={0}
-              totalCount={0}
-              activeCount={0}
-              description="Digitization metrics pending"
+              percentage={digitizationStats.percentage}
+              totalCount={digitizationStats.totalCount}
+              activeCount={digitizationStats.activeCount}
+              description={digitizationStats.description}
             />
+            
             <TopLGUListCard
               title="Top LGU per Province with Most Free WiFi"
               data={topLGUs}
             />
+
+            {/* Recent Sites moved to middle column */}
+            <RecentlyAddedSitesCard
+              data={recentlyAddedSites}
+              loading={recentSitesLoading}
+            />
+            
+            <RecentlyTerminatedSitesCard
+              data={recentlyTerminatedSites}
+              loading={recentSitesLoading}
+            />
           </div>
+
+          {/* Right Column - Charts & Tables */}
           <div className="flex flex-col gap-4">
             <div className="bg-white rounded-lg shadow p-4">
               <ExpiringContractsTable contracts={expiringContracts} />
             </div>
-            <div className="bg-white rounded-lg shadow p-4 h-full">
+            
+            <div className="bg-white rounded-lg shadow p-4 flex-1">
               <YearlyActivationChart
                 title="No. of WiFi Activated per Year of Activation"
                 data={yearlyActivationData}
