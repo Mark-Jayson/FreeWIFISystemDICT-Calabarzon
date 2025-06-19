@@ -43,7 +43,8 @@ const YearlyActivationChart = ({ title, data, highlightYear, noDateCount, darkMo
 
   return (
     <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} 
-      rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg h-full flex flex-col`}>
+      rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg`}
+      style={{ height: '400px', maxHeight: '400px' }}>
       
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
@@ -75,8 +76,8 @@ const YearlyActivationChart = ({ title, data, highlightYear, noDateCount, darkMo
         </div>
       </div>
 
-      {/* Chart container */}
-      <div className="flex-1 min-h-0" style={{ minHeight: '200px' }}>
+      {/* Chart container with fixed height */}
+      <div style={{ height: '240px', width: '100%' }}>
         {data.length > 0 ? (
           <ResponsiveContainer width="100%" height="100%">
             <BarChart

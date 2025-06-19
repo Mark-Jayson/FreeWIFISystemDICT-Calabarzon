@@ -17,6 +17,7 @@ import RecentActivitySummaryCard from '../components/dashboard/RecentActivitySum
 
 const Dashboard = () => {
   const [selectedProvince, setSelectedProvince] = useState('all');
+  const [darkMode, setDarkMode] = useState(false); // Add dark mode state
   const [expiringContracts, setExpiringContracts] = useState([]);
   const [yearlyActivationData, setYearlyActivationData] = useState([]);
   const [noDateCount, setNoDateCount] = useState(0);
@@ -59,6 +60,11 @@ const Dashboard = () => {
   });
 
   const handleProvinceSelect = (provinceId) => setSelectedProvince(provinceId);
+  
+  // Add dark mode toggle handler
+  const handleDarkModeToggle = () => {
+    setDarkMode(!darkMode);
+  };
 
   const fetchWifiStats = async (province = 'all') => {
     try {
@@ -233,11 +239,13 @@ const Dashboard = () => {
   }, [selectedProvince]);
 
   return (
-    <div className="flex-1 bg-blue-50 overflow-y-auto">
+    <div className={`flex-1 ${darkMode ? 'bg-gray-900' : 'bg-blue-50'} overflow-y-auto transition-colors duration-200`}>
       <Header
         region="Region IV – A Calabarzon"
         onProvinceSelect={handleProvinceSelect}
         selectedProvince={selectedProvince}
+        darkMode={darkMode}
+        onDarkModeToggle={handleDarkModeToggle}
       />
       <div className="px-6 pb-6">
         {/* Recent Activity Summary Row */}
@@ -312,18 +320,18 @@ const Dashboard = () => {
 
           {/* Right Column - Charts & Tables */}
           <div className="flex flex-col gap-4">
-            <div className="bg-white rounded-lg shadow p-4">
+            <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-4 transition-colors duration-200`}>
               <ExpiringContractsTable contracts={expiringContracts} />
             </div>
             
-            <div className="bg-white rounded-lg shadow p-4 flex-1">
+            <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-4 flex-1 transition-colors duration-200`}>
               <YearlyActivationChart
                 title="No. of WiFi Activated per Year of Activation"
                 data={yearlyActivationData}
                 highlightYear="2023"
                 noDateCount={noDateCount}
               />
-              <div className="mt-4 text-center text-sm text-gray-700">
+              <div className={`mt-4 text-center text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'} transition-colors duration-200`}>
                 <strong>WiFi activated without date:</strong> {noDateCount}
               </div>
             </div>

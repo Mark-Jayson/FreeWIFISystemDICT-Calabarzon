@@ -1,10 +1,7 @@
 import React, { useState } from 'react';
 import { 
   ChevronDown, 
-  Wifi, 
-  Search,
-  Bell,
-  User
+  Wifi
 } from 'lucide-react';
 
 const Header = ({ 
@@ -61,25 +58,13 @@ const Header = ({
           
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2">
-              <button className={`${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'} 
-                p-2 rounded-xl transition-colors duration-200`}>
-                <Search className="w-5 h-5" />
-              </button>
-              <button className={`${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'} 
-                p-2 rounded-xl transition-colors duration-200 relative`}>
-                <Bell className="w-5 h-5" />
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-              </button>
+              {/* Only Dark Mode Toggle Button */}
               <button 
                 onClick={onDarkModeToggle}
                 className={`${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'} 
                   p-2 rounded-xl transition-colors duration-200`}
               >
                 {darkMode ? '☀️' : '🌙'}
-              </button>
-              <button className={`${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'} 
-                p-2 rounded-xl transition-colors duration-200`}>
-                <User className="w-5 h-5" />
               </button>
             </div>
           </div>
