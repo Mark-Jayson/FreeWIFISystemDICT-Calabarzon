@@ -6,7 +6,7 @@
             "districts": [
                 {
                     "district_number": ["I"],
-                    "municipalities": ["Cavite City", "Kawit", "Novelata", "Rosaria"]
+                    "municipalities": ["Cavite City", "Kawit", "Novelata", "Rosario"]
                 },
                 {
                     "district_number": ["II"],
@@ -34,7 +34,7 @@
                 },
                 {
                     "district_number": ["VIII"],
-                    "municipalities": ["Alfonso", "General Emilio Aguinaldo", "Magallanes Cavite", "Maragondon", "Mendez (Mendez - Nuñez", "Naic", "Tagaytay", "Ternate"]
+                    "municipalities": ["Alfonso", "General Emilio Aguinaldo", "Magallanes Cavite", "Maragondon", "Mendez (Mendez - Nuñez)", "Naic", "Tagaytay", "Ternate"]
                 }
             ]
         },
