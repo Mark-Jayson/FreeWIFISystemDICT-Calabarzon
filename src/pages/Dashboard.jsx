@@ -3,9 +3,9 @@ import Header from '../components/dashboard/Header';
 import FreeWifiStatCard from '../components/dashboard/FreeWifiStatCard';
 import SitesStatusBar from '../components/dashboard/SitesStatusBar';
 import DigitizationCard from '../components/dashboard/DigitizationCard';
-import KeyMetricCard from '../components/dashboard/KeyMetricCard';
+//import KeyMetricCard from '../components/dashboard/KeyMetricCard';
 import LocationProvincesCard from '../components/dashboard/LocationProvincesCard';
-import WifiTechnologyBar from '../components/dashboard/WifiTechnologyBar';
+// import WifiTechnologyBar from '../components/dashboard/WifiTechnologyBar'; // COMMENTED OUT
 import LocationTypeGrid from '../components/dashboard/LocationTypeGrid';
 import TopLGUListCard from '../components/dashboard/TopLGUListCard';
 import ExpiringContractsTable from '../components/dashboard/ExpiringContractsTable';
@@ -265,8 +265,8 @@ const Dashboard = () => {
               trendValue={locationDistribution.trendValue}
               provincesData={locationDistribution.provincesData}
             />
-            <WifiTechnologyBar data={[]} />
-            <LocationTypeGrid
+            {/* <WifiTechnologyBar data={[]} /> */}
+             <LocationTypeGrid
               title={
                 selectedProvince === 'all'
                   ? 'Free WiFi Sites location per location types in Calabarzon'
@@ -274,6 +274,16 @@ const Dashboard = () => {
               }
               subtitle={selectedProvince === 'all' ? null : ''}
               data={siteTypeData}
+            />
+             {/* Recent Sites */}
+            <RecentlyAddedSitesCard
+              data={recentlyAddedSites}
+              loading={recentSitesLoading}
+            />
+            
+            <RecentlyTerminatedSitesCard
+              data={recentlyTerminatedSites}
+              loading={recentSitesLoading}
             />
           </div>
 
@@ -292,8 +302,8 @@ const Dashboard = () => {
               error={wifiStats.error}
             />
 
-            <KeyMetricCard gidaCount={0} elcacCount={0} />
-            
+            {/* <KeyMetricCard gidaCount={0} elcacCount={0} /> */}
+
             <DigitizationCard
               percentage={digitizationStats.percentage}
               totalCount={digitizationStats.totalCount}
@@ -306,16 +316,7 @@ const Dashboard = () => {
               data={topLGUs}
             />
 
-            {/* Recent Sites moved to middle column */}
-            <RecentlyAddedSitesCard
-              data={recentlyAddedSites}
-              loading={recentSitesLoading}
-            />
-            
-            <RecentlyTerminatedSitesCard
-              data={recentlyTerminatedSites}
-              loading={recentSitesLoading}
-            />
+           
           </div>
 
           {/* Right Column - Charts & Tables */}
@@ -323,15 +324,15 @@ const Dashboard = () => {
             <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-4 transition-colors duration-200`}>
               <ExpiringContractsTable contracts={expiringContracts} />
             </div>
-            
-            <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-4 flex-1 transition-colors duration-200`}>
+
+            <div className={`${darkMode ? 'bg-gray-800' : 'bg-white'} rounded-lg shadow p-4 transition-colors duration-200`}>
               <YearlyActivationChart
                 title="No. of WiFi Activated per Year of Activation"
                 data={yearlyActivationData}
                 highlightYear="2023"
                 noDateCount={noDateCount}
               />
-              <div className={`mt-4 text-center text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'} transition-colors duration-200`}>
+              <div className={`mt-4 text-left text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'} transition-colors duration-200`}>
                 <strong>WiFi activated without date:</strong> {noDateCount}
               </div>
             </div>
