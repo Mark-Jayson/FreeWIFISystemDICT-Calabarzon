@@ -14,6 +14,9 @@ import YearlyActivationChart from '../components/dashboard/YearlyActivationChart
 import RecentlyAddedSitesCard from '../components/dashboard/RecentlyAddedSitesCard';
 import RecentlyTerminatedSitesCard from '../components/dashboard/RecentlyTerminatedSitesCard';
 import RecentActivitySummaryCard from '../components/dashboard/RecentActivitySummaryCard';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+
 
 const Dashboard = () => {
   const [selectedProvince, setSelectedProvince] = useState('all');
@@ -65,6 +68,47 @@ const Dashboard = () => {
     setDarkMode(!darkMode);
   };
 
+  const handleGenerateReport = async () => {
+    try {
+      // Find the main content area of your dashboard to capture
+      const input = document.getElementById('dashboard-content'); // We'll add this ID below
+      if (!input) {
+        console.error('Dashboard content element not found!');
+        alert('Failed to find dashboard content for PDF generation.');
+        return;
+      }
+      const canvas = await html2canvas(input, {
+        scale: 2, // Increase scale for better resolution
+        logging: true, // Enable logging for debugging
+        useCORS: true, // Important if you have images from different origins
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4'); // 'p' for portrait, 'mm' for millimeters, 'a4' size
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+      // Add the first page
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      // Add more pages if content overflows
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      const exportFileDefaultName = `wifi-dashboard-report-${selectedProvince}-${new Date().toISOString().split('T')[0]}.pdf`;
+      pdf.save(exportFileDefaultName);
+    } catch (error) {
+      console.error('Error generating report:', error);
+      alert('Failed to generate report. Please try again.');
+    }
+  }
   const fetchWifiStats = async (province = 'all') => {
     try {
       setWifiStats((prev) => ({ ...prev, loading: true, error: null }));
@@ -262,7 +306,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="px-6 pb-6">
+      <div id="dashboard-content" className="px-6 pb-6">
         {/* Recent Activity Summary Row */}
         <div className="mb-6">
           <RecentActivitySummaryCard
