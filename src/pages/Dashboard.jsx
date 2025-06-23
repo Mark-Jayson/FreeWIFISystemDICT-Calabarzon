@@ -22,12 +22,12 @@ const Dashboard = () => {
   const [noDateCount, setNoDateCount] = useState(0);
   const [siteTypeData, setSiteTypeData] = useState([]);
   const [topLGUs, setTopLGUs] = useState([]);
-  
+
   // New state for recent sites
   const [recentlyAddedSites, setRecentlyAddedSites] = useState([]);
   const [recentlyTerminatedSites, setRecentlyTerminatedSites] = useState([]);
   const [recentSitesLoading, setRecentSitesLoading] = useState(true);
-  
+
   const [locationDistribution, setLocationDistribution] = useState({
     locationCount: 0,
     provincesData: [],
@@ -59,54 +59,10 @@ const Dashboard = () => {
   });
 
   const handleProvinceSelect = (provinceId) => setSelectedProvince(provinceId);
-  
-  // Report generation handler
-  const handleGenerateReport = async () => {
-    try {
-      const reportData = {
-        selectedProvince,
-        wifiStats,
-        locationDistribution,
-        digitizationStats,
-        recentlyAddedSites,
-        recentlyTerminatedSites,
-        expiringContracts,
-        yearlyActivationData,
-        siteTypeData,
-        topLGUs,
-        generatedAt: new Date().toISOString()
-      };
 
-      // You can customize this based on your needs:
-      // Option 1: Download as JSON
-      const dataStr = JSON.stringify(reportData, null, 2);
-      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-      const exportFileDefaultName = `wifi-dashboard-report-${selectedProvince}-${new Date().toISOString().split('T')[0]}.json`;
-      
-      const linkElement = document.createElement('a');
-      linkElement.setAttribute('href', dataUri);
-      linkElement.setAttribute('download', exportFileDefaultName);
-      linkElement.click();
-
-      // Option 2: Send to backend API (uncomment if you have a report endpoint)
-      // const response = await fetch('http://localhost:5000/api/generate-report', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(reportData)
-      // });
-      // if (response.ok) {
-      //   const blob = await response.blob();
-      //   const url = window.URL.createObjectURL(blob);
-      //   const a = document.createElement('a');
-      //   a.href = url;
-      //   a.download = `report-${Date.now()}.pdf`;
-      //   a.click();
-      // }
-
-    } catch (error) {
-      console.error('Error generating report:', error);
-      alert('Failed to generate report. Please try again.');
-    }
+  // Add dark mode toggle handler
+  const handleDarkModeToggle = () => {
+    setDarkMode(!darkMode);
   };
 
   const fetchWifiStats = async (province = 'all') => {
@@ -120,13 +76,13 @@ const Dashboard = () => {
       if (!res.ok) throw new Error(res.status);
       const data = await res.json();
       setWifiStats({ ...data, loading: false, error: null });
-      
+
       // Update digitization stats based on wifi stats
       setDigitizationStats({
         percentage: data.activePercentage || 0,
         totalCount: data.totalSites || 0,
         activeCount: data.activeSites || 0,
-        description: province === 'all' 
+        description: province === 'all'
           ? "WiFi Location Coverage in Calabarzon"
           : `WiFi Location Coverage in ${province}`
       });
@@ -140,12 +96,13 @@ const Dashboard = () => {
   const fetchRecentlyAddedSites = async () => {
     try {
       setRecentSitesLoading(true);
-      const url = selectedProvince === 'all' 
+      const url = selectedProvince === 'all'
         ? 'http://localhost:5000/api/recently-added-sites'
         : `http://localhost:5000/api/recently-added-sites?province=${selectedProvince}`;
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
+      console.log('✅ Dashboard got sites:', data);
       setRecentlyAddedSites(data);
     } catch (err) {
       console.error('Recently added sites error:', err);
@@ -156,7 +113,7 @@ const Dashboard = () => {
   // New function to fetch recently terminated sites
   const fetchRecentlyTerminatedSites = async () => {
     try {
-      const url = selectedProvince === 'all' 
+      const url = selectedProvince === 'all'
         ? 'http://localhost:5000/api/recently-terminated-sites'
         : `http://localhost:5000/api/recently-terminated-sites?province=${selectedProvince}`;
       const res = await fetch(url);
@@ -170,6 +127,7 @@ const Dashboard = () => {
       setRecentSitesLoading(false);
     }
   };
+
 
   const fetchExpiringContracts = async () => {
     try {
@@ -251,10 +209,10 @@ const Dashboard = () => {
         locationCount = count;
         filteredProvinces = count > 0
           ? [{ name: match.name, value: count, color: match.color }, {
-              name: 'Other',
-              value: data.total - count,
-              color: '#f0f0f0',
-            }]
+            name: 'Other',
+            value: data.total - count,
+            color: '#f0f0f0',
+          }]
           : [];
       }
 
@@ -323,7 +281,7 @@ const Dashboard = () => {
               provincesData={locationDistribution.provincesData}
             />
             {/* <WifiTechnologyBar data={[]} /> */}
-             <LocationTypeGrid
+            <LocationTypeGrid
               title={
                 selectedProvince === 'all'
                   ? 'Free WiFi Sites location per location types in Calabarzon'
@@ -332,12 +290,12 @@ const Dashboard = () => {
               subtitle={selectedProvince === 'all' ? null : ''}
               data={siteTypeData}
             />
-             {/* Recent Sites */}
+            {/* Recent Sites */}
             <RecentlyAddedSitesCard
               data={recentlyAddedSites}
               loading={recentSitesLoading}
             />
-            
+
             <RecentlyTerminatedSitesCard
               data={recentlyTerminatedSites}
               loading={recentSitesLoading}
@@ -367,11 +325,12 @@ const Dashboard = () => {
               activeCount={digitizationStats.activeCount}
               description={digitizationStats.description}
             />
-            
+
             <TopLGUListCard
               title="Top LGU per Province with Most Free WiFi"
               data={topLGUs}
             />
+            
           </div>
 
           {/* Right Column - Charts & Tables */}
