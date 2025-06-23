@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { AlertTriangle, Calendar, Clock, MapPin, ChevronDown, ChevronUp, Filter } from 'lucide-react';
 
-const ExpiringContractsTable = ({ contracts, darkMode = false }) => {
+const ExpiringContractsTable = ({ contracts }) => {
   const [sortOrder, setSortOrder] = useState('asc');
   const [showAll, setShowAll] = useState(false);
 
@@ -40,18 +40,17 @@ const ExpiringContractsTable = ({ contracts, darkMode = false }) => {
 
   if (!contracts || contracts.length === 0) {
     return (
-      <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} 
-        rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg`}>
+      <div className="bg-white border-gray-100 rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg">
         <div className="flex items-center justify-between mb-6">
-          <h3 className={`${darkMode ? 'text-white' : 'text-gray-900'} font-semibold`}>
+          <h3 className="text-gray-900 font-semibold">
             Expiring Contracts
           </h3>
-          <Calendar className={`w-5 h-5 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`} />
+          <Calendar className="w-5 h-5 text-gray-600" />
         </div>
         
         <div className="text-center py-8">
-          <Calendar className={`w-12 h-12 ${darkMode ? 'text-gray-600' : 'text-gray-400'} mx-auto mb-3`} />
-          <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm`}>
+          <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-3" />
+          <p className="text-gray-500 text-sm">
             No expiring contracts found
           </p>
         </div>
@@ -65,15 +64,14 @@ const ExpiringContractsTable = ({ contracts, darkMode = false }) => {
   }).length;
 
   return (
-    <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} 
-      rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg`}>
+    <div className="bg-white border-gray-100 rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className={`${darkMode ? 'text-white' : 'text-gray-900'} font-semibold`}>
+          <h3 className="text-gray-900 font-semibold">
             Expiring Contracts
           </h3>
-          <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm`}>
+          <p className="text-gray-600 text-sm">
             Monitor upcoming contract renewals
           </p>
         </div>
@@ -88,8 +86,7 @@ const ExpiringContractsTable = ({ contracts, darkMode = false }) => {
           )}
           <button
             onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-            className={`${darkMode ? 'bg-gray-700 hover:bg-gray-600 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-600'} 
-              p-2 rounded-lg transition-colors duration-200`}
+            className="bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-lg transition-colors duration-200"
             title={`Sort ${sortOrder === 'asc' ? 'newest first' : 'oldest first'}`}
           >
             {sortOrder === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -105,8 +102,7 @@ const ExpiringContractsTable = ({ contracts, darkMode = false }) => {
           return (
             <div
               key={index}
-              className={`${darkMode ? 'bg-gray-700 hover:bg-gray-650' : 'bg-gray-50 hover:bg-gray-100'} 
-                rounded-xl p-4 transition-all duration-200 border-l-4 ${
+              className={`bg-gray-50 hover:bg-gray-100 rounded-xl p-4 transition-all duration-200 border-l-4 ${
                 urgency.level === 'expired' ? 'border-red-500' :
                 urgency.level === 'critical' ? 'border-red-400' :
                 urgency.level === 'warning' ? 'border-amber-400' :
@@ -131,23 +127,23 @@ const ExpiringContractsTable = ({ contracts, darkMode = false }) => {
                     </div>
                     
                     <div className="flex-1 min-w-0">
-                      <h4 className={`${darkMode ? 'text-white' : 'text-gray-900'} font-medium text-sm truncate`}>
+                      <h4 className="text-gray-900 font-medium text-sm truncate">
                         {contract.site_name || contract.site || 'Unknown Site'}
                       </h4>
                       
                       <div className="flex items-center space-x-4 mt-1">
                         {contract.location && (
                           <div className="flex items-center space-x-1">
-                            <MapPin className={`w-3 h-3 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
-                            <span className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-xs`}>
+                            <MapPin className="w-3 h-3 text-gray-500" />
+                            <span className="text-gray-600 text-xs">
                               {contract.location}
                             </span>
                           </div>
                         )}
                         
                         <div className="flex items-center space-x-1">
-                          <Clock className={`w-3 h-3 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`} />
-                          <span className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-xs`}>
+                          <Clock className="w-3 h-3 text-gray-500" />
+                          <span className="text-gray-600 text-xs">
                             Expires: {formatDate(contract.contract_expiry_date || contract.date)}
                           </span>
                         </div>
@@ -183,8 +179,7 @@ const ExpiringContractsTable = ({ contracts, darkMode = false }) => {
         <div className="mt-4 text-center">
           <button
             onClick={() => setShowAll(!showAll)}
-            className={`${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-700'} 
-              text-sm font-medium transition-colors duration-200`}
+            className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors duration-200"
           >
             {showAll ? 'Show Less' : `Show All ${contracts.length} Contracts`}
           </button>
@@ -192,9 +187,9 @@ const ExpiringContractsTable = ({ contracts, darkMode = false }) => {
       )}
 
       {/* Summary */}
-      <div className={`mt-4 pt-4 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+      <div className="mt-4 pt-4 border-t border-gray-200">
         <div className="flex items-center justify-between text-xs">
-          <span className={`${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+          <span className="text-gray-600">
             Total: {contracts.length} contracts
           </span>
           {criticalCount > 0 && (

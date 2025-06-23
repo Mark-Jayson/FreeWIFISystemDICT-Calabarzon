@@ -1,4 +1,4 @@
-// File: components/dashboard/RecentActivitySummaryCard.jsx
+// components/dashboard/RecentActivitySummaryCard.jsx
 import React from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 

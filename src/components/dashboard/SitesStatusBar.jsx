@@ -14,13 +14,11 @@ const SitesStatusBar = ({
   unknownPercentage = 0,
   trendValue = '0%',
   isPositiveTrend = true,
-  loading = false,
-  darkMode = false
+  loading = false
 }) => {
   if (loading) {
     return (
-      <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} 
-        rounded-2xl border p-6 transition-all duration-300`}>
+      <div className="bg-white border-gray-100 rounded-2xl border p-6 transition-all duration-300">
         <div className="animate-pulse">
           <div className="h-4 bg-gray-300 rounded w-32 mb-4"></div>
           <div className="h-6 bg-gray-300 rounded mb-4"></div>
@@ -73,16 +71,15 @@ const SitesStatusBar = ({
   ].filter(item => item.count > 0); // Only show categories with data
 
   return (
-    <div className={`${darkMode ? 'bg-gray-800 border-gray-700 hover:bg-gray-750' : 'bg-white border-gray-100 hover:bg-gray-50'} 
-      rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group`}>
+    <div className="bg-white border-gray-100 hover:bg-gray-50 rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group">
       
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className={`${darkMode ? 'text-white' : 'text-gray-900'} font-semibold text-lg`}>
+          <h3 className="text-gray-900 font-semibold text-lg">
             Sites Status Overview
           </h3>
-          <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm mt-1`}>
+          <p className="text-gray-600 text-sm mt-1">
             Total Sites: {totalSites?.toLocaleString() || 0}
           </p>
         </div>
@@ -100,11 +97,11 @@ const SitesStatusBar = ({
 
       {/* Progress Bar */}
       <div className="mb-6">
-        <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-200'} h-4 rounded-full overflow-hidden flex`}>
+        <div className="bg-gray-200 h-4 rounded-full overflow-hidden flex">
           {statusData.map((item, index) => (
             <div
               key={index}
-              className={`h-full flex items-center justify-center transition-all duration-1000 ease-out`}
+              className="h-full flex items-center justify-center transition-all duration-1000 ease-out"
               style={{ 
                 backgroundColor: item.color,
                 width: `${item.percentage}%`
@@ -125,18 +122,17 @@ const SitesStatusBar = ({
         {statusData.map((item, index) => {
           const Icon = item.icon;
           return (
-            <div key={index} className={`${darkMode ? 'bg-gray-700 hover:bg-gray-650' : 'bg-gray-50 hover:bg-gray-100'} 
-              rounded-xl p-4 transition-all duration-200 cursor-pointer group/item`}>
+            <div key={index} className="bg-gray-50 hover:bg-gray-100 rounded-xl p-4 transition-all duration-200 cursor-pointer group/item">
               <div className="flex items-center justify-between mb-2">
                 <div className={`p-2 rounded-lg ${item.bgColor} group-hover/item:scale-110 transition-transform duration-200`}>
                   <Icon className="w-4 h-4 text-white" />
                 </div>
-                <span className={`${darkMode ? 'text-white' : 'text-gray-900'} text-xl font-bold`}>
+                <span className="text-gray-900 text-xl font-bold">
                   {item.count.toLocaleString()}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} text-sm font-medium`}>
+                <span className="text-gray-700 text-sm font-medium">
                   {item.label}
                 </span>
                 <span className={`${item.textColor} text-sm font-semibold`}>
@@ -149,17 +145,17 @@ const SitesStatusBar = ({
       </div>
 
       {/* Additional Info */}
-      <div className={`${darkMode ? 'bg-gray-700' : 'bg-blue-50'} rounded-xl p-4 mt-4`}>
+      <div className="bg-blue-50 rounded-xl p-4 mt-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className={`${darkMode ? 'text-white' : 'text-blue-900'} font-semibold text-sm`}>
+            <p className="text-blue-900 font-semibold text-sm">
               Active Rate
             </p>
-            <p className={`${darkMode ? 'text-gray-400' : 'text-blue-700'} text-xs`}>
+            <p className="text-blue-700 text-xs">
               {activeCount} of {totalSites} sites operational
             </p>
           </div>
-          <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-blue-900'}`}>
+          <div className="text-2xl font-bold text-blue-900">
             {Math.round(activePercentage)}%
           </div>
         </div>

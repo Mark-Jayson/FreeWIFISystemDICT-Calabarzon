@@ -1,17 +1,16 @@
+// components/dashboard/LocationProvincesCard.jsx
 import React from 'react';
 import { MapPin, TrendingUp, TrendingDown } from 'lucide-react';
 
 const LocationProvincesCard = ({ 
   locationCount, 
   trendValue, 
-  provincesData, 
-  darkMode = false 
+  provincesData 
 }) => {
   const isPositiveTrend = trendValue && trendValue.startsWith('+');
   
   return (
-    <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} 
-      rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg`}>
+    <div className="bg-white border-gray-100 rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg">
       
       {/* Header Section */}
       <div className="flex items-center justify-between mb-6">
@@ -20,10 +19,10 @@ const LocationProvincesCard = ({
             <MapPin className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h3 className={`${darkMode ? 'text-white' : 'text-gray-900'} font-semibold text-lg`}>
+            <h3 className="text-gray-900 font-semibold text-lg">
               Locations Served
             </h3>
-            <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'} text-sm`}>
+            <p className="text-gray-600 text-sm">
               Active WiFi coverage areas
             </p>
           </div>
@@ -32,7 +31,7 @@ const LocationProvincesCard = ({
 
       {/* Main Count */}
       <div className="mb-6">
-        <div className={`${darkMode ? 'text-white' : 'text-gray-900'} text-4xl font-bold mb-2`}>
+        <div className="text-gray-900 text-4xl font-bold mb-2">
           {locationCount ? locationCount.toLocaleString() : '0'}
         </div>
         {trendValue && (
@@ -42,7 +41,7 @@ const LocationProvincesCard = ({
               <TrendingDown className="w-4 h-4 mr-1" />
             }
             <span className="font-medium">{trendValue}</span>
-            <span className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} ml-1`}>vs last month</span>
+            <span className="text-gray-500 ml-1">vs last month</span>
           </div>
         )}
       </div>
@@ -50,7 +49,7 @@ const LocationProvincesCard = ({
       {/* Province Distribution */}
       {provincesData && provincesData.length > 0 && (
         <div>
-          <h4 className={`${darkMode ? 'text-white' : 'text-gray-900'} font-medium mb-4 text-sm`}>
+          <h4 className="text-gray-900 font-medium mb-4 text-sm">
             Distribution by Province
           </h4>
           <div className="space-y-3">
@@ -61,12 +60,12 @@ const LocationProvincesCard = ({
                     className="w-3 h-3 rounded-full" 
                     style={{ backgroundColor: province.color }}
                   />
-                  <span className={`${darkMode ? 'text-gray-300' : 'text-gray-700'} text-sm font-medium`}>
+                  <span className="text-gray-700 text-sm font-medium">
                     {province.name}
                   </span>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-200'} w-20 h-2 rounded-full overflow-hidden`}>
+                  <div className="bg-gray-200 w-20 h-2 rounded-full overflow-hidden">
                     <div 
                       className="h-full rounded-full transition-all duration-1000"
                       style={{ 
@@ -75,7 +74,7 @@ const LocationProvincesCard = ({
                       }}
                     />
                   </div>
-                  <span className={`${darkMode ? 'text-white' : 'text-gray-900'} font-semibold text-sm w-8 text-right`}>
+                  <span className="text-gray-900 font-semibold text-sm w-8 text-right">
                     {province.value}
                   </span>
                 </div>
@@ -87,8 +86,8 @@ const LocationProvincesCard = ({
 
       {/* Empty State */}
       {(!provincesData || provincesData.length === 0) && (
-        <div className={`${darkMode ? 'bg-gray-700' : 'bg-gray-50'} rounded-xl p-4 text-center`}>
-          <p className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} text-sm`}>
+        <div className="bg-gray-50 rounded-xl p-4 text-center">
+          <p className="text-gray-500 text-sm">
             No province data available
           </p>
         </div>
