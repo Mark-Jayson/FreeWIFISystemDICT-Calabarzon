@@ -25,6 +25,7 @@ const Dashboard = () => {
   const [noDateCount, setNoDateCount] = useState(0);
   const [siteTypeData, setSiteTypeData] = useState([]);
   const [topLGUs, setTopLGUs] = useState([]);
+  const [darkMode, setDarkMode] = useState(false); // Added missing darkMode state
 
   // New state for recent sites
   const [recentlyAddedSites, setRecentlyAddedSites] = useState([]);
@@ -62,72 +63,23 @@ const Dashboard = () => {
   });
 
   const handleProvinceSelect = (provinceId) => setSelectedProvince(provinceId);
-<<<<<<< HEAD
-  
-  // Report generation handler
-  const handleGenerateReport = async () => {
-    try {
-      const reportData = {
-        selectedProvince,
-        wifiStats,
-        locationDistribution,
-        digitizationStats,
-        recentlyAddedSites,
-        recentlyTerminatedSites,
-        expiringContracts,
-        yearlyActivationData,
-        siteTypeData,
-        topLGUs,
-        generatedAt: new Date().toISOString()
-      };
-
-      // You can customize this based on your needs:
-      // Option 1: Download as JSON
-      const dataStr = JSON.stringify(reportData, null, 2);
-      const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-      const exportFileDefaultName = `wifi-dashboard-report-${selectedProvince}-${new Date().toISOString().split('T')[0]}.json`;
-      
-      const linkElement = document.createElement('a');
-      linkElement.setAttribute('href', dataUri);
-      linkElement.setAttribute('download', exportFileDefaultName);
-      linkElement.click();
-
-      // Option 2: Send to backend API (uncomment if you have a report endpoint)
-      // const response = await fetch('http://localhost:5000/api/generate-report', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(reportData)
-      // });
-      // if (response.ok) {
-      //   const blob = await response.blob();
-      //   const url = window.URL.createObjectURL(blob);
-      //   const a = document.createElement('a');
-      //   a.href = url;
-      //   a.download = `report-${Date.now()}.pdf`;
-      //   a.click();
-      // }
-
-    } catch (error) {
-      console.error('Error generating report:', error);
-      alert('Failed to generate report. Please try again.');
-    }
-=======
 
   // Add dark mode toggle handler
   const handleDarkModeToggle = () => {
     setDarkMode(!darkMode);
->>>>>>> 22db4a4523526dc0eeac85f498f9681bb9762224
   };
 
+  // Single unified report generation handler
   const handleGenerateReport = async () => {
     try {
       // Find the main content area of your dashboard to capture
-      const input = document.getElementById('dashboard-content'); // We'll add this ID below
+      const input = document.getElementById('dashboard-content');
       if (!input) {
         console.error('Dashboard content element not found!');
         alert('Failed to find dashboard content for PDF generation.');
         return;
       }
+      
       const canvas = await html2canvas(input, {
         scale: 2, // Increase scale for better resolution
         logging: true, // Enable logging for debugging
@@ -141,6 +93,7 @@ const Dashboard = () => {
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       let heightLeft = imgHeight;
       let position = 0;
+      
       // Add the first page
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
@@ -155,11 +108,13 @@ const Dashboard = () => {
 
       const exportFileDefaultName = `wifi-dashboard-report-${selectedProvince}-${new Date().toISOString().split('T')[0]}.pdf`;
       pdf.save(exportFileDefaultName);
+      
     } catch (error) {
       console.error('Error generating report:', error);
       alert('Failed to generate report. Please try again.');
     }
-  }
+  };
+
   const fetchWifiStats = async (province = 'all') => {
     try {
       setWifiStats((prev) => ({ ...prev, loading: true, error: null }));
@@ -222,7 +177,6 @@ const Dashboard = () => {
       setRecentSitesLoading(false);
     }
   };
-
 
   const fetchExpiringContracts = async () => {
     try {
@@ -341,11 +295,7 @@ const Dashboard = () => {
         onProvinceSelect={handleProvinceSelect}
         selectedProvince={selectedProvince}
       />
-<<<<<<< HEAD
-      
-=======
 
->>>>>>> 22db4a4523526dc0eeac85f498f9681bb9762224
       {/* Report Button */}
       <div className="px-6 pt-4 pb-2">
         <div className="flex justify-end">
@@ -361,11 +311,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-<<<<<<< HEAD
-      <div className="px-6 pb-6">
-=======
       <div id="dashboard-content" className="px-6 pb-6">
->>>>>>> 22db4a4523526dc0eeac85f498f9681bb9762224
         {/* Recent Activity Summary Row */}
         <div className="mb-6">
           <RecentActivitySummaryCard
@@ -433,10 +379,6 @@ const Dashboard = () => {
               title="Top LGU per Province with Most Free WiFi"
               data={topLGUs}
             />
-<<<<<<< HEAD
-=======
-
->>>>>>> 22db4a4523526dc0eeac85f498f9681bb9762224
           </div>
 
           {/* Right Column - Charts & Tables */}
