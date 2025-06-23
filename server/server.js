@@ -1068,6 +1068,86 @@ app.get('/api/key-metrics', async (req, res) => {
     }
 });
 
+app.get('/api/recently-added-sites', async (req, res) => {
+    const { province } = req.query;
+
+    try {
+        const values = [];
+        let filterClause = `s.contract_status = 'ACTIVE' AND s.date_accepted IS NOT NULL`;
+
+        if (province && province.toLowerCase() !== 'all') {
+            filterClause += ` AND l.province ILIKE $1`;
+            values.push(province);
+        } else {
+            filterClause += ` AND LOWER(l.province) IN ('cavite', 'laguna', 'batangas', 'rizal', 'quezon')`;
+        }
+
+        const result = await pool.query(`
+      SELECT 
+        s.site_id,
+        s.site_name,
+        s.contract_status AS status,
+        s.date_accepted,
+        l.province,
+        l.locality AS municipality
+      FROM public.site s
+      JOIN public.location l ON s.location_id = l.loc_id
+      WHERE ${filterClause}
+    `, values);
+
+        const now = new Date();
+        const thirtyDaysAgo = new Date(now);
+        thirtyDaysAgo.setDate(now.getDate() - 30);
+
+        const monthMap = {
+            jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06',
+            jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12'
+        };
+
+        const parsed = result.rows.map(row => {
+            const raw = (row.date_accepted || '').trim().toLowerCase();
+            let parsedDate = null;
+
+            try {
+                if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+                    parsedDate = new Date(raw);
+                } else if (/^\d{2}\/\d{2}\/\d{4}$/.test(raw)) {
+                    const [d, m, y] = raw.split('/').map(Number);
+                    parsedDate = new Date(`${y}-${m}-${d}`);
+                } else if (/^\d{2}\/\d{4}$/.test(raw)) {
+                    const [m, y] = raw.split('/').map(Number);
+                    parsedDate = new Date(`${y}-${m}-01`);
+                } else if (/^\d{2}-[a-z]{3}-\d{2}$/.test(raw)) {
+                    const [d, mon, y] = raw.split('-');
+                    const month = monthMap[mon.toLowerCase()];
+                    const fullYear = 2000 + parseInt(y);
+                    parsedDate = new Date(`${fullYear}-${month}-${d}`);
+                }
+            } catch (_) { }
+
+            if (!parsedDate || isNaN(parsedDate)) return null;
+            if (parsedDate < thirtyDaysAgo || parsedDate > now) return null; // ✅ last 30 days only
+
+            return {
+                site_id: row.site_id,
+                site_name: row.site_name,
+                province: row.province,
+                municipality: row.municipality,
+                status: row.status || 'ACTIVE',
+                date_added: parsedDate.toISOString().split('T')[0],
+                _parsedDate: parsedDate
+            };
+        }).filter(Boolean)
+            .sort((a, b) => b._parsedDate - a._parsedDate)
+            .slice(0, 20);
+
+        res.status(200).json(parsed.map(({ _parsedDate, ...r }) => r));
+    } catch (error) {
+        console.error('❌ Error fetching recently added sites:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 
 // Start server
 const PORT = process.env.PORT || 5000;
