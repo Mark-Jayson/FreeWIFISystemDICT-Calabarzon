@@ -290,7 +290,7 @@ const Dashboard = () => {
         onProvinceSelect={handleProvinceSelect}
         selectedProvince={selectedProvince}
       />
-      
+
       {/* Report Button */}
       <div className="px-6 pt-4 pb-2">
         <div className="flex justify-end">
@@ -374,7 +374,7 @@ const Dashboard = () => {
               title="Top LGU per Province with Most Free WiFi"
               data={topLGUs}
             />
-            
+
           </div>
 
           {/* Right Column - Charts & Tables */}
