@@ -14,6 +14,9 @@ import YearlyActivationChart from '../components/dashboard/YearlyActivationChart
 import RecentlyAddedSitesCard from '../components/dashboard/RecentlyAddedSitesCard';
 import RecentlyTerminatedSitesCard from '../components/dashboard/RecentlyTerminatedSitesCard';
 import RecentActivitySummaryCard from '../components/dashboard/RecentActivitySummaryCard';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+
 
 const Dashboard = () => {
   const [selectedProvince, setSelectedProvince] = useState('all');
@@ -22,12 +25,12 @@ const Dashboard = () => {
   const [noDateCount, setNoDateCount] = useState(0);
   const [siteTypeData, setSiteTypeData] = useState([]);
   const [topLGUs, setTopLGUs] = useState([]);
-  
+
   // New state for recent sites
   const [recentlyAddedSites, setRecentlyAddedSites] = useState([]);
   const [recentlyTerminatedSites, setRecentlyTerminatedSites] = useState([]);
   const [recentSitesLoading, setRecentSitesLoading] = useState(true);
-  
+
   const [locationDistribution, setLocationDistribution] = useState({
     locationCount: 0,
     provincesData: [],
@@ -59,6 +62,7 @@ const Dashboard = () => {
   });
 
   const handleProvinceSelect = (provinceId) => setSelectedProvince(provinceId);
+<<<<<<< HEAD
   
   // Report generation handler
   const handleGenerateReport = async () => {
@@ -107,8 +111,55 @@ const Dashboard = () => {
       console.error('Error generating report:', error);
       alert('Failed to generate report. Please try again.');
     }
+=======
+
+  // Add dark mode toggle handler
+  const handleDarkModeToggle = () => {
+    setDarkMode(!darkMode);
+>>>>>>> 22db4a4523526dc0eeac85f498f9681bb9762224
   };
 
+  const handleGenerateReport = async () => {
+    try {
+      // Find the main content area of your dashboard to capture
+      const input = document.getElementById('dashboard-content'); // We'll add this ID below
+      if (!input) {
+        console.error('Dashboard content element not found!');
+        alert('Failed to find dashboard content for PDF generation.');
+        return;
+      }
+      const canvas = await html2canvas(input, {
+        scale: 2, // Increase scale for better resolution
+        logging: true, // Enable logging for debugging
+        useCORS: true, // Important if you have images from different origins
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4'); // 'p' for portrait, 'mm' for millimeters, 'a4' size
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+      // Add the first page
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      // Add more pages if content overflows
+      while (heightLeft >= 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      const exportFileDefaultName = `wifi-dashboard-report-${selectedProvince}-${new Date().toISOString().split('T')[0]}.pdf`;
+      pdf.save(exportFileDefaultName);
+    } catch (error) {
+      console.error('Error generating report:', error);
+      alert('Failed to generate report. Please try again.');
+    }
+  }
   const fetchWifiStats = async (province = 'all') => {
     try {
       setWifiStats((prev) => ({ ...prev, loading: true, error: null }));
@@ -120,13 +171,13 @@ const Dashboard = () => {
       if (!res.ok) throw new Error(res.status);
       const data = await res.json();
       setWifiStats({ ...data, loading: false, error: null });
-      
+
       // Update digitization stats based on wifi stats
       setDigitizationStats({
         percentage: data.activePercentage || 0,
         totalCount: data.totalSites || 0,
         activeCount: data.activeSites || 0,
-        description: province === 'all' 
+        description: province === 'all'
           ? "WiFi Location Coverage in Calabarzon"
           : `WiFi Location Coverage in ${province}`
       });
@@ -140,12 +191,13 @@ const Dashboard = () => {
   const fetchRecentlyAddedSites = async () => {
     try {
       setRecentSitesLoading(true);
-      const url = selectedProvince === 'all' 
+      const url = selectedProvince === 'all'
         ? 'http://localhost:5000/api/recently-added-sites'
         : `http://localhost:5000/api/recently-added-sites?province=${selectedProvince}`;
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
+      console.log('✅ Dashboard got sites:', data);
       setRecentlyAddedSites(data);
     } catch (err) {
       console.error('Recently added sites error:', err);
@@ -156,7 +208,7 @@ const Dashboard = () => {
   // New function to fetch recently terminated sites
   const fetchRecentlyTerminatedSites = async () => {
     try {
-      const url = selectedProvince === 'all' 
+      const url = selectedProvince === 'all'
         ? 'http://localhost:5000/api/recently-terminated-sites'
         : `http://localhost:5000/api/recently-terminated-sites?province=${selectedProvince}`;
       const res = await fetch(url);
@@ -170,6 +222,7 @@ const Dashboard = () => {
       setRecentSitesLoading(false);
     }
   };
+
 
   const fetchExpiringContracts = async () => {
     try {
@@ -251,10 +304,10 @@ const Dashboard = () => {
         locationCount = count;
         filteredProvinces = count > 0
           ? [{ name: match.name, value: count, color: match.color }, {
-              name: 'Other',
-              value: data.total - count,
-              color: '#f0f0f0',
-            }]
+            name: 'Other',
+            value: data.total - count,
+            color: '#f0f0f0',
+          }]
           : [];
       }
 
@@ -288,7 +341,11 @@ const Dashboard = () => {
         onProvinceSelect={handleProvinceSelect}
         selectedProvince={selectedProvince}
       />
+<<<<<<< HEAD
       
+=======
+
+>>>>>>> 22db4a4523526dc0eeac85f498f9681bb9762224
       {/* Report Button */}
       <div className="px-6 pt-4 pb-2">
         <div className="flex justify-end">
@@ -304,7 +361,11 @@ const Dashboard = () => {
         </div>
       </div>
 
+<<<<<<< HEAD
       <div className="px-6 pb-6">
+=======
+      <div id="dashboard-content" className="px-6 pb-6">
+>>>>>>> 22db4a4523526dc0eeac85f498f9681bb9762224
         {/* Recent Activity Summary Row */}
         <div className="mb-6">
           <RecentActivitySummaryCard
@@ -323,7 +384,7 @@ const Dashboard = () => {
               provincesData={locationDistribution.provincesData}
             />
             {/* <WifiTechnologyBar data={[]} /> */}
-             <LocationTypeGrid
+            <LocationTypeGrid
               title={
                 selectedProvince === 'all'
                   ? 'Free WiFi Sites location per location types in Calabarzon'
@@ -332,12 +393,12 @@ const Dashboard = () => {
               subtitle={selectedProvince === 'all' ? null : ''}
               data={siteTypeData}
             />
-             {/* Recent Sites */}
+            {/* Recent Sites */}
             <RecentlyAddedSitesCard
               data={recentlyAddedSites}
               loading={recentSitesLoading}
             />
-            
+
             <RecentlyTerminatedSitesCard
               data={recentlyTerminatedSites}
               loading={recentSitesLoading}
@@ -367,11 +428,15 @@ const Dashboard = () => {
               activeCount={digitizationStats.activeCount}
               description={digitizationStats.description}
             />
-            
+
             <TopLGUListCard
               title="Top LGU per Province with Most Free WiFi"
               data={topLGUs}
             />
+<<<<<<< HEAD
+=======
+
+>>>>>>> 22db4a4523526dc0eeac85f498f9681bb9762224
           </div>
 
           {/* Right Column - Charts & Tables */}
