@@ -11,7 +11,7 @@ import {
 } from 'recharts';
 import { Activity, TrendingUp, Calendar } from 'lucide-react';
 
-const YearlyActivationChart = ({ title, data, highlightYear, noDateCount, darkMode = false }) => {
+const YearlyActivationChart = ({ title, data, highlightYear, noDateCount }) => {
   const barSize = data.length > 5
     ? Math.max(8, Math.floor(240 / data.length))
     : 32;
@@ -27,9 +27,8 @@ const YearlyActivationChart = ({ title, data, highlightYear, noDateCount, darkMo
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'} 
-          p-3 rounded-lg shadow-lg border`}>
-          <p className={`${darkMode ? 'text-white' : 'text-gray-900'} font-medium`}>
+        <div className="bg-white border-gray-200 p-3 rounded-lg shadow-lg border">
+          <p className="text-gray-900 font-medium">
             Year {label}
           </p>
           <p className="text-blue-500 font-semibold">
@@ -42,16 +41,15 @@ const YearlyActivationChart = ({ title, data, highlightYear, noDateCount, darkMo
   };
 
   return (
-    <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} 
-      rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg`}
+    <div className="bg-white border-gray-100 rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg"
       style={{ height: '400px', maxHeight: '400px' }}>
       
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex-1">
           <div className="flex items-center space-x-2 mb-2">
-            <Activity className={`w-5 h-5 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`} />
-            <h3 className={`${darkMode ? 'text-white' : 'text-gray-900'} font-semibold text-base`}>
+            <Activity className="w-5 h-5 text-gray-600" />
+            <h3 className="text-gray-900 font-semibold text-base">
               {title}
             </h3>
           </div>
@@ -63,7 +61,7 @@ const YearlyActivationChart = ({ title, data, highlightYear, noDateCount, darkMo
             }`}>
               <TrendingUp className={`w-4 h-4 mr-1 ${parseFloat(trendPercentage) < 0 ? 'rotate-180' : ''}`} />
               <span className="font-medium">{Math.abs(trendPercentage)}%</span>
-              <span className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} ml-1`}>
+              <span className="text-gray-500 ml-1">
                 vs {parseInt(highlightYear) - 1}
               </span>
             </div>
@@ -87,12 +85,12 @@ const YearlyActivationChart = ({ title, data, highlightYear, noDateCount, darkMo
               <CartesianGrid 
                 strokeDasharray="3 3" 
                 vertical={false} 
-                stroke={darkMode ? '#374151' : '#e5e7eb'}
+                stroke="#e5e7eb"
               />
               <XAxis 
                 dataKey="year" 
                 tick={{ 
-                  fill: darkMode ? '#9CA3AF' : '#6B7280',
+                  fill: '#6B7280',
                   fontSize: 12 
                 }}
                 axisLine={false}
@@ -110,7 +108,7 @@ const YearlyActivationChart = ({ title, data, highlightYear, noDateCount, darkMo
                     key={`cell-${index}`}
                     fill={entry.year === highlightYear 
                       ? 'url(#highlightGradient)' 
-                      : darkMode ? '#4B5563' : '#E5E7EB'
+                      : '#E5E7EB'
                     }
                   />
                 ))}
@@ -124,8 +122,7 @@ const YearlyActivationChart = ({ title, data, highlightYear, noDateCount, darkMo
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <div className={`${darkMode ? 'text-gray-400' : 'text-gray-500'} 
-            h-full flex flex-col items-center justify-center`}>
+          <div className="text-gray-500 h-full flex flex-col items-center justify-center">
             <Activity className="w-12 h-12 mb-3 opacity-50" />
             <p className="text-sm">No activation data available</p>
           </div>
@@ -134,11 +131,11 @@ const YearlyActivationChart = ({ title, data, highlightYear, noDateCount, darkMo
 
       {/* Footer info */}
       {noDateCount > 0 && (
-        <div className={`mt-4 pt-4 border-t ${darkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-          <div className={`flex items-center justify-center text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <div className="flex items-center justify-center text-sm text-gray-600">
             <Calendar className="w-4 h-4 mr-2" />
             <span>
-              <strong className={darkMode ? 'text-gray-300' : 'text-gray-700'}>
+              <strong className="text-gray-700">
                 {noDateCount}
               </strong> sites activated without date
             </span>

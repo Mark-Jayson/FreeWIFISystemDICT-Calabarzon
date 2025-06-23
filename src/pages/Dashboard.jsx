@@ -25,6 +25,7 @@ const Dashboard = () => {
   const [noDateCount, setNoDateCount] = useState(0);
   const [siteTypeData, setSiteTypeData] = useState([]);
   const [topLGUs, setTopLGUs] = useState([]);
+  const [darkMode, setDarkMode] = useState(false); // Added missing darkMode state
 
   // New state for recent sites
   const [recentlyAddedSites, setRecentlyAddedSites] = useState([]);
@@ -68,15 +69,17 @@ const Dashboard = () => {
     setDarkMode(!darkMode);
   };
 
+  // Single unified report generation handler
   const handleGenerateReport = async () => {
     try {
       // Find the main content area of your dashboard to capture
-      const input = document.getElementById('dashboard-content'); // We'll add this ID below
+      const input = document.getElementById('dashboard-content');
       if (!input) {
         console.error('Dashboard content element not found!');
         alert('Failed to find dashboard content for PDF generation.');
         return;
       }
+      
       const canvas = await html2canvas(input, {
         scale: 2, // Increase scale for better resolution
         logging: true, // Enable logging for debugging
@@ -90,6 +93,7 @@ const Dashboard = () => {
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       let heightLeft = imgHeight;
       let position = 0;
+      
       // Add the first page
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
@@ -104,11 +108,13 @@ const Dashboard = () => {
 
       const exportFileDefaultName = `wifi-dashboard-report-${selectedProvince}-${new Date().toISOString().split('T')[0]}.pdf`;
       pdf.save(exportFileDefaultName);
+      
     } catch (error) {
       console.error('Error generating report:', error);
       alert('Failed to generate report. Please try again.');
     }
-  }
+  };
+
   const fetchWifiStats = async (province = 'all') => {
     try {
       setWifiStats((prev) => ({ ...prev, loading: true, error: null }));
@@ -171,7 +177,6 @@ const Dashboard = () => {
       setRecentSitesLoading(false);
     }
   };
-
 
   const fetchExpiringContracts = async () => {
     try {
@@ -374,7 +379,6 @@ const Dashboard = () => {
               title="Top LGU per Province with Most Free WiFi"
               data={topLGUs}
             />
-
           </div>
 
           {/* Right Column - Charts & Tables */}

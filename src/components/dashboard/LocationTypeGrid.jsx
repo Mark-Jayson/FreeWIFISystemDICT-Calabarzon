@@ -1,3 +1,4 @@
+// components/dashboard/LocationTypeGrid.jsx
 import React, { useState } from 'react';
 
 const getIconForSiteType = (type) => {
@@ -20,7 +21,6 @@ const getIconForSiteType = (type) => {
   if (lower.includes('sea')) return '🚢';
   if (lower.includes('land')) return '🚗';
   if (lower.includes('field office') || lower.includes('fo')) return '🏢';
-
 
   return '📍';
 };
