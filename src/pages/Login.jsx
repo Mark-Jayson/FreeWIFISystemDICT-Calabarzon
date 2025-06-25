@@ -20,20 +20,24 @@ const Login = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError("");
+  e.preventDefault();
+  setIsSubmitting(true);
+  setError("");
 
-    try {
-      const response = await axios.post("http://localhost:5000/api/login", formData);
-      
-      navigate("/dashboard");
-    } catch (err) {
-      setError(err.response?.data?.message || "Login failed. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  try {
+    const response = await axios.post("http://localhost:5000/api/login", formData);
+    
+    // Save user to localStorage
+    localStorage.setItem("user", JSON.stringify(response.data.user));
+
+    navigate("/dashboard");
+  } catch (err) {
+    setError(err.response?.data?.error || "Login failed. Please try again.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 font-montserrat">
