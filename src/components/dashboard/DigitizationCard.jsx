@@ -10,7 +10,16 @@ const DigitizationCard = ({
   const calculatedPercentage = totalCount > 0 ? Math.round((activeCount / totalCount) * 100) : percentage;
 
   return (
-    <div className="bg-white border-gray-100 rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg">
+    <div 
+      className="rounded-2xl p-6 transition-all duration-300 hover:shadow-lg"
+      style={{ 
+        backgroundColor: 'rgba(255, 255, 255, 1)',
+        borderColor: 'rgba(233, 236, 239, 1)',
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
+      }}
+    >
       
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
@@ -44,7 +53,15 @@ const DigitizationCard = ({
       
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4 mb-4">
-        <div className="bg-blue-50 rounded-xl p-3">
+        <div 
+          className="rounded-xl p-3"
+          style={{ 
+            backgroundColor: 'rgba(239, 246, 255, 1)',
+            borderColor: 'rgba(233, 236, 239, 1)',
+            borderWidth: '1px',
+            borderStyle: 'solid'
+          }}
+        >
           <div className="text-lg font-bold text-blue-900 mb-1">
             {activeCount.toLocaleString()}
           </div>
@@ -52,7 +69,15 @@ const DigitizationCard = ({
             Active Sites
           </div>
         </div>
-        <div className="bg-gray-50 rounded-xl p-3">
+        <div 
+          className="rounded-xl p-3"
+          style={{ 
+            backgroundColor: 'rgba(249, 250, 251, 1)',
+            borderColor: 'rgba(233, 236, 239, 1)',
+            borderWidth: '1px',
+            borderStyle: 'solid'
+          }}
+        >
           <div className="text-lg font-bold text-gray-900 mb-1">
             {totalCount.toLocaleString()}
           </div>

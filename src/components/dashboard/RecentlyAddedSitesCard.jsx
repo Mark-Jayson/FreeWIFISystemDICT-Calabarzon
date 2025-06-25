@@ -8,7 +8,13 @@ const RecentlyAddedSitesCard = ({ data = [], loading = false }) => {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow p-4">
+      <div 
+        className="rounded-lg shadow p-4"
+        style={{ 
+          backgroundColor: 'rgba(255, 255, 255, 1)',
+          borderColor: 'rgba(225, 225, 225, 1)'
+        }}
+      >
         <div className="flex items-center gap-2 mb-4">
           <TrendingUp className="text-green-600" size={20} />
           <h3 className="font-semibold text-gray-800">Recently Added Sites</h3>
@@ -16,8 +22,14 @@ const RecentlyAddedSitesCard = ({ data = [], loading = false }) => {
         <div className="space-y-3">
           {[1, 2, 3].map((i) => (
             <div key={i} className="animate-pulse">
-              <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+              <div 
+                className="h-4 rounded w-3/4 mb-2"
+                style={{ backgroundColor: 'rgba(229, 231, 235, 1)' }}
+              ></div>
+              <div 
+                className="h-3 rounded w-1/2"
+                style={{ backgroundColor: 'rgba(229, 231, 235, 1)' }}
+              ></div>
             </div>
           ))}
         </div>
@@ -26,14 +38,23 @@ const RecentlyAddedSitesCard = ({ data = [], loading = false }) => {
   }
 
   return (
-    <div className="bg-white rounded-lg shadow p-4">
+    <div 
+      className="rounded-lg shadow p-4"
+      style={{ 
+        backgroundColor: 'rgba(255, 255, 255, 1)',
+        borderColor: 'rgba(225, 225, 225, 1)'
+      }}
+    >
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <TrendingUp className="text-green-600" size={20} />
           <h3 className="font-semibold text-gray-800">Recently Added Sites</h3>
         </div>
         <div className="flex items-center gap-2 text-sm text-green-600 font-medium">
-          <span className="bg-green-100 px-2 py-1 rounded-full">
+          <span 
+            className="px-2 py-1 rounded-full"
+            style={{ backgroundColor: 'rgba(220, 252, 231, 1)' }}
+          >
             +{data.length} New
           </span>
         </div>
@@ -48,7 +69,14 @@ const RecentlyAddedSitesCard = ({ data = [], loading = false }) => {
         <>
           <div className="space-y-3">
             {displayData.map((site, index) => (
-              <div key={index} className="border-l-4 border-green-500 pl-3 py-2 bg-green-50 rounded-r">
+              <div 
+                key={index} 
+                className="pl-3 py-2 rounded-r"
+                style={{ 
+                  borderLeft: '4px solid rgba(34, 197, 94, 1)',
+                  backgroundColor: 'rgba(240, 253, 244, 1)'
+                }}
+              >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <h4 className="font-medium text-gray-800 text-sm">{site.siteName || site.site_name}</h4>
@@ -63,7 +91,13 @@ const RecentlyAddedSitesCard = ({ data = [], loading = false }) => {
                       </div>
                     </div>
                     <div className="mt-1">
-                      <span className="inline-block px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
+                      <span 
+                        className="inline-block px-2 py-1 text-xs rounded-full"
+                        style={{ 
+                          backgroundColor: 'rgba(220, 252, 231, 1)',
+                          color: 'rgba(22, 101, 52, 1)'
+                        }}
+                      >
                         {site.status || 'Active'}
                       </span>
                     </div>
@@ -76,7 +110,10 @@ const RecentlyAddedSitesCard = ({ data = [], loading = false }) => {
           {data.length > 5 && (
             <button
               onClick={() => setShowAll(!showAll)}
-              className="w-full mt-3 py-2 text-sm text-green-600 hover:text-green-700 font-medium border-t border-gray-200 pt-3"
+              className="w-full mt-3 py-2 text-sm text-green-600 hover:text-green-700 font-medium pt-3"
+              style={{ 
+                borderTop: '1px solid rgba(229, 231, 235, 1)'
+              }}
             >
               {showAll ? 'Show Less' : `Show All ${data.length} Sites`}
             </button>

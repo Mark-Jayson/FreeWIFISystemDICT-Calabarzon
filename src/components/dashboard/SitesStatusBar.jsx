@@ -18,13 +18,31 @@ const SitesStatusBar = ({
 }) => {
   if (loading) {
     return (
-      <div className="bg-white border-gray-100 rounded-2xl border p-6 transition-all duration-300">
+      <div 
+        className="rounded-2xl border p-6 transition-all duration-300"
+        style={{ 
+          backgroundColor: 'rgba(255, 255, 255, 1)',
+          borderColor: 'rgba(243, 244, 246, 1)'
+        }}
+      >
         <div className="animate-pulse">
-          <div className="h-4 bg-gray-300 rounded w-32 mb-4"></div>
-          <div className="h-6 bg-gray-300 rounded mb-4"></div>
+          <div 
+            className="h-4 rounded w-32 mb-4"
+            style={{ backgroundColor: 'rgba(209, 213, 219, 1)' }}
+          ></div>
+          <div 
+            className="h-6 rounded mb-4"
+            style={{ backgroundColor: 'rgba(209, 213, 219, 1)' }}
+          ></div>
           <div className="space-y-3">
-            <div className="h-4 bg-gray-300 rounded"></div>
-            <div className="h-4 bg-gray-300 rounded"></div>
+            <div 
+              className="h-4 rounded"
+              style={{ backgroundColor: 'rgba(209, 213, 219, 1)' }}
+            ></div>
+            <div 
+              className="h-4 rounded"
+              style={{ backgroundColor: 'rgba(209, 213, 219, 1)' }}
+            ></div>
           </div>
         </div>
       </div>
@@ -36,8 +54,8 @@ const SitesStatusBar = ({
       label: 'Active Sites',
       count: activeCount,
       percentage: activePercentage,
-      color: '#10B981',
-      bgColor: 'bg-green-500',
+      color: 'rgba(16, 185, 129, 1)',
+      bgColor: 'rgba(34, 197, 94, 1)',
       icon: CheckCircle,
       textColor: 'text-green-600'
     },
@@ -45,8 +63,8 @@ const SitesStatusBar = ({
       label: 'For Renewal',
       count: forRenewalCount,
       percentage: forRenewalPercentage,
-      color: '#F59E0B',
-      bgColor: 'bg-amber-500',
+      color: 'rgba(245, 158, 11, 1)',
+      bgColor: 'rgba(245, 158, 11, 1)',
       icon: RefreshCw,
       textColor: 'text-amber-600'
     },
@@ -54,8 +72,8 @@ const SitesStatusBar = ({
       label: 'Terminated',
       count: terminatedCount,
       percentage: terminatedPercentage,
-      color: '#EF4444',
-      bgColor: 'bg-red-500',
+      color: 'rgba(239, 68, 68, 1)',
+      bgColor: 'rgba(239, 68, 68, 1)',
       icon: XCircle,
       textColor: 'text-red-600'
     },
@@ -63,15 +81,27 @@ const SitesStatusBar = ({
       label: 'Unknown',
       count: unknownCount,
       percentage: unknownPercentage,
-      color: '#6B7280',
-      bgColor: 'bg-gray-500',
+      color: 'rgba(107, 114, 128, 1)',
+      bgColor: 'rgba(107, 114, 128, 1)',
       icon: AlertTriangle,
       textColor: 'text-gray-600'
     }
   ].filter(item => item.count > 0); // Only show categories with data
 
   return (
-    <div className="bg-white border-gray-100 hover:bg-gray-50 rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group">
+    <div 
+      className="rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group"
+      style={{ 
+        backgroundColor: 'rgba(255, 255, 255, 1)',
+        borderColor: 'rgba(243, 244, 246, 1)'
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = 'rgba(249, 250, 251, 1)';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 1)';
+      }}
+    >
       
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
@@ -97,7 +127,10 @@ const SitesStatusBar = ({
 
       {/* Progress Bar */}
       <div className="mb-6">
-        <div className="bg-gray-200 h-4 rounded-full overflow-hidden flex">
+        <div 
+          className="h-4 rounded-full overflow-hidden flex"
+          style={{ backgroundColor: 'rgba(229, 231, 235, 1)' }}
+        >
           {statusData.map((item, index) => (
             <div
               key={index}
@@ -122,9 +155,22 @@ const SitesStatusBar = ({
         {statusData.map((item, index) => {
           const Icon = item.icon;
           return (
-            <div key={index} className="bg-gray-50 hover:bg-gray-100 rounded-xl p-4 transition-all duration-200 cursor-pointer group/item">
+            <div 
+              key={index} 
+              className="rounded-xl p-4 transition-all duration-200 cursor-pointer group/item"
+              style={{ backgroundColor: 'rgba(249, 250, 251, 1)' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(243, 244, 246, 1)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'rgba(249, 250, 251, 1)';
+              }}
+            >
               <div className="flex items-center justify-between mb-2">
-                <div className={`p-2 rounded-lg ${item.bgColor} group-hover/item:scale-110 transition-transform duration-200`}>
+                <div 
+                  className="p-2 rounded-lg group-hover/item:scale-110 transition-transform duration-200"
+                  style={{ backgroundColor: item.bgColor }}
+                >
                   <Icon className="w-4 h-4 text-white" />
                 </div>
                 <span className="text-gray-900 text-xl font-bold">
@@ -145,17 +191,23 @@ const SitesStatusBar = ({
       </div>
 
       {/* Additional Info */}
-      <div className="bg-blue-50 rounded-xl p-4 mt-4">
+      <div 
+        className="rounded-xl p-4 mt-4"
+        style={{ backgroundColor: 'rgba(239, 246, 255, 1)' }}
+      >
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-blue-900 font-semibold text-sm">
+            <p className="font-semibold text-sm" style={{ color: 'rgba(30, 58, 138, 1)' }}>
               Active Rate
             </p>
-            <p className="text-blue-700 text-xs">
+            <p className="text-xs" style={{ color: 'rgba(29, 78, 216, 1)' }}>
               {activeCount} of {totalSites} sites operational
             </p>
           </div>
-          <div className="text-2xl font-bold text-blue-900">
+          <div 
+            className="text-2xl font-bold"
+            style={{ color: 'rgba(30, 58, 138, 1)' }}
+          >
             {Math.round(activePercentage)}%
           </div>
         </div>
