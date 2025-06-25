@@ -84,7 +84,7 @@ const Login = () => {
         </p>
       </div>
 
-      <footer className="w-full fixed bottom-6 bg-gray-100 text-gray-600 text-sm">
+      <footer className="w-full bottom-6 bg-gray-100 text-gray-600 text-sm">
         <div className="max-w-6xl mx-auto">
           <div className="border-gray-700 mt-6 pt-6 text-center text-gray-600 text-xs">
             <p>This website is for official use only. Unauthorized access is prohibited.</p>

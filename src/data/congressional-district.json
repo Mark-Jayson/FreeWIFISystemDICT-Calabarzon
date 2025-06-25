@@ -1,0 +1,146 @@
+{
+    "region": "CALABARZON",
+    "province": [
+        {
+            "name": "Cavite",
+            "districts": [
+                {
+                    "district_number": ["I"],
+                    "municipalities": ["Cavite City", "Kawit", "Novelata", "Rosario"]
+                },
+                {
+                    "district_number": ["II"],
+                    "municipalities": ["Bacoor City"]
+                },
+                {
+                    "district_number": ["III"],
+                    "municipalities": ["Imus"]
+                },
+                {
+                    "district_number": ["IV"],
+                    "municipalities": ["City of Dasmariñas"]
+                },
+                {
+                    "district_number": ["V"],
+                    "municipalities": ["Carmona", "General Mariano Alvarez", "Silang"]
+                },
+                {
+                    "district_number": ["VI"],
+                    "municipalities": ["General Trias"]
+                },
+                {
+                    "district_number": ["VII"],
+                    "municipalities": ["Amadeo", "Indang", "Tanza", "Trece Martires"]
+                },
+                {
+                    "district_number": ["VIII"],
+                    "municipalities": ["Alfonso", "General Emilio Aguinaldo", "Magallanes Cavite", "Maragondon", "Mendez (Mendez - Nuñez)", "Naic", "Tagaytay", "Ternate"]
+                }
+            ]
+        },
+        {
+            "name": "Laguna",
+            "districts": [
+                {
+                    "district_number": ["I"],
+                    "municipalities": ["City of San Pedro"]
+                },
+                {
+                    "district_number": ["II"],
+                    "municipalities": ["City of Cabuyao", "Bay", "Los Baños"]
+                },
+                {
+                    "district_number": ["III"],
+                    "municipalities": ["San Pablo City", "Alaminos", "Calauan", "Liliw", "Nagcarlan", "Rizal Laguna", "Victoria Laguna"]
+                },
+                {
+                    "district_number": ["IV"],
+                    "municipalities": ["Cavinti", "Famy", "Kalayaan Laguna", "Luisiana", "Lumban", "Mabitac", "Magdalena", "Majayjay", "Paete", "Pagsanjan", "Pakil", "Pangil", "Pila", "Santa Cruz", "Santa Maria", "Siniloan"]
+                },
+                {
+                    "district_number": ["Biñan District"],
+                    "municipalities": ["City of Biñan"]
+                },
+                {
+                    "district_number": ["Calamba District"],
+                    "municipalities": ["City of Calamba"]
+                },
+                {
+                    "district_number": ["Santa Rosa District"],
+                    "municipalities": ["City of Santa Rosa"]
+                }
+            ]
+        },
+        {
+            "name": "Batangas",
+            "districts": [
+                {
+                    "district_number": ["I"],
+                    "municipalities": ["Balayan", "Calaca", "Calatagan", "Lemery", "Lian", "Nasugbu", "Taal", "Tuy"]
+                },
+                {
+                    "district_number": ["II"],
+                    "municipalities": ["Bauan", "Lobo", "Mabini", "San Luis", "San Pascual", "Tingloy"]
+                },
+                {
+                    "district_number": ["III"],
+                    "municipalities": ["Santo Tomas", "Tanauan City", "Agoncillo", "Alitagtag", "Balete", "Laurel", "Malvar", "Mataas na Kahoy", "San Nicholas", "Santa Teresita", "Talisay"]
+                },
+                {
+                    "district_number": ["IV"],
+                    "municipalities": ["Ibaan", "Cuenca", "Padre Garcia", "Rosario", "San Jose", "San Juan", "Taysan"]
+                },
+                {
+                    "district_number": ["V"],
+                    "municipalities": ["Batangas City"]
+                },
+                {
+                    "district_number": ["VI"],
+                    "municipalities": ["Lipa City"]
+                }
+            ]
+        },
+        {
+            "name": "Rizal",
+            "districts": [
+                {
+                    "district_number": ["I"],
+                    "municipalities": ["City of Antipolo", "Angono", "Binangonan", "Cainta", "Taytay"]
+                },
+                {
+                    "district_number": ["II"],
+                    "municipalities": ["Baras Rizal", "Cardema", "Jala-Jala", "Morong Rizal", "Pililla", "Tanay", "Teresa"]
+                },
+                {
+                    "district_number": ["III"],
+                    "municipalities": ["San Mateo"]
+                },
+                {
+                    "district_number": ["IV"],
+                    "municipalities": ["Rodriguez"]
+                }
+            ]
+        },
+        {
+            "name": "Quezon",
+            "districts": [
+                {
+                    "district_number": ["I"],
+                    "municipalities": ["City of Tayabas", "Burdeos", "General Nakar", "Infanta Quezon", "Jomalig", "Lucban", "Mauban", "Pagbilao", "Panukulan", "Patnanungan", "Polilio", "Real", "Sampaloc"]
+                },
+                {
+                    "district_number": ["II"],
+                    "municipalities": ["Candelaria Quezon", "Dolores Quezon", "Lucena City", "Sariaya", "Tiaong"]
+                },
+                {
+                    "district_number": ["III"],
+                    "municipalities": ["Agdangan", "Buenavista", "Calauag", "Catanauan", "General Luna Quezon", "Macalelon", "Mulanay", "Padre Burgos Quezon", "Pitogo Quezon", "San Andres", "San Antonio Quezon", "San Francisco Quezon", "San Narciso Quezon", "Unisan"]
+                },
+                {
+                    "district_number": ["IV"],
+                    "municipalities": ["Alabat", "Atimonan", "Guinayangan", "Gumaca", "Lopez", "Perez", "Plaridel", "Quezon", "Tagkawayan"]
+                }
+            ]
+        }
+    ]
+}

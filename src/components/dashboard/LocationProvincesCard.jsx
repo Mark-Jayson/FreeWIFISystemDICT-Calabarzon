@@ -1,58 +1,97 @@
 // components/dashboard/LocationProvincesCard.jsx
 import React from 'react';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { MapPin, TrendingUp, TrendingDown } from 'lucide-react';
 
-const LocationProvincesCard = ({ locationCount, trendValue, provincesData }) => {
+const LocationProvincesCard = ({ 
+  locationCount, 
+  trendValue, 
+  provincesData 
+}) => {
+  const isPositiveTrend = trendValue && trendValue.startsWith('+');
+  
   return (
-    <div className="bg-white rounded-lg shadow p-4 h-full">
-      <div className="flex items-start mb-4 pb-4 border-b">
-        <div className="w-1 h-12 bg-blue-500 mr-2 mt-1"></div>
-        <div>
-          <div className="text-sm font-medium mb-1">No. of location with Free WiFi sites</div>
-          <div className="text-4xl font-bold text-blue-950">{locationCount}</div>
-          
-          <div className="flex items-center text-xs mt-1 text-green-600">
-            <span className="mr-1">↑</span> {trendValue}
+    <div className="bg-white border-gray-100 rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg">
+      
+      {/* Header Section */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center space-x-3">
+          <div className="p-2 rounded-xl bg-gradient-to-br from-purple-400 to-purple-600">
+            <MapPin className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h3 className="text-gray-900 font-semibold text-lg">
+              Locations Served
+            </h3>
+            <p className="text-gray-600 text-sm">
+              Active WiFi coverage areas
+            </p>
           </div>
         </div>
       </div>
-      
-      <div>
-        <div className="text-sm font-medium mb-4">Distribution per Province</div>
-        <div className="flex justify-between items-center">
-          <div className="flex flex-col text-sm gap-2">
-            {provincesData.map((entry, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <span 
-                  className="w-3 h-3 rounded-full" 
-                  style={{ backgroundColor: entry.color }}
-                ></span>
-                <span className="text-gray-700">{entry.name}</span>
-                <span className="ml-auto font-medium">{entry.value}</span>
+
+      {/* Main Count */}
+      <div className="mb-6">
+        <div className="text-gray-900 text-4xl font-bold mb-2">
+          {locationCount ? locationCount.toLocaleString() : '0'}
+        </div>
+        {trendValue && (
+          <div className={`flex items-center text-sm ${isPositiveTrend ? 'text-green-600' : 'text-red-600'}`}>
+            {isPositiveTrend ? 
+              <TrendingUp className="w-4 h-4 mr-1" /> : 
+              <TrendingDown className="w-4 h-4 mr-1" />
+            }
+            <span className="font-medium">{trendValue}</span>
+            <span className="text-gray-500 ml-1">vs last month</span>
+          </div>
+        )}
+      </div>
+
+      {/* Province Distribution */}
+      {provincesData && provincesData.length > 0 && (
+        <div>
+          <h4 className="text-gray-900 font-medium mb-4 text-sm">
+            Distribution by Province
+          </h4>
+          <div className="space-y-3">
+            {provincesData.map((province, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div 
+                    className="w-3 h-3 rounded-full" 
+                    style={{ backgroundColor: province.color }}
+                  />
+                  <span className="text-gray-700 text-sm font-medium">
+                    {province.name}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <div className="bg-gray-200 w-20 h-2 rounded-full overflow-hidden">
+                    <div 
+                      className="h-full rounded-full transition-all duration-1000"
+                      style={{ 
+                        width: `${provincesData.length > 0 ? (province.value / Math.max(...provincesData.map(p => p.value))) * 100 : 0}%`,
+                        backgroundColor: province.color 
+                      }}
+                    />
+                  </div>
+                  <span className="text-gray-900 font-semibold text-sm w-8 text-right">
+                    {province.value}
+                  </span>
+                </div>
               </div>
             ))}
           </div>
-          <div className="w-32 h-32">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={provincesData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={0}
-                  outerRadius={60}
-                  paddingAngle={0}
-                  dataKey="value"
-                >
-                  {provincesData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
         </div>
-      </div>
+      )}
+
+      {/* Empty State */}
+      {(!provincesData || provincesData.length === 0) && (
+        <div className="bg-gray-50 rounded-xl p-4 text-center">
+          <p className="text-gray-500 text-sm">
+            No province data available
+          </p>
+        </div>
+      )}
     </div>
   );
 };

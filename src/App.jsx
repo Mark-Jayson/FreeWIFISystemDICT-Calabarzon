@@ -6,23 +6,28 @@ import Dashboard from "./pages/Dashboard.jsx";
 import Layout from "./pages/Layout.jsx";
 import AddWifiSitePage from "./pages/AddWifiSitePage.jsx";
 import WiFiList from "./pages/WiFiList.jsx";
+import Coordinate from "./pages/Other.jsx";
 
 function App() {
   return (
     <Router>
       <Routes>
         {/* Optional: Auth routes without sidebar */}
-        {/* <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} /> */}
+        <Route index element={<Login />} />
+         
+         <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<Signup />} /> 
 
         {/* Routes with sidebar and layout */}
         <Route path="/" element={<Layout />}>
-          <Route index element={<MainDashboard />} /> {/* "/" default route */}
+          <Route index element={<MainDashboard/>} /> {/* "/" default route */}
+         
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="map" element={<MainDashboard />} />
           <Route path="wifi" element={<WiFiList />} />
+          <Route path="playground" element={<Coordinate />} />
           <Route path="add-wifi-site" element={<AddWifiSitePage />} />
-          <Route path="settings" element={<MainDashboard />} />
+          <Route path="logout" element={<MainDashboard />} />
         </Route>
       </Routes>
     </Router>

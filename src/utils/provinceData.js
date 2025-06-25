@@ -35,8 +35,8 @@ export const provinceData = {
         activePercentage: 80
       },
       // GIDA and ELCAC
-      gidaCount: 220,
-      elcacCount: 220,
+     // gidaCount: 220,
+      //elcacCount: 220,
       // Digitization
       digitization: {
         percentage: 67,
@@ -86,8 +86,8 @@ export const provinceData = {
         activePercentage: 80
       },
       // GIDA and ELCAC
-      gidaCount: 48,
-      elcacCount: 52,
+    //  gidaCount: 48,
+      //elcacCount: 52,
       // Digitization
       digitization: {
         percentage: 72,
@@ -136,8 +136,8 @@ export const provinceData = {
         activePercentage: 84
       },
       // GIDA and ELCAC
-      gidaCount: 40,
-      elcacCount: 45,
+     // gidaCount: 40,
+      //elcacCount: 45,
       // Digitization
       digitization: {
         percentage: 70,
@@ -186,8 +186,8 @@ export const provinceData = {
         activePercentage: 78
       },
       // GIDA and ELCAC
-      gidaCount: 46,
-      elcacCount: 48,
+     // gidaCount: 46,
+      //elcacCount: 48,
       // Digitization
       digitization: {
         percentage: 65,
@@ -236,8 +236,8 @@ export const provinceData = {
         activePercentage: 82
       },
       // GIDA and ELCAC
-      gidaCount: 42,
-      elcacCount: 42,
+     // gidaCount: 42,
+      //elcacCount: 42,
       // Digitization
       digitization: {
         percentage: 68,
@@ -286,8 +286,8 @@ export const provinceData = {
         activePercentage: 76
       },
       // GIDA and ELCAC
-      gidaCount: 33,
-      elcacCount: 33,
+      //gidaCount: 33,
+      //elcacCount: 33,
       // Digitization
       digitization: {
         percentage: 58,

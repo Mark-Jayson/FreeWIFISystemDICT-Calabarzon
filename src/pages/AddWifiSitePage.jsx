@@ -12,74 +12,95 @@ const AddWifiSitePage = () => {
   const [error, setError] = useState('');
   const searchResultsRef = useRef(null);
 
-  const provinceData = {
-    'Cavite': {
-      localities: ['Bacoor', 'Cavite City', 'Dasmariñas', 'General Trias', 'Imus', 'Tagaytay', 'Trece Martires'],
-      congressionals: ['1st District', '2nd District', '3rd District', '4th District', '5th District', '6th District', '7th District', '8th District']
-    },
-    'Laguna': {
-      localities: ['Biñan', 'Cabuyao', 'Calamba', 'Los Baños', 'San Pablo', 'San Pedro', 'Santa Rosa'],
-      congressionals: ['1st District', '2nd District', '3rd District', '4th District', '5th District']
-    },
-    'Batangas': {
-      localities: ['Batangas City', 'Lipa', 'Santo Tomas', 'Tanauan', 'Bauan', 'Nasugbu', 'San Juan'],
-      congressionals: ['1st District', '2nd District', '3rd District', '4th District', '5th District', '6th District']
-    },
-    'Rizal': {
-      localities: ['Antipolo', 'Cainta', 'Taytay', 'Rodriguez', 'San Mateo', 'Tanay', 'Teresa'],
-      congressionals: ['1st District', '2nd District', '3rd District', '4th District']
-    },
-    'Quezon': {
-      localities: ['Lucena', 'Tayabas', 'Candelaria', 'Sariaya', 'Lucban', 'Infanta', 'Pagbilao'],
-      congressionals: ['1st District', '2nd District', '3rd District', '4th District']
-    }
-  };
+  // const provinceData = {
+  //   'Cavite': {
+  //     localities: ['Bacoor', 'Cavite City', 'Dasmariñas', 'General Trias', 'Imus', 'Tagaytay', 'Trece Martires'],
+  //     congressionals: ['1st District', '2nd District', '3rd District', '4th District', '5th District', '6th District', '7th District', '8th District']
+  //   },
+  //   'Laguna': {
+  //     localities: ['Biñan', 'Cabuyao', 'Calamba', 'Los Baños', 'San Pablo', 'San Pedro', 'Santa Rosa'],
+  //     congressionals: ['1st District', '2nd District', '3rd District', '4th District', '5th District']
+  //   },
+  //   'Batangas': {
+  //     localities: ['Batangas City', 'Lipa', 'Santo Tomas', 'Tanauan', 'Bauan', 'Nasugbu', 'San Juan'],
+  //     congressionals: ['1st District', '2nd District', '3rd District', '4th District', '5th District', '6th District']
+  //   },
+  //   'Rizal': {
+  //     localities: ['Antipolo', 'Cainta', 'Taytay', 'Rodriguez', 'San Mateo', 'Tanay', 'Teresa'],
+  //     congressionals: ['1st District', '2nd District', '3rd District', '4th District']
+  //   },
+  //   'Quezon': {
+  //     localities: ['Lucena', 'Tayabas', 'Candelaria', 'Sariaya', 'Lucban', 'Infanta', 'Pagbilao'],
+  //     congressionals: ['1st District', '2nd District', '3rd District', '4th District']
+  //   }
+  // };
 
   const [formData, setFormData] = useState({
-    // Location data
     province: '',
-    congressional: '',
     locality: '',
-    locationName: '',
-    site: '', // site_name in location table
-    category: '',
-    longitude: '',
-    latitude: '',
-
-    // AP Site data
-    siteId: '', // site_name in apsites table
-    siteName: '',
-    contract: '',
-    project: '',
-    procurement: '',
-    technology: '',
-    linkProvider: '',
-    bandwidth: '',
-    ispProvider: '',
-    activationDate: '',
-    endOfContract: ''
+    congDistrict: ''
   });
 
+  const [provinceData, setProvinceData] = useState({});
   const [localityOptions, setLocalityOptions] = useState([]);
   const [congressionalOptions, setCongressionalOptions] = useState([]);
 
-  // Update locality and congressional options when province changes
+  // Load JSON once
+  useEffect(() => {
+    fetch('src/data/congressional-district.json')
+      .then(res => res.json())
+      .then(data => {
+        const dataMap = {};
+        data.province.forEach(province => {
+          const localitiesSet = new Set();
+          const congressionalSet = new Set();
+
+          province.districts.forEach(district => {
+            district.municipalities.forEach(locality => {
+              localitiesSet.add(locality);
+            });
+            district.district_number.forEach(num => {
+              congressionalSet.add(`District ${num}`);
+            });
+          });
+
+          dataMap[province.name] = {
+            localities: Array.from(localitiesSet),
+            congressionals: Array.from(congressionalSet)
+          };
+        });
+
+        setProvinceData(dataMap);
+      })
+      .catch(err => console.error('Error loading JSON:', err));
+  }, []);
+
+  // Update options when province changes
   useEffect(() => {
     if (formData.province && provinceData[formData.province]) {
       setLocalityOptions(provinceData[formData.province].localities);
       setCongressionalOptions(provinceData[formData.province].congressionals);
-
-      // Reset locality and congressional when province changes
       setFormData(prev => ({
         ...prev,
         locality: '',
-        congressional: ''
+        congDistrict: ''
       }));
     } else {
       setLocalityOptions([]);
       setCongressionalOptions([]);
     }
-  }, [formData.province]);
+  }, [formData.province, provinceData]);
+
+  // Handle form changes
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+
 
   // Close search results when clicking outside
   useEffect(() => {
@@ -116,7 +137,7 @@ const AddWifiSitePage = () => {
     setIsSearching(true);
 
     try {
-      const response = await fetch(`http://localhost:5000/api/locations/search?query=${encodeURIComponent(query)}`);
+      const response = await fetch(`http://localhost:5000/api/location/search?query=${encodeURIComponent(query)}`);
       const data = await response.json();
 
       if (response.ok) {
@@ -137,30 +158,26 @@ const AddWifiSitePage = () => {
 
   // Select a location from search results
   const selectLocation = (location) => {
-    setFormData({
-      ...formData,
-      province: location.province || '',
-      congressional: location.congressional || '',
-      locality: location.locality || '',
+    // Set locality and congressional options before setting province so it won't be cleared
+    if (provinceData[location.province]) {
+      setLocalityOptions(provinceData[location.province].localities);
+      setCongressionalOptions(provinceData[location.province].congressionals);
+    }
+
+    setFormData(prev => ({
+      ...prev,
+      locationID: location.location_id || '',
       locationName: location.location_name || '',
-      site: location.site_name || '',
-      category: location.category || '',
-      longitude: location.longitude ? location.longitude.toString() : '',
-      latitude: location.latitude ? location.latitude.toString() : '',
-      // Keep AP Site data unchanged
-    });
+      province: location.province || '',
+      locality: location.locality || '',
+      congDistrict: location.congressional_district || '',
+      cluster: location.cluster || '',
+      category: location.category || ''
+    }));
 
     setShowSearchResults(false);
     setSearchQuery(location.location_name || '');
-    setShowNewLocationForm(true); // Show the form with populated data
-  };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value
-    });
+    setShowNewLocationForm(true);
   };
 
   const handleSubmit = async () => {
@@ -168,7 +185,7 @@ const AddWifiSitePage = () => {
 
 
     // Validate required fields
-    if (!formData.locationName || !formData.siteId) {
+    if (!formData.locationName || !formData.sideCode) {
       alert('Location name and AP Site name are required');
       return;
     }
@@ -191,25 +208,31 @@ const AddWifiSitePage = () => {
 
         // Clear the form
         setFormData({
-          province: '',
-          congressional: '',
-          locality: '',
+          locationID: '',
           locationName: '',
-          site: '',
+          province: '',
+          locality: '',
+          congDistrict: '',
+          cluster: '',
           category: '',
-          longitude: '',
-          latitude: '',
-          siteId: '',
+
+          // AP Site data
+          sideCode: '', // site_name in apsites table
           siteName: '',
+          contractStatus: '',
+          dateActivation: '',
+          dateEndContract: '',
           contract: '',
-          project: '',
-          procurement: '',
-          technology: '',
+          siteType: '',
+          cmsProvider: '',
           linkProvider: '',
           bandwidth: '',
-          ispProvider: '',
-          activationDate: '',
-          endOfContract: ''
+          latitude: '',
+          longitude: '',
+          termination: '',
+          year: '',
+          dateAccepted: '',
+          dateDeclaration: ''
         });
 
         setSearchQuery('');
@@ -230,14 +253,13 @@ const AddWifiSitePage = () => {
     if (showNewLocationForm) {
       setFormData({
         ...formData,
-        province: '',
-        congressional: '',
-        locality: '',
+        locationID: '',
         locationName: '',
-        site: '',
-        category: '',
-        longitude: '',
-        latitude: '',
+        province: '',
+        locality: '',
+        congDistrict: '',
+        cluster: '',
+        category: ''
       });
       setSearchQuery('');
     }
@@ -340,75 +362,16 @@ const AddWifiSitePage = () => {
                     {searchQuery ? "Using selected location" : "Adding new location of AP sites"}
                   </h2>
 
-                  <div className="grid grid-cols-3 gap-4 mb-4">
+                  <div className="container grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3  space-y-9 space-x-4 mb-8">
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Location ID</label>
                       <input
                         type="text"
-                        name="lotId"
-                        value={formData.lotId}
+                        name="locationID"
+                        value={formData.locationID}
                         onChange={handleChange}
                         className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                       />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">Province</label>
-                      <select
-                        name="province"
-                        value={formData.province}
-                        onChange={handleChange}
-                        className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
-                        required
-                      >
-                        <option value="" disabled selected className="text-gray-400">Select a Province</option>
-                        <option value="Cavite">Cavite</option>
-                        <option value="Laguna">Laguna</option>
-                        <option value="Batangas">Batangas</option>
-                        <option value="Rizal">Rizal</option>
-                        <option value="Quezon">Quezon</option>
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">Congressional</label>
-                      <select
-                        name="congressional"
-                        value={formData.congressional}
-                        onChange={handleChange}
-                        className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
-                        disabled={!formData.province}
-                      >
-                        <option value="" disabled selected className="text-gray-400">
-                          {formData.province ? "Select Congressional District" : "Congressional District"}
-                        </option>
-                        {congressionalOptions.map((congressional, index) => (
-                          <option key={index} value={congressional}>
-                            {congressional}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">Locality</label>
-                      <select
-                        name="locality"
-                        value={formData.locality}
-                        onChange={handleChange}
-                        className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
-                        disabled={!formData.province}
-                      >
-                        <option value="" disabled selected className="text-gray-400">
-                          {formData.province ? "Select Locality" : "Locality"}
-                        </option>
-                        {localityOptions.map((locality, index) => (
-                          <option key={index} value={locality}>
-                            {locality}
-                          </option>
-                        ))}
-                      </select>
                     </div>
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Location Name</label>
@@ -420,68 +383,111 @@ const AddWifiSitePage = () => {
                         className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                       />
                     </div>
-                  </div>
 
-                  <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
-                      <label className="block text-xs text-gray-600 mb-1">Site Type</label>
+                      <label className="block text-xs text-gray-600 mb-1">Province</label>
+                      <select
+                        name="province"
+                        value={formData.province}
+                        onChange={handleChange}
+                        className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
+                        required
+                      >
+                        <option value="" disabled>Select a Province</option>
+                        {Object.keys(provinceData).map((province, index) => (
+                          <option key={index} value={province}>{province}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Locality</label>
+                      <select
+                        name="locality"
+                        value={formData.locality}
+                        onChange={handleChange}
+                        className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
+                        disabled={!formData.province}
+                      >
+                        <option value="" disabled>
+                          {formData.province ? "Select Locality" : "Locality"}
+                        </option>
+                        {localityOptions.map((locality, index) => (
+                          <option key={index} value={locality}>{locality}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Congressional District</label>
+                      <select
+                        name="congDistrict"
+                        value={formData.congDistrict}
+                        onChange={handleChange}
+                        className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
+                        disabled={!formData.province}
+                      >
+                        <option value="" disabled>
+                          {formData.province ? "Select Congressional District" : "Congressional District"}
+                        </option>
+                        {congressionalOptions.map((district, index) => (
+                          <option key={index} value={district}>{district}</option>
+                        ))}
+                      </select>
+                    </div>
+
+
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Cluster</label>
                       <input
                         type="text"
-                        name="site"
-                        value={formData.site}
+                        name="cluster"
+                        value={formData.cluster}
                         onChange={handleChange}
                         className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                       />
                     </div>
                     <div>
                       <label className="block text-xs text-gray-600 mb-1">Category</label>
-                      <input
-                        type="text"
+                      <select
                         name="category"
                         value={formData.category}
                         onChange={handleChange}
                         className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
-                      />
+                      >
+                        <option value="" disabled={formData.category !== ""}>
+                          Select category
+                        </option>
+                        <option value="Plaza and Open Areas">Plaza and Open Areas</option>
+                        <option value="Government Hospitals and RHUs">Government Hospitals and RHUs</option>
+                        <option value="National and Local Government Offices">National and Local Government Offices</option>
+                        <option value="Integrated HS">Integrated HS</option>
+                        <option value="High School">High School</option>
+                        <option value="Elementary School">Elementary School</option>
+                        <option value="Public Libraries">Public Spaces</option>
+                        <option value="State Universities and Colleges">SUC</option>
+                        <option value="Tourism Sites">Tourism Sites</option>
+                        <option value="Transport Terminals">Transport Terminals</option>
+                      </select>
                     </div>
                   </div>
-
-                  <div className="grid grid-cols-2 gap-4 mb-4">
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">Longitude</label>
-                      <input
-                        type="text"
-                        name="longitude"
-                        value={formData.longitude}
-                        onChange={handleChange}
-                        className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs text-gray-600 mb-1">Latitude</label>
-                      <input
-                        type="text"
-                        name="latitude"
-                        value={formData.latitude}
-                        onChange={handleChange}
-                        className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
-                      />
-                    </div>
-                  </div>
+                  <hr class="border-t-1 border-gray-400 my-4" />
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
 
           <div className="mb-8">
-            <h2 className="text-sm font-medium mb-4">AP Site Information</h2>
+            <h2 className="text-md font-medium mb-4">AP Site Information
+            </h2>
 
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="container grid sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 space-y-9 space-x-4 mb-8">
               <div>
                 <label className="block text-xs text-gray-600 mb-1">Site Code</label>
                 <input
                   type="text"
-                  name="siteId"
-                  value={formData.siteId}
+                  name="sideCode"
+                  value={formData.sideCode}
                   onChange={handleChange}
                   className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                 />
@@ -490,7 +496,7 @@ const AddWifiSitePage = () => {
                 <label className="block text-xs text-gray-600 mb-1">AP Site Name</label>
                 <input
                   type="text"
-                  name="siteId"
+                  name="siteName"
                   value={formData.siteName}
                   onChange={handleChange}
                   className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
@@ -499,12 +505,12 @@ const AddWifiSitePage = () => {
               <div>
                 <label className="block text-xs text-gray-600 mb-1">Contract Status</label>
                 <select
-                  name="contract"
-                  value={formData.contract}
+                  name="contractStatus"
+                  value={formData.contractStatus}
                   onChange={handleChange}
                   className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                 >
-                  <option value="" disabled={formData.contract !== ""}>
+                  <option value="" disabled={formData.contractStatus !== ""}>
                     Select status
                   </option>
                   <option value="Active">Active</option>
@@ -515,42 +521,93 @@ const AddWifiSitePage = () => {
                 </select>
               </div>
 
-            </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-xs text-gray-600 mb-1">Project</label>
+                <label className="block text-xs text-gray-600 mb-1">Activation Date</label>
                 <input
-                  type="text"
-                  name="project"
-                  value={formData.project}
+                  type="date"
+                  name="dateActivation"
+                  value={formData.dateActivation}
                   onChange={handleChange}
                   className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                 />
               </div>
-              <div>
-                <label className="block text-xs text-gray-600 mb-1">Procurement</label>
+              <div class="break-after-column">
+                <label className="block text-xs text-gray-600 mb-1">End of Contract</label>
                 <input
-                  type="text"
-                  name="procurement"
-                  value={formData.procurement}
+                  type="date"
+                  name="dateEndContract"
+                  value={formData.dateEndContract}
                   onChange={handleChange}
                   className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                 />
               </div>
-            </div>
+              <div >
+                <label className="block text-xs text-gray-600 mb-1">Contract</label>
+                <input
+                  type="text"
+                  name="contract"
+                  value={formData.contract}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
+                />
+              </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <label className="block text-xs text-gray-600 mb-1">Technology</label>
+                <label className="block text-xs text-gray-600 mb-1">Site Type</label>
+                <select
+                  name="siteType"
+                  value={formData.siteType}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
+                >
+                  <option value="" disabled={formData.category !== ""}>
+                    Select category
+                  </option>
+                  <option value="*PM">Public Market</option>
+                  <option value="*PP">Parks and Playground</option>
+                  <option value="BGY">Barangay</option>
+                  <option value="CQF">Clinical Quality Framework</option>
+                  <option value="DRRMO">Disaster Risk Reduction and Management Office</option>
+                  <option value="FO">Field Office</option>
+                  <option value="HEI-SUC">Higher Education Institutions - State Universities and Colleges</option>
+
+                  <option value="HSP"> Health Service Provider </option>
+                  <option value="LGU"> Local Government Unit </option>
+                  <option value="LGU - BRGY"> Local Government Unit - Barangay </option>
+                  <option value="LGU - HALL"> Local Government Unit - Municipal Hall / City Hall </option>
+                  <option value="LGU - HEALTH"> Local Government Unit - Heath Services </option>
+                  <option value="LGU - OTHERS"> Local Government Unit - Others </option>
+                  <option value="LGU - POL"> Local Government Unit - Police </option>
+                  <option value="LGU - TOUR"> Local Government Unit - Tourism </option>
+                  <option value="LIB"> Library </option>
+                  <option value="MKT"> Market </option>
+                  <option value="NGA"> National Government Agency </option>
+                  <option value="PES"> Public Elementary School </option>
+                  <option value="PHS"> Public High School </option>
+                  <option value="PLZ"> Plaza </option>
+                  <option value="PP"> PP </option>
+                  <option value="RHU"> Rural Health Unit </option>
+                  <option value="SEA"> SEA </option>
+                  <option value="SUC"> State Universities and Colleges </option>
+                  <option value="TRM - LAND"> Tourism - Land </option>
+                  <option value="TRM - SEA"> Tourism - Sea </option>
+
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">CMS Provider</label>
                 <input
                   type="text"
-                  name="technology"
-                  value={formData.technology}
+                  name="cmsProvider"
+                  value={formData.cmsProvider}
                   onChange={handleChange}
                   className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                 />
               </div>
+
+
+
               <div>
                 <label className="block text-xs text-gray-600 mb-1">Link Provider</label>
                 <input
@@ -561,10 +618,7 @@ const AddWifiSitePage = () => {
                   className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                 />
               </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
+              <div className="break-after-column">
                 <label className="block text-xs text-gray-600 mb-1">Bandwidth</label>
                 <input
                   type="text"
@@ -575,34 +629,61 @@ const AddWifiSitePage = () => {
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-600 mb-1">ISP Provider</label>
+                <label className="block text-xs text-gray-600 mb-1">Latitude</label>
                 <input
                   type="text"
-                  name="ispProvider"
-                  value={formData.ispProvider}
-                  onChange={handleChange}
-                  className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 mb-8">
-              <div>
-                <label className="block text-xs text-gray-600 mb-1">Activation Date</label>
-                <input
-                  type="date"
-                  name="activationDate"
-                  value={formData.activationDate}
+                  name="latitude"
+                  value={formData.latitude}
                   onChange={handleChange}
                   className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                 />
               </div>
               <div>
-                <label className="block text-xs text-gray-600 mb-1">End of Contract</label>
+                <label className="block text-xs text-gray-600 mb-1">Longitude</label>
                 <input
-                  type="date"
-                  name="endOfContract"
-                  value={formData.endOfContract}
+                  type="text"
+                  name="longitude"
+                  value={formData.longitude}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">Termination</label>
+                <input
+                  type="text"
+                  name="termination"
+                  value={formData.termination}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">Year Accepted</label>
+                <input
+                  type="text"
+                  name="year"
+                  value={formData.year}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">Date Accepted</label>
+                <input
+                  type="text"
+                  name="dateAccepted"
+                  value={formData.dateAccepted}
+                  onChange={handleChange}
+                  className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
+                />
+              </div>
+              <div>
+                <label className="block text-xs text-gray-600 mb-1">Date of Declaration</label>
+                <input
+                  type="text"
+                  name="dateDeclaration"
+                  value={formData.dateDeclaration}
                   onChange={handleChange}
                   className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                 />

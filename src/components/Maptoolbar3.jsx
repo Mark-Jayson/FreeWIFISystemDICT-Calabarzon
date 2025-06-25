@@ -1,8 +1,7 @@
+// MapToolbar2.jsx
 import React, { useState, useRef, useEffect } from 'react';
-// COMMENTED OUT: Import from hardcoded JSON utils file
-// import { searchFWSLocations } from '../utils/fwsLocations';
 
-const MapToolbar = ({ mapInstance, onSearch, onReset }) => { // Added onReset prop
+const MapToolbar = ({ mapInstance, setPanelData, onSearch, onLocationSelected }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
@@ -71,7 +70,7 @@ const MapToolbar = ({ mapInstance, onSearch, onReset }) => { // Added onReset pr
     setShowResults(results.length > 0);
   };
 
-  // Handle search result selection - MODIFIED
+  // Handle search result selection - UPDATED for database structure
   const handleResultClick = async (location) => {
     // Hide the search results dropdown
     setShowResults(false);
@@ -80,52 +79,56 @@ const MapToolbar = ({ mapInstance, onSearch, onReset }) => { // Added onReset pr
     setSearchTerm('');
 
     try {
-      // Fetch map pin data for this location to get coordinates and ensure it's a valid location for map interaction
-      // This is necessary because the search results might not contain lat/lng directly
-      const response = await fetch(`http://localhost:5000/api/map-pins`);
-      const allSites = await response.json();
+      // Get site data for this location from database
+      const siteResponse = await fetch(`http://localhost:5000/api/map-pins`);
+      const allSites = await siteResponse.json();
 
-      // Find a site that matches this location for coordinates
-      const targetSite = allSites.find(site => site.location_id === location.loc_id);
+      // Find sites that match this location
+      const locationSites = allSites.filter(site =>
+        site.location_id === location.loc_id
+      );
 
-      if (targetSite && mapInstance) {
+      // Construct the full location data including apSites for LocationInfoPanel
+      const fullLocationData = {
+        location_name: location.location_name,
+        location_id: location.loc_id,
+        category: location.category,
+        province: location.province,
+        locality: location.locality,
+        congressional_district: location.congressional_district,
+        // Take latitude/longitude from the first site if available, or location if it has them
+        latitude: location.latitude || (locationSites.length > 0 ? locationSites[0].latitude : null),
+        longitude: location.longitude || (locationSites.length > 0 ? locationSites[0].longitude : null),
+        apSites: locationSites.map(site => ({
+          name: site.site_name,
+          technology: site.technology,
+          status: site.contract_status,
+          site_id: site.site_id
+        }))
+      };
+
+      if (locationSites.length > 0 && mapInstance) {
+        // Use the first site's coordinates for map navigation
+        const firstSite = locationSites[0];
         mapInstance.flyTo({
-          center: [parseFloat(targetSite.longitude), parseFloat(targetSite.latitude)],
+          center: [firstSite.longitude, firstSite.latitude],
           zoom: 15,
           essential: true
         });
       }
 
-      // Trigger search in MainDashboard, passing the full location object
-      // MainDashboard will then use this loc_id to fetch detailed data for LocationInfoPanel
-      onSearch(location);
+      // Trigger search with the selected location's data (this will clear the InfoPanel)
+      onSearch(''); // Clear search query to close InfoPanel
+
+      // Call the new prop to pass the full location data to MainDashboard
+      if (onLocationSelected) {
+        onLocationSelected(fullLocationData);
+      }
 
     } catch (error) {
       console.error('Error handling result click:', error);
-      // Even if map fly or data fetch fails, still try to trigger the onSearch to open a panel
-      // onSearch(location.location_name); // Fallback to sending just the name
-    }
-  };
-
-  // NEW: Handle reset button click
-  const handleReset = () => {
-    // Clear search input and results
-    setSearchTerm('');
-    setSearchResults([]);
-    setShowResults(false);
-
-    // Reset map to initial position and zoom
-    if (mapInstance) {
-      mapInstance.flyTo({
-        center: [121.2, 14.1], // INITIAL_CENTER from MainDashboard
-        zoom: 8.8, // INITIAL_ZOOM from MainDashboard
-        essential: true
-      });
-    }
-
-    // Call the reset function from MainDashboard to clear all panels and state
-    if (onReset) {
-      onReset();
+      // Still trigger search even if other operations fail
+      onSearch('');
     }
   };
 
@@ -194,17 +197,6 @@ const MapToolbar = ({ mapInstance, onSearch, onReset }) => { // Added onReset pr
         )}
       </div>
 
-      {/* NEW: Reset Button */}
-      <button
-        onClick={handleReset}
-        className={`px-3 py-2 mr-4 bg-red-500 text-white rounded-full text-xs whitespace-nowrap transition-all duration-200 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300 ${hoveredButton === 'reset' ? 'bg-red-600' : ''}`}
-        onMouseEnter={() => setHoveredButton('reset')}
-        onMouseLeave={() => setHoveredButton(null)}
-        title="Reset map view and clear all panels"
-      >
-        Reset
-      </button>
-
       <div className="text-gray-700 mr-2 text-sm whitespace-nowrap">
         Filters
       </div>
@@ -250,4 +242,4 @@ const MapToolbar = ({ mapInstance, onSearch, onReset }) => { // Added onReset pr
   );
 };
 
-export default MapToolbar;
+export default MapToolbar1;
