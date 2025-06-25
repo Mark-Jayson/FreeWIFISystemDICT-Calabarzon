@@ -289,7 +289,13 @@ const Dashboard = () => {
   }, [selectedProvince]);
 
   return (
-    <div className="flex-1 bg-blue-50 overflow-y-auto">
+    <div 
+      className="flex-1 overflow-y-auto"
+      style={{ 
+        backgroundColor: 'rgba(255, 255, 255, 0)',
+        WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
+      }}
+    >
       <Header
         region="Region IV – A Calabarzon"
         onProvinceSelect={handleProvinceSelect}
@@ -369,11 +375,27 @@ const Dashboard = () => {
 
           {/* Right Column - Charts & Tables */}
           <div className="flex flex-col gap-4">
-            <div className="bg-white rounded-lg shadow p-4">
+            <div 
+              className="rounded-lg shadow p-4"
+              style={{ 
+                backgroundColor: 'rgba(255, 255, 255, 1)',
+                borderColor: 'rgba(233, 236, 239, 1)',
+                borderWidth: '1px',
+                borderStyle: 'solid'
+              }}
+            >
               <ExpiringContractsTable contracts={expiringContracts} />
             </div>
 
-            <div className="bg-white rounded-lg shadow p-4">
+            <div 
+              className="rounded-lg shadow p-4"
+              style={{ 
+                backgroundColor: 'rgba(255, 255, 255, 1)',
+                borderColor: 'rgba(233, 236, 239, 1)',
+                borderWidth: '1px',
+                borderStyle: 'solid'
+              }}
+            >
               <YearlyActivationChart
                 title="No. of WiFi Activated per Year of Activation"
                 data={yearlyActivationData}
