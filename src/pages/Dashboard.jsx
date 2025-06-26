@@ -316,18 +316,7 @@ const Dashboard = () => {
         onGenerateReport={handleGenerateReport}
       />
 
-<<<<<<< HEAD
-      <div 
-        id="dashboard-content" 
-        className="px-6 pb-6 pt-6"
-        style={{ 
-          fontFamily: 'ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
-          WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
-        }}
-      >
-=======
       <div id="dashboard-content" className="px-6 pb-6 pt-6">
->>>>>>> 16aebd70dbd3af0ef3c383feedc8243d5b49fb97
         {/* Recent Activity Summary Row */}
         <div className="mb-6">
           <RecentActivitySummaryCard
