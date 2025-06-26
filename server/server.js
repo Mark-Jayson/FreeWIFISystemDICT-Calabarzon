@@ -121,8 +121,7 @@ async function createTablesIfNotExist() {
             longitude NUMERIC(9,6),
             isterminated BOOLEAN,
             CONSTRAINT unique_location_composite UNIQUE (province, locality, location_name)
-        
-            );
+        );
 
         CREATE TABLE IF NOT EXISTS public.site (
             site_id SERIAL PRIMARY KEY,
@@ -131,7 +130,7 @@ async function createTablesIfNotExist() {
             site_name VARCHAR(100),
             contract_status VARCHAR(20),
             activation_date DATE,
-            end_of_contract DATE,   
+            end_of_contract DATE,
             contract VARCHAR(100),
             site_type VARCHAR(100),
             cms_provider VARCHAR(100),
@@ -151,12 +150,22 @@ async function createTablesIfNotExist() {
 
     try {
         await pool.query(createTablesQuery);
-        console.log('Location and site tables created or already exist.');
+
+        // Reseed SERIAL sequences to avoid duplicate key issues
+        await pool.query(`
+            SELECT setval('location_loc_id_seq', COALESCE((SELECT MAX(loc_id) FROM public.location), 0));
+        `);
+        await pool.query(`
+            SELECT setval('site_site_id_seq', COALESCE((SELECT MAX(site_id) FROM public.site), 0));
+        `);
+
+        console.log('Location and site tables created or already exist. Sequences reseeded.');
     } catch (error) {
         console.error('Error creating database tables:', error);
         throw error;
     }
 }
+
 
 // Initialize tables when server starts
 (async () => {
@@ -1073,7 +1082,73 @@ app.get('/api/recently-added-sites', async (req, res) => {
 
     try {
         const values = [];
-        let filterClause = `s.contract_status = 'ACTIVE' AND s.date_accepted IS NOT NULL`;
+        let filterClause = `(s.contract_status = 'ACTIVE' OR s.contract_status IS NULL) AND s.date_accepted IS NOT NULL`;
+
+        if (province && province.toLowerCase() !== 'all') {
+            filterClause += ` AND l.province ILIKE $1`;
+            values.push(province);
+        } else {
+            filterClause += ` AND LOWER(l.province) IN ('cavite', 'laguna', 'batangas', 'rizal', 'quezon')`;
+        }
+
+        const result = await pool.query(`
+            SELECT 
+                s.site_id,
+                s.site_name,
+                s.contract_status AS status,
+                s.date_accepted,
+                l.province,
+                l.locality AS municipality
+            FROM public.site s
+            JOIN public.location l ON s.location_id = l.loc_id
+            WHERE ${filterClause}
+        `, values);
+
+        // Calculate timestamp for the start of yesterday
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        yesterday.setHours(0, 0, 0, 0);
+        const yesterdayTime = yesterday.getTime();
+
+        const recentlyAdded = result.rows
+            .map(row => {
+                const raw = row.date_accepted;
+                if (!raw) return null;
+
+                const parsedDate = new Date(raw);
+                if (isNaN(parsedDate)) return null;
+
+                // ✅ Compare by timestamp
+                if (parsedDate.getTime() < yesterdayTime) return null;
+
+                return {
+                    site_id: row.site_id,
+                    site_name: row.site_name,
+                    province: row.province,
+                    municipality: row.municipality,
+                    status: row.status || 'ACTIVE',
+                    date_added: parsedDate.toISOString().split('T')[0],
+                    _timestamp: parsedDate.getTime()
+                };
+            })
+            .filter(Boolean)
+            .sort((a, b) => b._timestamp - a._timestamp)
+            .slice(0, 20)
+            .map(({ _timestamp, ...rest }) => rest);
+
+        res.status(200).json(recentlyAdded);
+    } catch (error) {
+        console.error('❌ Error fetching recently added sites:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+app.get('/api/recently-terminated-sites', async (req, res) => {
+    const { province } = req.query;
+
+    try {
+        const values = [];
+        let filterClause = `(s.contract_status = 'TERMINATED' OR s.contract_status = 'ACTIVE') AND s.end_of_contract IS NOT NULL`;
 
         if (province && province.toLowerCase() !== 'all') {
             filterClause += ` AND l.province ILIKE $1`;
@@ -1087,86 +1162,6 @@ app.get('/api/recently-added-sites', async (req, res) => {
         s.site_id,
         s.site_name,
         s.contract_status AS status,
-        s.date_accepted,
-        l.province,
-        l.locality AS municipality
-      FROM public.site s
-      JOIN public.location l ON s.location_id = l.loc_id
-      WHERE ${filterClause}
-    `, values);
-
-        const now = new Date();
-        const thirtyDaysAgo = new Date(now);
-        thirtyDaysAgo.setDate(now.getDate() - 30);
-
-        const monthMap = {
-            jan: '01', feb: '02', mar: '03', apr: '04', may: '05', jun: '06',
-            jul: '07', aug: '08', sep: '09', oct: '10', nov: '11', dec: '12'
-        };
-
-        const parsed = result.rows.map(row => {
-            const raw = (row.date_accepted || '').trim().toLowerCase();
-            let parsedDate = null;
-
-            try {
-                if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
-                    parsedDate = new Date(raw);
-                } else if (/^\d{2}\/\d{2}\/\d{4}$/.test(raw)) {
-                    const [d, m, y] = raw.split('/').map(Number);
-                    parsedDate = new Date(`${y}-${m}-${d}`);
-                } else if (/^\d{2}\/\d{4}$/.test(raw)) {
-                    const [m, y] = raw.split('/').map(Number);
-                    parsedDate = new Date(`${y}-${m}-01`);
-                } else if (/^\d{2}-[a-z]{3}-\d{2}$/.test(raw)) {
-                    const [d, mon, y] = raw.split('-');
-                    const month = monthMap[mon.toLowerCase()];
-                    const fullYear = 2000 + parseInt(y);
-                    parsedDate = new Date(`${fullYear}-${month}-${d}`);
-                }
-            } catch (_) { }
-
-            if (!parsedDate || isNaN(parsedDate)) return null;
-            if (parsedDate < thirtyDaysAgo || parsedDate > now) return null; // ✅ last 30 days only
-
-            return {
-                site_id: row.site_id,
-                site_name: row.site_name,
-                province: row.province,
-                municipality: row.municipality,
-                status: row.status || 'ACTIVE',
-                date_added: parsedDate.toISOString().split('T')[0],
-                _parsedDate: parsedDate
-            };
-        }).filter(Boolean)
-            .sort((a, b) => b._parsedDate - a._parsedDate)
-            .slice(0, 20);
-
-        res.status(200).json(parsed.map(({ _parsedDate, ...r }) => r));
-    } catch (error) {
-        console.error('❌ Error fetching recently added sites:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-});
-
-app.get('/api/recently-terminated-sites', async (req, res) => {
-  const { province } = req.query;
-
-  try {
-    const values = [];
-    let filterClause = `(s.contract_status = 'TERMINATED' OR s.contract_status = 'ACTIVE') AND s.end_of_contract IS NOT NULL`;
-
-    if (province && province.toLowerCase() !== 'all') {
-      filterClause += ` AND l.province ILIKE $1`;
-      values.push(province);
-    } else {
-      filterClause += ` AND LOWER(l.province) IN ('cavite', 'laguna', 'batangas', 'rizal', 'quezon')`;
-    }
-
-    const result = await pool.query(`
-      SELECT 
-        s.site_id,
-        s.site_name,
-        s.contract_status AS status,
         s.end_of_contract,
         l.province,
         l.locality AS municipality
@@ -1175,60 +1170,60 @@ app.get('/api/recently-terminated-sites', async (req, res) => {
       WHERE ${filterClause}
     `, values);
 
-    const now = new Date();
+        const now = new Date();
 
-    const monthMap = {
-      jan: '01', feb: '02', mar: '03', apr: '04',
-      may: '05', jun: '06', jul: '07', aug: '08',
-      sep: '09', oct: '10', nov: '11', dec: '12'
-    };
-
-    const recentlyTerminated = result.rows.map(row => {
-      const raw = row.end_of_contract?.trim().toLowerCase();
-      let parsedDate = null;
-
-      try {
-        const match = raw.match(/^(\d{1,2})-([a-z]{3})-(\d{2})$/i);
-        if (!match) return null;
-
-        const [_, dayStr, monStr, yyStr] = match;
-        const day = parseInt(dayStr);
-        const month = monthMap[monStr.toLowerCase()];
-        const year = 2000 + parseInt(yyStr);
-
-        if (!day || !month || isNaN(year)) return null;
-
-        const isoDate = `${year}-${month}-${String(day).padStart(2, '0')}`;
-        parsedDate = new Date(isoDate);
-
-        if (isNaN(parsedDate)) return null;
-
-        // ✅ Only include if the date is in the past or today
-        if (parsedDate > now) return null;
-
-        return {
-          site_id: row.site_id,
-          site_name: row.site_name,
-          status: row.status === 'ACTIVE' ? 'EXPIRED' : row.status, // Label ACTIVES with past dates as EXPIRED
-          province: row.province,
-          municipality: row.municipality,
-          date_terminated: isoDate,
-          _parsedDate: parsedDate
+        const monthMap = {
+            jan: '01', feb: '02', mar: '03', apr: '04',
+            may: '05', jun: '06', jul: '07', aug: '08',
+            sep: '09', oct: '10', nov: '11', dec: '12'
         };
-      } catch {
-        return null;
-      }
-    })
-    .filter(Boolean)
-    .sort((a, b) => b._parsedDate - a._parsedDate)
-    .slice(0, 20)
-    .map(({ _parsedDate, ...rest }) => rest);
 
-    res.status(200).json(recentlyTerminated);
-  } catch (error) {
-    console.error('❌ Error fetching recently terminated sites:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
+        const recentlyTerminated = result.rows.map(row => {
+            const raw = row.end_of_contract?.trim().toLowerCase();
+            let parsedDate = null;
+
+            try {
+                const match = raw.match(/^(\d{1,2})-([a-z]{3})-(\d{2})$/i);
+                if (!match) return null;
+
+                const [_, dayStr, monStr, yyStr] = match;
+                const day = parseInt(dayStr);
+                const month = monthMap[monStr.toLowerCase()];
+                const year = 2000 + parseInt(yyStr);
+
+                if (!day || !month || isNaN(year)) return null;
+
+                const isoDate = `${year}-${month}-${String(day).padStart(2, '0')}`;
+                parsedDate = new Date(isoDate);
+
+                if (isNaN(parsedDate)) return null;
+
+                // ✅ Only include if the date is in the past or today
+                if (parsedDate > now) return null;
+
+                return {
+                    site_id: row.site_id,
+                    site_name: row.site_name,
+                    status: row.status === 'ACTIVE' ? 'EXPIRED' : row.status, // Label ACTIVES with past dates as EXPIRED
+                    province: row.province,
+                    municipality: row.municipality,
+                    date_terminated: isoDate,
+                    _parsedDate: parsedDate
+                };
+            } catch {
+                return null;
+            }
+        })
+            .filter(Boolean)
+            .sort((a, b) => b._parsedDate - a._parsedDate)
+            .slice(0, 20)
+            .map(({ _parsedDate, ...rest }) => rest);
+
+        res.status(200).json(recentlyTerminated);
+    } catch (error) {
+        console.error('❌ Error fetching recently terminated sites:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
 // Start server
