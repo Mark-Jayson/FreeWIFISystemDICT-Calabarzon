@@ -27,10 +27,10 @@ const FreeWifiStatCard = ({
   const forRenewalPercentage = totalSites > 0 ? ((forRenewalSites / totalSites) * 100).toFixed(1) : 0;
   const unknownPercentage = totalSites > 0 ? ((unknownSites / totalSites) * 100).toFixed(1) : 0;
 
-  // Custom RGBA colors converted from your OKLAB/OKLCH values
+  // RGB color palette
   const colors = {
-    background: 'rgba(255, 255, 255, 1)', // oklab(0.999994 0.0000455677 0.0000200868 / 1)
-    border: 'rgba(236, 237, 240, 1)', // oklch(0.928 0.006 264.531)
+    background: 'rgba(255, 255, 255, 1)',
+    border: 'rgba(236, 237, 240, 1)',
     blue: {
       100: 'rgba(219, 234, 254, 1)',
       400: 'rgba(96, 165, 250, 1)',

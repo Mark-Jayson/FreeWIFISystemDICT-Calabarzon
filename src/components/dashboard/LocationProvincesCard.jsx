@@ -8,16 +8,10 @@ const LocationProvincesCard = ({
 }) => {
   const isPositiveTrend = trendValue && trendValue.startsWith('+');
   
-  // Custom RGBA colors
+  // RGB color palette
   const colors = {
-    background: 'rgba(255, 255, 255, 1)', // bg-white
-    border: 'rgba(243, 244, 246, 1)', // border-gray-100
-    text: {
-      primary: 'rgba(17, 24, 39, 1)', // text-gray-900
-      secondary: 'rgba(75, 85, 99, 1)', // text-gray-600
-      tertiary: 'rgba(55, 65, 81, 1)', // text-gray-700
-      muted: 'rgba(107, 114, 128, 1)', // text-gray-500
-    },
+    background: 'rgba(255, 255, 255, 1)',
+    border: 'rgba(236, 237, 240, 1)',
     purple: {
       400: 'rgba(196, 181, 253, 1)',
       600: 'rgba(147, 51, 234, 1)',
@@ -31,8 +25,11 @@ const LocationProvincesCard = ({
     gray: {
       50: 'rgba(249, 250, 251, 1)',
       200: 'rgba(229, 231, 235, 1)',
-    },
-    white: 'rgba(255, 255, 255, 1)',
+      500: 'rgba(107, 114, 128, 1)',
+      600: 'rgba(75, 85, 99, 1)',
+      700: 'rgba(55, 65, 81, 1)',
+      900: 'rgba(17, 24, 39, 1)',
+    }
   };
 
   return (
@@ -58,13 +55,13 @@ const LocationProvincesCard = ({
           <div>
             <h3 
               className="font-semibold text-lg"
-              style={{ color: colors.text.primary }}
+              style={{ color: colors.gray[900] }}
             >
               Locations Served
             </h3>
             <p 
               className="text-sm"
-              style={{ color: colors.text.secondary }}
+              style={{ color: colors.gray[600] }}
             >
               Active WiFi coverage areas
             </p>
@@ -76,7 +73,7 @@ const LocationProvincesCard = ({
       <div className="mb-6">
         <div 
           className="text-4xl font-bold mb-2"
-          style={{ color: colors.text.primary }}
+          style={{ color: colors.gray[900] }}
         >
           {locationCount ? locationCount.toLocaleString() : '0'}
         </div>
@@ -92,7 +89,7 @@ const LocationProvincesCard = ({
             <span className="font-medium">{trendValue}</span>
             <span 
               className="ml-1"
-              style={{ color: colors.text.muted }}
+              style={{ color: colors.gray[500] }}
             >
               vs last month
             </span>
@@ -105,7 +102,7 @@ const LocationProvincesCard = ({
         <div>
           <h4 
             className="font-medium mb-4 text-sm"
-            style={{ color: colors.text.primary }}
+            style={{ color: colors.gray[900] }}
           >
             Distribution by Province
           </h4>
@@ -119,7 +116,7 @@ const LocationProvincesCard = ({
                   />
                   <span 
                     className="text-sm font-medium"
-                    style={{ color: colors.text.tertiary }}
+                    style={{ color: colors.gray[700] }}
                   >
                     {province.name}
                   </span>
@@ -139,7 +136,7 @@ const LocationProvincesCard = ({
                   </div>
                   <span 
                     className="font-semibold text-sm w-8 text-right"
-                    style={{ color: colors.text.primary }}
+                    style={{ color: colors.gray[900] }}
                   >
                     {province.value}
                   </span>
@@ -158,7 +155,7 @@ const LocationProvincesCard = ({
         >
           <p 
             className="text-sm"
-            style={{ color: colors.text.muted }}
+            style={{ color: colors.gray[500] }}
           >
             No province data available
           </p>
