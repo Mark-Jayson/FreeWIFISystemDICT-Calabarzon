@@ -316,7 +316,15 @@ const Dashboard = () => {
         onGenerateReport={handleGenerateReport}
       />
 
-      <div id="dashboard-content" className="px-6 pb-6 pt-6">
+      <div 
+        id="dashboard-content" 
+        className="px-6 pb-6 pt-6"
+        style={{ 
+          fontFamily: 'ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
+          WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
+        }}
+      >
+
         {/* Recent Activity Summary Row */}
         <div className="mb-6">
           <RecentActivitySummaryCard
@@ -392,7 +400,7 @@ const Dashboard = () => {
               className="rounded-lg shadow p-4"
               style={{ 
                 backgroundColor: 'rgba(255, 255, 255, 1)',
-                borderColor: 'rgba(236, 237, 240, 1)', /* Converted from oklch(0.928 0.006 264.531) */
+                borderColor: 'rgba(230, 232, 236, 1)', /* Updated RGB equivalent */
                 borderWidth: '1px',
                 borderStyle: 'solid',
                 WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
@@ -405,7 +413,8 @@ const Dashboard = () => {
               className="rounded-lg shadow p-4"
               style={{ 
                 backgroundColor: 'rgba(255, 255, 255, 1)',
-                borderColor: 'rgba(236, 237, 240, 1)', /* Converted from oklch(0.928 0.006 264.531) */
+                borderColor: 'rgba(230, 232, 236, 1)', /* Updated RGB equivalent */
+
                 borderWidth: '1px',
                 borderStyle: 'solid',
                 WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'

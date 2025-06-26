@@ -127,15 +127,16 @@ const MainDashboard = () => {
 
       const fullData = await response.json();
 
+           
+              const siteOfCity = await fetch(`http://localhost:5000/api/sitesByLocality/${fullData.locality}`);
+              const locOfCity = await fetch(`http://localhost:5000/api/getLocationsOfProvince/${fullData.locality}`);
+               const province = await fetch(`http://localhost:5000/api/getProvince/${fullData.locality}`);
+              const getprovince = await province.json();
+              console.log('Province Data:', getprovince);
+               if (!locOfCity.ok) {
+                // Handle HTTP errors, e.g., 404 from your backend
+                const errorData = await locOfCity.json();
 
-      const siteOfCity = await fetch(`http://localhost:5000/api/sitesByLocality/${fullData.locality}`);
-      const locOfCity = await fetch(`http://localhost:5000/api/getLocationsOfProvince/${fullData.locality}`);
-      const province = await fetch(`http://localhost:5000/api/getProvince/${fullData.locality}`);
-      const getprovince = await province.json();
-      console.log('Province Data:', getprovince);
-      if (!locOfCity.ok) {
-        // Handle HTTP errors, e.g., 404 from your backend
-        const errorData = await locOfCity.json();
 
         throw new Error(errorData.error || `HTTP error! Status: ${locOfCity.status}`);
       }
@@ -585,14 +586,15 @@ const MainDashboard = () => {
       // Map the category filter name to its coded value, then convert to lowercase.
       const filterCategory = categ[filters.category] ? categ[filters.category].toLowerCase() : null;
 
-      // Iterate through each item received from the API.
-      // Each 'item' represents a site, but includes location details (latitude, longitude, location_id, isterminated, etc.).
-      data.forEach(item => {
-        // Check if a marker for this location_id has already been created.
-        // If it has, skip this item to avoid placing multiple markers for the same location.
-        if (processedLocationIds.has(item.location_id)) {
-          return; // Skip to the next item in the loop
-        }
+        // Iterate through each item received from the API.
+        // Each 'item' represents a site, but includes location details (latitude, longitude, location_id, isterminated, etc.).
+        data.forEach(item => {
+            // Check if a marker for this location_id has already been created.
+            // If it has, skip this item to avoid placing multiple markers for the same location.
+            if (processedLocationIds.has(item.location_id)) {
+                return; // Skip to the next item in the loop
+            }
+
 
         // --- Primary Filtering Logic ---
         // If a filter is provided, check if the item's corresponding property matches the filter.
@@ -761,14 +763,11 @@ const MainDashboard = () => {
         newMarkers.push(marker);
       });
 
-      // Update the state variable that holds all currently displayed markers.
-      // This is crucial for managing markers (e.g., clearing them later).
-      setMarkers(newMarkers);
-      console.log(`Added ${newMarkers.length} unique location markers from database`);
     } catch (err) {
       console.error('Failed to fetch map pins:', err);
     }
-  };
+
+};
 
 
   // Initialize and configure the Mapbox map
