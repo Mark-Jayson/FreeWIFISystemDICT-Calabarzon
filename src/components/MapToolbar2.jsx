@@ -1,8 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
-// COMMENTED OUT: Import from hardcoded JSON utils file
-// import { searchFWSLocations } from '../utils/fwsLocations';
+// MapToolbar.jsx
 
-const MapToolbar = ({ mapInstance, onSearch, onReset }) => { // Added onReset prop
+import React, { useState, useRef, useEffect } from 'react';
+import FilterModal from './FilterModal';
+
+const MapToolbar = ({ mapInstance, onSearch, onReset, onApplyFilters, selectedFilters }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
@@ -10,17 +11,33 @@ const MapToolbar = ({ mapInstance, onSearch, onReset }) => { // Added onReset pr
   const searchResultsRef = useRef(null);
   const [hoveredButton, setHoveredButton] = useState(null);
 
+  const [modalFilterId, setModalFilterId] = useState(null);
+
+ 
+
   const filterItems = [
-    { id: 'district', label: 'District' },
-    { id: 'technology', label: 'Technology' },
-    { id: 'elcac', label: 'ELCAC' },
-    { id: 'cida', label: 'CIDA' },
-    { id: 'status', label: 'Status' },
-    { id: 'type', label: 'Type' },
-    { id: 'classification', label: 'Classification' }
+    {
+      id: 'district',
+      label: 'District',
+      options: ['Lone', 'I', 'II', , 'III', 'IV', 'V', 'VI', 'VII', 'VIII']
+    },
+    {
+      id: 'Province',
+      label: 'Province',
+      options: ['Cavite', 'Laguna', 'Rizal', 'Batangas', 'Quezon']
+    },
+    {
+      id: 'contractStatus',
+      label: 'Contract Status',
+      options: [true, false, 'All']
+    },
+    {
+      id: 'category',
+      label: 'Category',
+      options: ['Plaza', 'Public High School', 'Tourism Sea', 'Rural Health Unit', 'Library', 'Local Government Unit - Tourism', 'Local Government Unit - Municipal Hall/City Hall', 'Integrated High School', 'Parks and Playground', 'Transport Terminals', 'Public Libraries', 'State Universities and Colleges', 'Elementary School', 'National and Local Government Offices', 'National Government Agency', 'Market']
+    }
   ];
 
-  // Handle click outside of search results
   useEffect(() => {
     function handleClickOutside(event) {
       if (searchResultsRef.current && !searchResultsRef.current.contains(event.target)) {
@@ -34,16 +51,13 @@ const MapToolbar = ({ mapInstance, onSearch, onReset }) => { // Added onReset pr
     };
   }, []);
 
-  // NEW: Database search function
   const searchDatabaseLocations = async (query) => {
     try {
       setIsSearching(true);
       const response = await fetch(`http://localhost:5000/api/location/search?query=${encodeURIComponent(query)}`);
-
       if (!response.ok) {
         throw new Error('Search request failed');
       }
-
       const data = await response.json();
       return data;
     } catch (error) {
@@ -54,40 +68,26 @@ const MapToolbar = ({ mapInstance, onSearch, onReset }) => { // Added onReset pr
     }
   };
 
-  // Handle search input change - UPDATED to use database
   const handleSearchChange = async (e) => {
     const query = e.target.value;
     setSearchTerm(query);
-
     if (query.trim() === '') {
       setSearchResults([]);
       setShowResults(false);
       return;
     }
-
-    // UPDATED: Search database locations instead of hardcoded JSON
     const results = await searchDatabaseLocations(query);
     setSearchResults(results);
     setShowResults(results.length > 0);
   };
 
-  // Handle search result selection - MODIFIED
   const handleResultClick = async (location) => {
-    // Hide the search results dropdown
     setShowResults(false);
-
-    // Clear the search input
     setSearchTerm('');
-
     try {
-      // Fetch map pin data for this location to get coordinates and ensure it's a valid location for map interaction
-      // This is necessary because the search results might not contain lat/lng directly
       const response = await fetch(`http://localhost:5000/api/map-pins`);
       const allSites = await response.json();
-
-      // Find a site that matches this location for coordinates
       const targetSite = allSites.find(site => site.location_id === location.loc_id);
-
       if (targetSite && mapInstance) {
         mapInstance.flyTo({
           center: [parseFloat(targetSite.longitude), parseFloat(targetSite.latitude)],
@@ -95,39 +95,73 @@ const MapToolbar = ({ mapInstance, onSearch, onReset }) => { // Added onReset pr
           essential: true
         });
       }
-
-      // Trigger search in MainDashboard, passing the full location object
-      // MainDashboard will then use this loc_id to fetch detailed data for LocationInfoPanel
       onSearch(location);
-
     } catch (error) {
       console.error('Error handling result click:', error);
-      // Even if map fly or data fetch fails, still try to trigger the onSearch to open a panel
-      // onSearch(location.location_name); // Fallback to sending just the name
     }
   };
 
-  // NEW: Handle reset button click
   const handleReset = () => {
-    // Clear search input and results
     setSearchTerm('');
     setSearchResults([]);
     setShowResults(false);
+    const resetFilters = {
+      district: null,
+      Province: null,
+      contractStatus: null,
+      category: null
+    };
+    // Call onApplyFilters to update the parent's state
+    if (onApplyFilters) {
+      onApplyFilters(resetFilters);
+    }
+    setModalFilterId(null);
 
-    // Reset map to initial position and zoom
     if (mapInstance) {
       mapInstance.flyTo({
-        center: [121.2, 14.1], // INITIAL_CENTER from MainDashboard
-        zoom: 8.8, // INITIAL_ZOOM from MainDashboard
+        center: [121.2, 14.1],
+        zoom: 8.8,
         essential: true
       });
     }
-
-    // Call the reset function from MainDashboard to clear all panels and state
     if (onReset) {
       onReset();
     }
   };
+
+  const openFilterModal = (filterId) => {
+    setModalFilterId(filterId);
+  };
+
+  const closeModal = () => {
+    setModalFilterId(null);
+  };
+
+   const handleFilterOptionSelect = (filterId, option) => {
+    const updatedFilters = {
+      ...selectedFilters,
+      [filterId]: option
+    };
+    if (onApplyFilters) {
+      onApplyFilters(updatedFilters);
+    }
+  };
+
+  const handleClearAllFilters = () => {
+    const clearedFilters = {
+      district: null,
+      Province: null,
+      contractStatus: null,
+      category: null
+    };
+    // Call onApplyFilters here with the cleared filters
+    if (onApplyFilters) {
+      onApplyFilters(clearedFilters);
+    }
+    console.log('All filters cleared.');
+  };
+
+  const currentFilterItem = filterItems.find(item => item.id === modalFilterId);
 
   return (
     <div className="bg-white p-3 shadow-md flex items-center">
@@ -146,7 +180,6 @@ const MapToolbar = ({ mapInstance, onSearch, onReset }) => { // Added onReset pr
           </svg>
         </div>
 
-        {/* Loading indicator */}
         {isSearching && (
           <div className="absolute z-20 mt-1 w-[280px] bg-white rounded shadow-lg p-2 text-gray-700 text-sm">
             <div className="flex items-center">
@@ -156,7 +189,6 @@ const MapToolbar = ({ mapInstance, onSearch, onReset }) => { // Added onReset pr
           </div>
         )}
 
-        {/* Search results dropdown - UPDATED for database structure */}
         {showResults && searchResults.length > 0 && !isSearching && (
           <div className="absolute z-20 mt-1 w-[280px] max-h-60 overflow-y-auto bg-white rounded shadow-lg" ref={searchResultsRef}>
             {searchResults.map((location, index) => (
@@ -184,7 +216,6 @@ const MapToolbar = ({ mapInstance, onSearch, onReset }) => { // Added onReset pr
           </div>
         )}
 
-        {/* No results message */}
         {showResults && searchResults.length === 0 && !isSearching && searchTerm.trim() !== '' && (
           <div className="absolute z-20 mt-1 w-[280px] bg-white rounded shadow-lg p-3 text-gray-700 text-sm">
             <div className="text-center text-gray-500">
@@ -194,7 +225,6 @@ const MapToolbar = ({ mapInstance, onSearch, onReset }) => { // Added onReset pr
         )}
       </div>
 
-      {/* NEW: Reset Button */}
       <button
         onClick={handleReset}
         className={`px-3 py-2 mr-4 bg-red-500 text-white rounded-full text-xs whitespace-nowrap transition-all duration-200 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300 ${hoveredButton === 'reset' ? 'bg-red-600' : ''}`}
@@ -207,31 +237,56 @@ const MapToolbar = ({ mapInstance, onSearch, onReset }) => { // Added onReset pr
 
       <div className="text-gray-700 mr-2 text-sm whitespace-nowrap">
         Filters
+        {Object.values(selectedFilters).filter(val => val !== null).length > 0 && (
+          <span className="ml-1 px-2 py-1 bg-blue-500 text-white text-xs rounded-full">
+            {Object.values(selectedFilters).filter(val => val !== null).length}
+          </span>
+        )}
       </div>
 
       <div className="flex space-x-2 overflow-x-auto">
         {filterItems.map(item => (
-          <button
-            key={item.id}
-            className={`px-3 py-1 border border-gray-300 rounded-full flex items-center text-xs whitespace-nowrap transition-all duration-200 ${hoveredButton === item.id
-              ? 'bg-blue-50 border-blue-300 text-blue-600'
-              : 'hover:bg-gray-50'
-              }`}
-            onMouseEnter={() => setHoveredButton(item.id)}
-            onMouseLeave={() => setHoveredButton(null)}
-          >
-            {item.label}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-3 w-3 ml-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+          <div key={item.id} className="relative">
+            <button
+              key={item.id}
+              className={`px-3 py-1 border rounded-full flex items-center text-xs whitespace-nowrap transition-all duration-200
+                ${selectedFilters[item.id] ? 'bg-blue-100 border-blue-500 text-blue-700' : 'border-gray-300 hover:bg-gray-50'}
+                ${hoveredButton === item.id ? 'bg-blue-50 border-blue-300 text-blue-600' : ''}
+              `}
+              onMouseEnter={() => setHoveredButton(item.id)}
+              onMouseLeave={() => setHoveredButton(null)}
+              onClick={() => openFilterModal(item.id)}
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              {item.label}: {selectedFilters[item.id] || 'All'}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-3 w-3 ml-1"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+          </div>
+        ))}
+
+        {/* NEW: Clear All Filters Button */}
+        {Object.values(selectedFilters).filter(val => val !== null).length > 0 && (
+          <button
+            onClick={handleClearAllFilters}
+            className={`px-3 py-1 border border-gray-300 rounded-full flex items-center text-xs whitespace-nowrap transition-all duration-200
+                        bg-gray-100 hover:bg-gray-200 text-gray-700`}
+            onMouseEnter={() => setHoveredButton('clearAllFilters')}
+            onMouseLeave={() => setHoveredButton(null)}
+            title="Clear all active filters"
+          >
+            Clear All Filters
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-        ))}
+        )}
 
         <button
           className={`p-1 border border-gray-300 rounded-full flex items-center justify-center text-xs transition-all duration-200 ${hoveredButton === 'more'
@@ -246,6 +301,15 @@ const MapToolbar = ({ mapInstance, onSearch, onReset }) => { // Added onReset pr
           </svg>
         </button>
       </div>
+
+      {modalFilterId && (
+        <FilterModal
+          filterItem={currentFilterItem}
+          selectedValue={selectedFilters[modalFilterId]}
+          onSelectOption={handleFilterOptionSelect}
+          onClose={closeModal}
+        />
+      )}
     </div>
   );
 };
