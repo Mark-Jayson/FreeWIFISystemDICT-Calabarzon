@@ -26,7 +26,8 @@ const Dashboard = () => {
   const [siteTypeData, setSiteTypeData] = useState([]);
   const [topLGUs, setTopLGUs] = useState([]);
   const [darkMode, setDarkMode] = useState(false); // Added missing darkMode state
-
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  
   // New state for recent sites
   const [recentlyAddedSites, setRecentlyAddedSites] = useState([]);
   const [recentlyTerminatedSites, setRecentlyTerminatedSites] = useState([]);
@@ -71,29 +72,39 @@ const Dashboard = () => {
 
   // Single unified report generation handler
   const handleGenerateReport = async () => {
+    setIsGeneratingPdf(true); // Corrected: use setIsGeneratingPdf (capital 'I')
     try {
-      // Find the main content area of your dashboard to capture
       const input = document.getElementById('dashboard-content');
       if (!input) {
         console.error('Dashboard content element not found!');
-        alert('Failed to find dashboard content for PDF generation.');
+        alert('Failed to find dashboard content for PDF generation. Make sure the div has id="dashboard-content".');
+        setIsGeneratingPdf(false); // Corrected: use setIsGeneratingPdf (capital 'I')
         return;
       }
-      
+
+      // Add a small delay to ensure all content is rendered, especially charts
+      // This can be crucial for html2canvas to capture everything correctly
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       const canvas = await html2canvas(input, {
         scale: 2, // Increase scale for better resolution
         logging: true, // Enable logging for debugging
         useCORS: true, // Important if you have images from different origins
+        // Consider increasing the timeout for very large or complex dashboards
+        // timeout: 5000,
       });
 
+      // Optional: Temporarily append the canvas to the body to inspect it
+      // document.body.appendChild(canvas);
+
       const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4'); // 'p' for portrait, 'mm' for millimeters, 'a4' size
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 297; // A4 height in mm
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgWidth = 210;
+      const pageHeight = 297;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       let heightLeft = imgHeight;
       let position = 0;
-      
+
       // Add the first page
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
@@ -108,10 +119,12 @@ const Dashboard = () => {
 
       const exportFileDefaultName = `wifi-dashboard-report-${selectedProvince}-${new Date().toISOString().split('T')[0]}.pdf`;
       pdf.save(exportFileDefaultName);
-      
+
     } catch (error) {
       console.error('Error generating report:', error);
-      alert('Failed to generate report. Please try again.');
+      alert('Failed to generate report. Please try again. Check console for details.');
+    } finally {
+      setIsGeneratingPdf(false); // Corrected: use setIsGeneratingPdf (capital 'I')
     }
   };
 
@@ -409,6 +422,19 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      {isGeneratingPdf && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl flex items-center space-x-3">
+            <svg className="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p className="text-gray-800 font-medium">Generating PDF report...</p>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

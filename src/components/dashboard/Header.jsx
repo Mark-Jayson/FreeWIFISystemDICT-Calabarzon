@@ -6,6 +6,8 @@ const Header = ({
   onProvinceSelect,
   selectedProvince = "all",
   onGenerateReport,
+  isGeneratingPdf,
+
 }) => {
   const provinces = [
     { id: "all", name: "Region IV - A Calabarzon" },
@@ -78,7 +80,7 @@ const Header = ({
 
             {/* Province Selector */}
             <div className="relative ml-8">
-              <select 
+              <select
                 value={selectedProvince}
                 onChange={(e) => onProvinceSelect && onProvinceSelect(e.target.value)}
                 className="appearance-none border rounded-xl px-4 py-2 pr-10 text-sm font-medium focus:ring-2 focus:border-transparent transition-all duration-200 cursor-pointer"
