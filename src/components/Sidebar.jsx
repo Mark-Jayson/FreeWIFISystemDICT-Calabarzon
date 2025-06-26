@@ -79,6 +79,9 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
         onClick={() => handleNavigation(item)}
         onMouseEnter={() => setHoveredItem(item.id)}
         onMouseLeave={() => setHoveredItem(null)}
+        style={{ 
+          WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)' 
+        }}
       >
         {item.icon === 'wifi-icon' ? (
           <div className="relative w-6 h-6 mb-1">
@@ -99,15 +102,39 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
 
   return (
     <>
-      <div className="bg-blue-800 text-white w-16 flex flex-col h-full overflow-hidden shadow-black-100">
-        <div className="bg-white h-40">
+      <div 
+        className="text-white w-16 flex flex-col h-full overflow-hidden shadow-black-100"
+        style={{ 
+          backgroundColor: 'rgba(30, 64, 175, 1)', // Blue-800 equivalent
+          WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
+        }}
+      >
+        <div 
+          className="h-40"
+          style={{ 
+            backgroundColor: 'rgba(255, 255, 255, 1)',
+            borderBottomColor: 'rgba(229, 231, 235, 1)', // Gray-200 equivalent
+            borderBottomWidth: '1px',
+            borderBottomStyle: 'solid'
+          }}
+        >
           <div className="w-full flex justify-center py-3">
-            <div className="bg-white rounded-full p-1">
+            <div 
+              className="rounded-full p-1"
+              style={{ 
+                backgroundColor: 'rgba(255, 255, 255, 1)' 
+              }}
+            >
               <img src={DICTLogo} alt="DICT Logo" className="w-10 h-10" />
             </div>
           </div>
           <div className="w-full flex justify-center py-3 mb-8">
-            <div className="bg-white rounded-full p-1">
+            <div 
+              className="rounded-full p-1"
+              style={{ 
+                backgroundColor: 'rgba(255, 255, 255, 1)' 
+              }}
+            >
               <img src={FreeWifi} alt="Free WiFi Logo" className="w-10 h-10" />
             </div>
           </div>
@@ -121,20 +148,62 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
       </div>
 
       {showLogoutConfirm && (
-        <div className="fixed inset-0 z-50 backdrop-blur-sm bg-white/20 flex items-center justify-center">
-          <div className="bg-white rounded-lg shadow-xl p-6 max-w-sm w-full border border-gray-200">
-            <h3 className="text-lg font-semibold mb-4 text-gray-900">Confirm Logout</h3>
-            <p className="text-gray-700 mb-6">Are you sure you want to log out?</p>
+        <div 
+          className="fixed inset-0 z-50 backdrop-blur-sm flex items-center justify-center"
+          style={{ 
+            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+            WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
+          }}
+        >
+          <div 
+            className="rounded-lg shadow-xl p-6 max-w-sm w-full"
+            style={{ 
+              backgroundColor: 'rgba(255, 255, 255, 1)',
+              borderColor: 'rgba(229, 231, 235, 1)', // Gray-200 equivalent
+              borderWidth: '1px',
+              borderStyle: 'solid'
+            }}
+          >
+            <h3 
+              className="text-lg font-semibold mb-4"
+              style={{ 
+                color: 'rgba(17, 24, 39, 1)' // Gray-900 equivalent
+              }}
+            >
+              Confirm Logout
+            </h3>
+            <p 
+              className="mb-6"
+              style={{ 
+                color: 'rgba(55, 65, 81, 1)' // Gray-700 equivalent
+              }}
+            >
+              Are you sure you want to log out?
+            </p>
             <div className="flex justify-end gap-3">
               <button
                 onClick={handleCancelLogout}
-                className="px-4 py-2 text-sm bg-gray-200 hover:bg-gray-300 rounded"
+                className="px-4 py-2 text-sm rounded transition-colors duration-200"
+                style={{ 
+                  backgroundColor: 'rgba(229, 231, 235, 1)', // Gray-200 equivalent
+                  color: 'rgba(17, 24, 39, 1)', // Gray-900 equivalent
+                  WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(209, 213, 219, 1)'} // Gray-300 equivalent
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(229, 231, 235, 1)'} // Gray-200 equivalent
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmLogout}
-                className="px-4 py-2 text-sm bg-red-500 text-white hover:bg-red-600 rounded"
+                className="px-4 py-2 text-sm rounded transition-colors duration-200"
+                style={{ 
+                  backgroundColor: 'rgba(239, 68, 68, 1)', // Red-500 equivalent
+                  color: 'rgba(255, 255, 255, 1)',
+                  WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(220, 38, 38, 1)'} // Red-600 equivalent
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(239, 68, 68, 1)'} // Red-500 equivalent
               >
                 Logout
               </button>

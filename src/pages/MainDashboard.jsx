@@ -30,12 +30,15 @@ const MainDashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [markers, setMarkers] = useState([]);
   const [panelData, setPanelData] = useState(null);
+<<<<<<< HEAD
   const [selectedFilters, setSelectedFilters] = useState({
     district: null,
     Province: null,
     contractStatus: null,
     category: null
   });
+=======
+>>>>>>> 16aebd70dbd3af0ef3c383feedc8243d5b49fb97
 
   // Map state
   const [map, setMap] = useState(null);
@@ -127,6 +130,7 @@ const MainDashboard = () => {
         
         const fullData = await response.json();
 
+<<<<<<< HEAD
              
               const siteOfCity = await fetch(`http://localhost:5000/api/sitesByLocality/${fullData.locality}`);
               const locOfCity = await fetch(`http://localhost:5000/api/getLocationsOfProvince/${fullData.locality}`);
@@ -136,6 +140,11 @@ const MainDashboard = () => {
                if (!locOfCity.ok) {
                 // Handle HTTP errors, e.g., 404 from your backend
                 const errorData = await locOfCity.json();
+=======
+        const locOfCity = await fetch(`http://localhost:5000/api/getLocationsOfProvince/${fullData.province}`);
+        const locationsOfCity = await locOfCity.json();
+        console.log('Locations of province:', locationsOfCity);
+>>>>>>> 16aebd70dbd3af0ef3c383feedc8243d5b49fb97
 
                 throw new Error(errorData.error || `HTTP error! Status: ${locOfCity.status}`);
               }
@@ -588,6 +597,7 @@ const MainDashboard = () => {
             if (processedLocationIds.has(item.location_id)) {
                 return; // Skip to the next item in the loop
             }
+<<<<<<< HEAD
 
             // --- Primary Filtering Logic ---
             // If a filter is provided, check if the item's corresponding property matches the filter.
@@ -760,11 +770,29 @@ const MainDashboard = () => {
         // This is crucial for managing markers (e.g., clearing them later).
         setMarkers(newMarkers);
         console.log(`Added ${newMarkers.length} unique location markers from database`);
+=======
+          } catch (err) {
+            console.error('Error fetching location with sites:', err);
+          }
+        });
+
+        // Add the newly created valid marker to our array.
+        newMarkers.push(marker);
+      });
+
+      // Update the state variable that holds all current markers.
+      setMarkers(newMarkers);
+      console.log(`Added ${newMarkers.length} unique location markers from database`);
+>>>>>>> 16aebd70dbd3af0ef3c383feedc8243d5b49fb97
     } catch (err) {
         console.error('Failed to fetch map pins:', err);
     }
+<<<<<<< HEAD
 };
 
+=======
+  };
+>>>>>>> 16aebd70dbd3af0ef3c383feedc8243d5b49fb97
 
   // Initialize and configure the Mapbox map
   useEffect(() => {

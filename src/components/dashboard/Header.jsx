@@ -6,8 +6,11 @@ const Header = ({
   onProvinceSelect,
   selectedProvince = "all",
   onGenerateReport,
+<<<<<<< HEAD
   isGeneratingPdf,
 
+=======
+>>>>>>> 16aebd70dbd3af0ef3c383feedc8243d5b49fb97
 }) => {
   const provinces = [
     { id: "all", name: "Region IV - A Calabarzon" },
@@ -83,6 +86,7 @@ const Header = ({
               <select
                 value={selectedProvince}
                 onChange={(e) => onProvinceSelect && onProvinceSelect(e.target.value)}
+<<<<<<< HEAD
                 className="appearance-none border rounded-xl px-4 py-2 pr-10 text-sm font-medium focus:ring-2 focus:border-transparent transition-all duration-200 cursor-pointer"
                 style={{
                   backgroundColor: colors.white,
@@ -105,6 +109,9 @@ const Header = ({
                     e.target.style.borderColor = colors.gray[300];
                   }
                 }}
+=======
+                className="appearance-none bg-white border-gray-300 text-gray-900 border rounded-xl px-4 py-2 pr-10 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 cursor-pointer hover:border-blue-400"
+>>>>>>> 16aebd70dbd3af0ef3c383feedc8243d5b49fb97
               >
                 {provinces.map((province) => (
                   <option key={province.id} value={province.id}>
@@ -123,6 +130,7 @@ const Header = ({
           <div className="flex items-center">
             <button
               onClick={onGenerateReport}
+<<<<<<< HEAD
               className="px-4 py-2 rounded-xl shadow-md transition-colors duration-200 flex items-center gap-2 text-sm font-medium cursor-pointer hover:shadow-lg"
               style={{
                 backgroundColor: colors.blue[600],
@@ -134,6 +142,9 @@ const Header = ({
               onMouseLeave={(e) => {
                 e.target.style.backgroundColor = colors.blue[600];
               }}
+=======
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl shadow-md transition-colors duration-200 flex items-center gap-2 text-sm font-medium cursor-pointer hover:shadow-lg"
+>>>>>>> 16aebd70dbd3af0ef3c383feedc8243d5b49fb97
             >
               <Download className="w-4 h-4" />
               Generate Report

@@ -305,7 +305,7 @@ const Dashboard = () => {
     <div 
       className="flex-1 overflow-y-auto"
       style={{ 
-        backgroundColor: 'rgba(255, 255, 255, 0)',
+        backgroundColor: 'rgba(255, 255, 255, 0)', // Transparent background
         WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
       }}
     >
@@ -316,7 +316,18 @@ const Dashboard = () => {
         onGenerateReport={handleGenerateReport}
       />
 
+<<<<<<< HEAD
+      <div 
+        id="dashboard-content" 
+        className="px-6 pb-6 pt-6"
+        style={{ 
+          fontFamily: 'ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
+          WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
+        }}
+      >
+=======
       <div id="dashboard-content" className="px-6 pb-6 pt-6">
+>>>>>>> 16aebd70dbd3af0ef3c383feedc8243d5b49fb97
         {/* Recent Activity Summary Row */}
         <div className="mb-6">
           <RecentActivitySummaryCard
@@ -392,9 +403,10 @@ const Dashboard = () => {
               className="rounded-lg shadow p-4"
               style={{ 
                 backgroundColor: 'rgba(255, 255, 255, 1)',
-                borderColor: 'rgba(233, 236, 239, 1)',
+                borderColor: 'rgba(236, 237, 240, 1)', /* Converted from oklch(0.928 0.006 264.531) */
                 borderWidth: '1px',
-                borderStyle: 'solid'
+                borderStyle: 'solid',
+                WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
               }}
             >
               <ExpiringContractsTable contracts={expiringContracts} />
@@ -404,9 +416,10 @@ const Dashboard = () => {
               className="rounded-lg shadow p-4"
               style={{ 
                 backgroundColor: 'rgba(255, 255, 255, 1)',
-                borderColor: 'rgba(233, 236, 239, 1)',
+                borderColor: 'rgba(236, 237, 240, 1)', /* Converted from oklch(0.928 0.006 264.531) */
                 borderWidth: '1px',
-                borderStyle: 'solid'
+                borderStyle: 'solid',
+                WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
               }}
             >
               <YearlyActivationChart
@@ -415,7 +428,12 @@ const Dashboard = () => {
                 highlightYear="2023"
                 noDateCount={noDateCount}
               />
-              <div className="mt-4 text-left text-sm text-gray-700">
+              <div 
+                className="mt-4 text-left text-sm"
+                style={{ 
+                  color: 'rgba(55, 65, 81, 1)' // Gray-700 equivalent
+                }}
+              >
                 <strong>WiFi activated without date:</strong> {noDateCount}
               </div>
             </div>
@@ -424,13 +442,48 @@ const Dashboard = () => {
       </div>
 
       {isGeneratingPdf && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl flex items-center space-x-3">
-            <svg className="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        <div 
+          className="fixed inset-0 flex items-center justify-center z-50"
+          style={{ 
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
+          }}
+        >
+          <div 
+            className="p-6 rounded-lg shadow-xl flex items-center space-x-3"
+            style={{ 
+              backgroundColor: 'rgba(255, 255, 255, 1)'
+            }}
+          >
+            <svg 
+              className="animate-spin h-5 w-5" 
+              style={{ color: 'rgba(37, 99, 235, 1)' }} /* Blue-600 equivalent */
+              xmlns="http://www.w3.org/2000/svg" 
+              fill="none" 
+              viewBox="0 0 24 24"
+            >
+              <circle 
+                className="opacity-25" 
+                cx="12" 
+                cy="12" 
+                r="10" 
+                stroke="currentColor" 
+                strokeWidth="4"
+              ></circle>
+              <path 
+                className="opacity-75" 
+                fill="currentColor" 
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
             </svg>
-            <p className="text-gray-800 font-medium">Generating PDF report...</p>
+            <p 
+              className="font-medium"
+              style={{ 
+                color: 'rgba(31, 41, 55, 1)' // Gray-800 equivalent
+              }}
+            >
+              Generating PDF report...
+            </p>
           </div>
         </div>
       )}
