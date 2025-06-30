@@ -27,7 +27,12 @@ const YearlyActivationChart = ({ title, data, highlightYear, noDateCount }) => {
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white border-gray-200 p-3 rounded-lg shadow-lg border">
+        <div className="bg-white border-gray-200 p-3 rounded-lg shadow-lg border"
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 1)',
+            borderColor: 'rgba(229, 231, 235, 1)',
+            fontFamily: 'ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"'
+          }}>
           <p className="text-gray-900 font-medium">
             Year {label}
           </p>
@@ -42,7 +47,13 @@ const YearlyActivationChart = ({ title, data, highlightYear, noDateCount }) => {
 
   return (
     <div className="bg-white border-gray-100 rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg"
-      style={{ height: '400px', maxHeight: '400px' }}>
+      style={{ 
+        height: '400px', 
+        maxHeight: '400px',
+        backgroundColor: 'rgba(255, 255, 255, 1)',
+        borderColor: 'rgba(236, 237, 242, 1)',
+        fontFamily: 'ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"'
+      }}>
       
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
@@ -69,7 +80,11 @@ const YearlyActivationChart = ({ title, data, highlightYear, noDateCount }) => {
         </div>
         
         {/* Highlight year badge */}
-        <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-3 py-1 rounded-full text-xs font-medium">
+        <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-3 py-1 rounded-full text-xs font-medium"
+          style={{
+            background: 'linear-gradient(to right, rgba(59, 130, 246, 1), rgba(147, 51, 234, 1))',
+            color: 'rgba(255, 255, 255, 1)'
+          }}>
           {highlightYear} Focus
         </div>
       </div>
@@ -85,12 +100,12 @@ const YearlyActivationChart = ({ title, data, highlightYear, noDateCount }) => {
               <CartesianGrid 
                 strokeDasharray="3 3" 
                 vertical={false} 
-                stroke="#e5e7eb"
+                stroke="rgba(229, 231, 235, 1)"
               />
               <XAxis 
                 dataKey="year" 
                 tick={{ 
-                  fill: '#6B7280',
+                  fill: 'rgba(107, 114, 128, 1)',
                   fontSize: 12 
                 }}
                 axisLine={false}
@@ -108,15 +123,15 @@ const YearlyActivationChart = ({ title, data, highlightYear, noDateCount }) => {
                     key={`cell-${index}`}
                     fill={entry.year === highlightYear 
                       ? 'url(#highlightGradient)' 
-                      : '#E5E7EB'
+                      : 'rgba(229, 231, 235, 1)'
                     }
                   />
                 ))}
               </Bar>
               <defs>
                 <linearGradient id="highlightGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#8B5CF6" />
-                  <stop offset="100%" stopColor="#3B82F6" />
+                  <stop offset="0%" stopColor="rgba(139, 92, 246, 1)" />
+                  <stop offset="100%" stopColor="rgba(59, 130, 246, 1)" />
                 </linearGradient>
               </defs>
             </BarChart>
@@ -131,7 +146,8 @@ const YearlyActivationChart = ({ title, data, highlightYear, noDateCount }) => {
 
       {/* Footer info */}
       {noDateCount > 0 && (
-        <div className="mt-4 pt-4 border-t border-gray-200">
+        <div className="mt-4 pt-4 border-t border-gray-200"
+          style={{ borderTopColor: 'rgba(229, 231, 235, 1)' }}>
           <div className="flex items-center justify-center text-sm text-gray-600">
             <Calendar className="w-4 h-4 mr-2" />
             <span>

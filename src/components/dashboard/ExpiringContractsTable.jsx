@@ -40,7 +40,16 @@ const ExpiringContractsTable = ({ contracts }) => {
 
   if (!contracts || contracts.length === 0) {
     return (
-      <div className="bg-white border-gray-100 rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg">
+      <div 
+        className="rounded-2xl p-6 transition-all duration-300 hover:shadow-lg"
+        style={{ 
+          backgroundColor: 'rgba(255, 255, 255, 1)',
+          borderColor: 'rgba(233, 236, 239, 1)',
+          borderWidth: '1px',
+          borderStyle: 'solid',
+          WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
+        }}
+      >
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-gray-900 font-semibold">
             Expiring Contracts
@@ -64,7 +73,16 @@ const ExpiringContractsTable = ({ contracts }) => {
   }).length;
 
   return (
-    <div className="bg-white border-gray-100 rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg">
+    <div 
+      className="rounded-2xl p-6 transition-all duration-300 hover:shadow-lg"
+      style={{ 
+        backgroundColor: 'rgba(255, 255, 255, 1)',
+        borderColor: 'rgba(233, 236, 239, 1)',
+        borderWidth: '1px',
+        borderStyle: 'solid',
+        WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
+      }}
+    >
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -86,7 +104,15 @@ const ExpiringContractsTable = ({ contracts }) => {
           )}
           <button
             onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-            className="bg-gray-100 hover:bg-gray-200 text-gray-600 p-2 rounded-lg transition-colors duration-200"
+            className="text-gray-600 p-2 rounded-lg transition-colors duration-200"
+            style={{ 
+              backgroundColor: 'rgba(243, 244, 246, 1)',
+              borderColor: 'rgba(233, 236, 239, 1)',
+              borderWidth: '1px',
+              borderStyle: 'solid'
+            }}
+            onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(229, 231, 235, 1)'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(243, 244, 246, 1)'}
             title={`Sort ${sortOrder === 'asc' ? 'newest first' : 'oldest first'}`}
           >
             {sortOrder === 'asc' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -102,12 +128,26 @@ const ExpiringContractsTable = ({ contracts }) => {
           return (
             <div
               key={index}
-              className={`bg-gray-50 hover:bg-gray-100 rounded-xl p-4 transition-all duration-200 border-l-4 ${
+              className={`rounded-xl p-4 transition-all duration-200 border-l-4 ${
                 urgency.level === 'expired' ? 'border-red-500' :
                 urgency.level === 'critical' ? 'border-red-400' :
                 urgency.level === 'warning' ? 'border-amber-400' :
                 'border-green-400'
               }`}
+              style={{ 
+                backgroundColor: 'rgba(249, 250, 251, 1)',
+                borderTopColor: 'rgba(233, 236, 239, 1)',
+                borderRightColor: 'rgba(233, 236, 239, 1)',
+                borderBottomColor: 'rgba(233, 236, 239, 1)',
+                borderTopWidth: '1px',
+                borderRightWidth: '1px',
+                borderBottomWidth: '1px',
+                borderTopStyle: 'solid',
+                borderRightStyle: 'solid',
+                borderBottomStyle: 'solid'
+              }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(243, 244, 246, 1)'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(249, 250, 251, 1)'}
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
@@ -187,7 +227,14 @@ const ExpiringContractsTable = ({ contracts }) => {
       )}
 
       {/* Summary */}
-      <div className="mt-4 pt-4 border-t border-gray-200">
+      <div 
+        className="mt-4 pt-4"
+        style={{ 
+          borderTopColor: 'rgba(233, 236, 239, 1)',
+          borderTopWidth: '1px',
+          borderTopStyle: 'solid'
+        }}
+      >
         <div className="flex items-center justify-between text-xs">
           <span className="text-gray-600">
             Total: {contracts.length} contracts

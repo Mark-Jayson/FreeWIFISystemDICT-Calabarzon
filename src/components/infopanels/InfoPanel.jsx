@@ -13,9 +13,10 @@ useEffect(() => {
   if (searchQuery && searchQuery.trim() !== '') {
     setProvinceData(panelData);
     setShowPanel(true);
+    
 
     console.log('Received panelData:', panelData);
-    console.log('Province Name from panelData:', panelData?.provinceName);
+    console.log('City click', onCityClick);
 
     if (panelData?.provinceName) {
       // FIX: Changed from govMayorsData to governorAndMayors
@@ -49,6 +50,7 @@ useEffect(() => {
   const handleCityClick = (city) => {
     if (onCityClick) {
       onCityClick(city);
+      console.log('City clicked:', city);
     }
   };
 
@@ -145,14 +147,14 @@ useEffect(() => {
         <div className="mb-4 border-t border-gray-200 pt-3">
           <div className="text-sm text-gray-500 mb-3">Cities/Municipalities with Free WiFi Sites</div>
           
-          {provinceData?.cities?.map((city, index) => (
+          {panelData.cities.map((city, index) => (
             <div 
               key={index} 
               className="border border-gray-200 rounded-lg p-3 mb-3 cursor-pointer hover:shadow-md transition-all duration-200"
-              onClick={() => handleCityClick(city)}
+              onClick={() => handleCityClick(city.locality)}
             >
               <div className="text-xs text-gray-500">City/Municipality</div>
-              <div className="text-sm font-medium mb-2">{city.name}</div>
+              <div className="text-sm font-medium mb-2">{city.locality}</div>
               <div className="flex justify-between items-center">
                 <div className="flex items-center">
                   <div className="bg-blue-500 rounded-full p-2 mr-2">
@@ -160,7 +162,7 @@ useEffect(() => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-4m-5 0H3m2 0h3M9 7h1m-1 4h1m4-4h1m-1 4h1m-1-8h1m-1 4h1" />
                     </svg>
                   </div>
-                  <div className="text-xs text-gray-500">{city.totalSites} WiFi Sites</div>
+                  <div className="text-xs text-gray-500">{city.locality} WiFi Sites</div>
                 </div>
                 <div className="text-xs text-gray-400">Click to view</div>
               </div>

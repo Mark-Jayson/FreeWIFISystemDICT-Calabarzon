@@ -1,4 +1,4 @@
-// components/dashboard/WifiTechnologyBar.jsx
+// // components/dashboard/WifiTechnologyBar.jsx
 // import React from 'react';
 // import { Wifi, Router, Signal, Antenna, TrendingUp } from 'lucide-react';
 
@@ -11,10 +11,10 @@
 // }) => {
 //   // Default data if none provided
 //   const defaultData = [
-//     { name: 'WiFi 6', value: 45, count: 567, color: '#10B981', icon: '📡' },
-//     { name: 'WiFi 5', value: 35, count: 441, color: '#3B82F6', icon: '📶' },
-//     { name: 'WiFi 4', value: 15, count: 189, color: '#F59E0B', icon: '📻' },
-//     { name: 'Other', value: 5, count: 63, color: '#6B7280', icon: '⚡' }
+//     { name: 'WiFi 6', value: 45, count: 567, color: 'rgba(16, 185, 129, 1)', icon: '📡' },
+//     { name: 'WiFi 5', value: 35, count: 441, color: 'rgba(59, 130, 246, 1)', icon: '📶' },
+//     { name: 'WiFi 4', value: 15, count: 189, color: 'rgba(245, 158, 11, 1)', icon: '📻' },
+//     { name: 'Other', value: 5, count: 63, color: 'rgba(107, 114, 128, 1)', icon: '⚡' }
 //   ];
 
 //   const displayData = data.length > 0 ? data : defaultData;
@@ -35,7 +35,11 @@
 //   if (loading) {
 //     return (
 //       <div className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-100'} 
-//         rounded-2xl border p-6 transition-all duration-300`}>
+//         rounded-2xl border p-6 transition-all duration-300`}
+//         style={{
+//           backgroundColor: darkMode ? undefined : 'rgba(255, 255, 255, 1)',
+//           borderColor: darkMode ? undefined : 'rgba(236, 237, 242, 1)'
+//         }}>
 //         <div className="animate-pulse">
 //           <div className="h-5 bg-gray-300 rounded w-48 mb-2"></div>
 //           <div className="h-3 bg-gray-300 rounded w-32 mb-6"></div>
@@ -59,7 +63,12 @@
 
 //   return (
 //     <div className={`${darkMode ? 'bg-gray-800 border-gray-700 hover:bg-gray-750' : 'bg-white border-gray-100 hover:bg-gray-50'} 
-//       rounded-2xl border p-4 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group`}>
+//       rounded-2xl border p-4 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group`}
+//       style={{
+//         backgroundColor: darkMode ? undefined : 'rgba(255, 255, 255, 1)',
+//         borderColor: darkMode ? undefined : 'rgba(236, 237, 242, 1)',
+//         fontFamily: 'ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"'
+//       }}>
     
 //       {/* Header */}
 //       <div className="flex items-center justify-between mb-4">
@@ -120,7 +129,7 @@
 //                 <div className="flex items-center space-x-2">
 //                   <div 
 //                     className="p-1.5 rounded-md group-hover/item:scale-110 transition-transform duration-200"
-//                     style={{ backgroundColor: `${item.color}20` }}
+//                     style={{ backgroundColor: `${item.color.replace('1)', '0.2)')}` }}
 //                   >
 //                     <IconComponent 
 //                       className="w-3 h-3" 
@@ -151,7 +160,10 @@
 //       </div>
 
 //       {/* Summary Footer - Compact */}
-//       <div className={`${darkMode ? 'bg-gray-700' : 'bg-blue-50'} rounded-lg p-2 mt-3`}>
+//       <div className={`${darkMode ? 'bg-gray-700' : 'bg-blue-50'} rounded-lg p-2 mt-3`}
+//         style={{
+//           backgroundColor: darkMode ? undefined : 'rgba(239, 246, 255, 1)'
+//         }}>
 //         <div className="flex items-center justify-between">
 //           <div>
 //             <p className={`${darkMode ? 'text-white' : 'text-blue-900'} font-semibold text-xs`}>

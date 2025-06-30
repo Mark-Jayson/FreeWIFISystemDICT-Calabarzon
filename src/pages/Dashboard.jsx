@@ -26,7 +26,8 @@ const Dashboard = () => {
   const [siteTypeData, setSiteTypeData] = useState([]);
   const [topLGUs, setTopLGUs] = useState([]);
   const [darkMode, setDarkMode] = useState(false); // Added missing darkMode state
-
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  
   // New state for recent sites
   const [recentlyAddedSites, setRecentlyAddedSites] = useState([]);
   const [recentlyTerminatedSites, setRecentlyTerminatedSites] = useState([]);
@@ -71,29 +72,39 @@ const Dashboard = () => {
 
   // Single unified report generation handler
   const handleGenerateReport = async () => {
+    setIsGeneratingPdf(true); // Corrected: use setIsGeneratingPdf (capital 'I')
     try {
-      // Find the main content area of your dashboard to capture
       const input = document.getElementById('dashboard-content');
       if (!input) {
         console.error('Dashboard content element not found!');
-        alert('Failed to find dashboard content for PDF generation.');
+        alert('Failed to find dashboard content for PDF generation. Make sure the div has id="dashboard-content".');
+        setIsGeneratingPdf(false); // Corrected: use setIsGeneratingPdf (capital 'I')
         return;
       }
-      
+
+      // Add a small delay to ensure all content is rendered, especially charts
+      // This can be crucial for html2canvas to capture everything correctly
+      await new Promise(resolve => setTimeout(resolve, 500));
+
       const canvas = await html2canvas(input, {
         scale: 2, // Increase scale for better resolution
         logging: true, // Enable logging for debugging
         useCORS: true, // Important if you have images from different origins
+        // Consider increasing the timeout for very large or complex dashboards
+        // timeout: 5000,
       });
 
+      // Optional: Temporarily append the canvas to the body to inspect it
+      // document.body.appendChild(canvas);
+
       const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4'); // 'p' for portrait, 'mm' for millimeters, 'a4' size
-      const imgWidth = 210; // A4 width in mm
-      const pageHeight = 297; // A4 height in mm
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgWidth = 210;
+      const pageHeight = 297;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       let heightLeft = imgHeight;
       let position = 0;
-      
+
       // Add the first page
       pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
       heightLeft -= pageHeight;
@@ -108,10 +119,12 @@ const Dashboard = () => {
 
       const exportFileDefaultName = `wifi-dashboard-report-${selectedProvince}-${new Date().toISOString().split('T')[0]}.pdf`;
       pdf.save(exportFileDefaultName);
-      
+
     } catch (error) {
       console.error('Error generating report:', error);
-      alert('Failed to generate report. Please try again.');
+      alert('Failed to generate report. Please try again. Check console for details.');
+    } finally {
+      setIsGeneratingPdf(false); // Corrected: use setIsGeneratingPdf (capital 'I')
     }
   };
 
@@ -289,7 +302,13 @@ const Dashboard = () => {
   }, [selectedProvince]);
 
   return (
-    <div className="flex-1 bg-blue-50 overflow-y-auto">
+    <div 
+      className="flex-1 overflow-y-auto"
+      style={{ 
+        backgroundColor: 'rgba(255, 255, 255, 0)', // Transparent background
+        WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
+      }}
+    >
       <Header
         region="Region IV – A Calabarzon"
         onProvinceSelect={handleProvinceSelect}
@@ -297,7 +316,15 @@ const Dashboard = () => {
         onGenerateReport={handleGenerateReport}
       />
 
-      <div id="dashboard-content" className="px-6 pb-6 pt-6">
+      <div 
+        id="dashboard-content" 
+        className="px-6 pb-6 pt-6"
+        style={{ 
+          fontFamily: 'ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
+          WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
+        }}
+      >
+
         {/* Recent Activity Summary Row */}
         <div className="mb-6">
           <RecentActivitySummaryCard
@@ -369,24 +396,96 @@ const Dashboard = () => {
 
           {/* Right Column - Charts & Tables */}
           <div className="flex flex-col gap-4">
-            <div className="bg-white rounded-lg shadow p-4">
+            <div 
+              className="rounded-lg shadow p-4"
+              style={{ 
+                backgroundColor: 'rgba(255, 255, 255, 1)',
+                borderColor: 'rgba(230, 232, 236, 1)', /* Updated RGB equivalent */
+                borderWidth: '1px',
+                borderStyle: 'solid',
+                WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
+              }}
+            >
               <ExpiringContractsTable contracts={expiringContracts} />
             </div>
 
-            <div className="bg-white rounded-lg shadow p-4">
+            <div 
+              className="rounded-lg shadow p-4"
+              style={{ 
+                backgroundColor: 'rgba(255, 255, 255, 1)',
+                borderColor: 'rgba(230, 232, 236, 1)', /* Updated RGB equivalent */
+
+                borderWidth: '1px',
+                borderStyle: 'solid',
+                WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
+              }}
+            >
               <YearlyActivationChart
                 title="No. of WiFi Activated per Year of Activation"
                 data={yearlyActivationData}
                 highlightYear="2023"
                 noDateCount={noDateCount}
               />
-              <div className="mt-4 text-left text-sm text-gray-700">
+              <div 
+                className="mt-4 text-left text-sm"
+                style={{ 
+                  color: 'rgba(55, 65, 81, 1)' // Gray-700 equivalent
+                }}
+              >
                 <strong>WiFi activated without date:</strong> {noDateCount}
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {isGeneratingPdf && (
+        <div 
+          className="fixed inset-0 flex items-center justify-center z-50"
+          style={{ 
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
+          }}
+        >
+          <div 
+            className="p-6 rounded-lg shadow-xl flex items-center space-x-3"
+            style={{ 
+              backgroundColor: 'rgba(255, 255, 255, 1)'
+            }}
+          >
+            <svg 
+              className="animate-spin h-5 w-5" 
+              style={{ color: 'rgba(37, 99, 235, 1)' }} /* Blue-600 equivalent */
+              xmlns="http://www.w3.org/2000/svg" 
+              fill="none" 
+              viewBox="0 0 24 24"
+            >
+              <circle 
+                className="opacity-25" 
+                cx="12" 
+                cy="12" 
+                r="10" 
+                stroke="currentColor" 
+                strokeWidth="4"
+              ></circle>
+              <path 
+                className="opacity-75" 
+                fill="currentColor" 
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            <p 
+              className="font-medium"
+              style={{ 
+                color: 'rgba(31, 41, 55, 1)' // Gray-800 equivalent
+              }}
+            >
+              Generating PDF report...
+            </p>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
