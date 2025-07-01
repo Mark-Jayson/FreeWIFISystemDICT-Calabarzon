@@ -316,6 +316,7 @@ const Dashboard = () => {
         onGenerateReport={handleGenerateReport}
       />
 
+
       <div 
         id="dashboard-content" 
         className="px-6 pb-6 pt-6"
