@@ -33,7 +33,7 @@ const MainDashboard = () => {
   const [selectedFilters, setSelectedFilters] = useState({
     district: null,
     Province: null,
-    contractStatus: true,
+    contractStatus: 'All', // Default to 'All' for contract statu
     category: null
   });
 
@@ -531,7 +531,7 @@ const MainDashboard = () => {
   const addFWSMarkers = async (mapInstance, filters = {
     district: null,
     Province: null,
-    contractStatus: true,
+    contractStatus: 'All', // Default to 'All' for contract status
     category: null
   }) => {
     // Clear any existing markers on the map before adding new ones.
@@ -568,7 +568,8 @@ const MainDashboard = () => {
 
       const contract = {
         'Active': true,
-        'Terminated': false
+        'Terminated': false,
+        'All': null // This will be used to indicate no specific contract status filter
       }
 
       // Initialize an empty array to store the new Mapbox GL JS marker objects.
@@ -581,7 +582,7 @@ const MainDashboard = () => {
       // or getting the mapped category value, or setting to null if no filter is applied.
       const filterProvince = filters.Province ? filters.Province.toLowerCase() : null;
       const filterDistrict = filters.district ? filters.district.toLowerCase() : null;
-      const filterContractStatus = filters.contractStatus; // Contract status is likely exact, no toLowerCase
+      const filterContractStatus = contract[filters.contractStatus]; // Contract status is likely exact, no toLowerCase
       // Map the category filter name to its coded value, then convert to lowercase.
       const filterCategory = categ[filters.category] ? categ[filters.category].toLowerCase() : null;
 
@@ -613,7 +614,7 @@ const MainDashboard = () => {
         // Filter by Contract Status:
         // This is the corrected line. It checks if a filterContractStatus is provided
         // AND if the item's contract_status does NOT match the provided filter.
-        if (item.isterminated !== filterContractStatus) {
+        if (item.isterminated !== filterContractStatus || filterContractStatus === null) {
           console.log(`Filtering out marker for contract status: ${item.isterminated} (Does not match filter: ${filters.contractStatus})`);
           return;
         }

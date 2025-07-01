@@ -29,7 +29,7 @@ const MapToolbar = ({ mapInstance, onSearch, onReset, onApplyFilters, selectedFi
     {
       id: 'contractStatus',
       label: 'Contract Status',
-      options: [true, false, 'All']
+      options: ['Active', 'Terminated', 'All']
     },
     {
       id: 'category',
@@ -108,7 +108,7 @@ const MapToolbar = ({ mapInstance, onSearch, onReset, onApplyFilters, selectedFi
     const resetFilters = {
       district: null,
       Province: null,
-      contractStatus: null,
+      contractStatus: 'All',
       category: null
     };
     // Call onApplyFilters to update the parent's state
@@ -151,7 +151,7 @@ const MapToolbar = ({ mapInstance, onSearch, onReset, onApplyFilters, selectedFi
     const clearedFilters = {
       district: null,
       Province: null,
-      contractStatus: null,
+      contractStatus: 'All',
       category: null
     };
     // Call onApplyFilters here with the cleared filters
