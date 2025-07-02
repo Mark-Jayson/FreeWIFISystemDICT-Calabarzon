@@ -13,60 +13,13 @@ const MapToolbar = ({ mapInstance, onSearch, onReset, onApplyFilters, selectedFi
 
   const [modalFilterId, setModalFilterId] = useState(null);
 
-  // RGB color overrides for Tailwind's OKLCH colors
-  const rgbColors = {
-    // Blue colors
-    'bg-blue-50': { backgroundColor: 'rgb(239, 246, 255)' },
-    'bg-blue-100': { backgroundColor: 'rgb(219, 234, 254)' },
-    'bg-blue-500': { backgroundColor: 'rgb(59, 130, 246)' },
-    'border-blue-300': { borderColor: 'rgb(147, 197, 253)' },
-    'border-blue-500': { borderColor: 'rgb(59, 130, 246)' },
-    'text-blue-600': { color: 'rgb(37, 99, 235)' },
-    'text-blue-700': { color: 'rgb(29, 78, 216)' },
-    'ring-blue-500': { '--tw-ring-color': 'rgb(59, 130, 246)' },
-    'focus:ring-blue-500': { '--tw-ring-color': 'rgb(59, 130, 246)' },
-    
-    // Red colors
-    'bg-red-500': { backgroundColor: 'rgb(239, 68, 68)' },
-    'bg-red-600': { backgroundColor: 'rgb(220, 38, 38)' },
-    'ring-red-300': { '--tw-ring-color': 'rgb(252, 165, 165)' },
-    'focus:ring-red-300': { '--tw-ring-color': 'rgb(252, 165, 165)' },
-    
-    // Gray colors
-    'bg-gray-50': { backgroundColor: 'rgb(249, 250, 251)' },
-    'bg-gray-100': { backgroundColor: 'rgb(243, 244, 246)' },
-    'bg-gray-200': { backgroundColor: 'rgb(229, 231, 235)' },
-    'border-gray-100': { borderColor: 'rgb(243, 244, 246)' },
-    'border-gray-300': { borderColor: 'rgb(209, 213, 219)' },
-    'text-gray-500': { color: 'rgb(107, 114, 128)' },
-    'text-gray-600': { color: 'rgb(75, 85, 99)' },
-    'text-gray-700': { color: 'rgb(55, 65, 81)' },
-    
-    // Green colors
-    'text-green-600': { color: 'rgb(22, 163, 74)' },
-    
-    // White
-    'bg-white': { backgroundColor: 'rgb(255, 255, 255)' },
-    'text-white': { color: 'rgb(255, 255, 255)' }
-  };
-
-  // Helper function to get RGB styles
-  const getRgbStyle = (className) => {
-    return rgbColors[className] || {};
-  };
-
-  // Helper function to merge multiple RGB styles
-  const mergeRgbStyles = (...classNames) => {
-    return classNames.reduce((acc, className) => {
-      return { ...acc, ...getRgbStyle(className) };
-    }, {});
-  };
+ 
 
   const filterItems = [
     {
       id: 'district',
       label: 'District',
-      options: ['Lone', 'I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII']
+      options: ['Lone', 'I', 'II', , 'III', 'IV', 'V', 'VI', 'VII', 'VIII']
     },
     {
       id: 'Province',
@@ -211,54 +164,50 @@ const MapToolbar = ({ mapInstance, onSearch, onReset, onApplyFilters, selectedFi
   const currentFilterItem = filterItems.find(item => item.id === modalFilterId);
 
   return (
-    <div className="bg-white p-3 shadow-md flex items-center" style={getRgbStyle('bg-white')}>
+    <div className="bg-white p-3 shadow-md flex items-center">
       <div className="relative mr-4">
         <input
           type="text"
           placeholder="Search Location"
           className="w-48 pl-8 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 text-m"
-          style={mergeRgbStyles('border-gray-300', 'focus:ring-blue-500')}
           value={searchTerm}
           onChange={handleSearchChange}
           onFocus={() => searchResults.length > 0 && setShowResults(true)}
         />
-        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" style={getRgbStyle('text-gray-500')}>
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
         </div>
 
         {isSearching && (
-          <div className="absolute z-20 mt-1 w-[280px] bg-white rounded shadow-lg p-2 text-gray-700 text-sm" style={mergeRgbStyles('bg-white', 'text-gray-700')}>
+          <div className="absolute z-20 mt-1 w-[280px] bg-white rounded shadow-lg p-2 text-gray-700 text-sm">
             <div className="flex items-center">
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2" style={getRgbStyle('border-blue-500')}></div>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2"></div>
               Searching database...
             </div>
           </div>
         )}
 
         {showResults && searchResults.length > 0 && !isSearching && (
-          <div className="absolute z-20 mt-1 w-[280px] max-h-60 overflow-y-auto bg-white rounded shadow-lg" style={getRgbStyle('bg-white')} ref={searchResultsRef}>
+          <div className="absolute z-20 mt-1 w-[280px] max-h-60 overflow-y-auto bg-white rounded shadow-lg" ref={searchResultsRef}>
             {searchResults.map((location, index) => (
               <div
                 key={location.loc_id || index}
                 className="p-3 hover:bg-gray-100 cursor-pointer text-gray-700 text-sm border-b border-gray-100 last:border-b-0"
-                style={mergeRgbStyles('text-gray-700', 'border-gray-100')}
                 onClick={() => handleResultClick(location)}
-                onMouseEnter={(e) => e.target.style.backgroundColor = 'rgb(243, 244, 246)'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
               >
-                <div className="font-medium text-blue-600" style={getRgbStyle('text-blue-600')}>{location.location_name}</div>
-                <div className="text-sm text-gray-600 mt-1" style={getRgbStyle('text-gray-600')}>
+                <div className="font-medium text-blue-600">{location.location_name}</div>
+                <div className="text-sm text-gray-600 mt-1">
                   {location.locality && `${location.locality}, `}{location.province}
                 </div>
                 {location.congressional_district && (
-                  <div className="text-xs text-gray-500 mt-1" style={getRgbStyle('text-gray-500')}>
+                  <div className="text-xs text-gray-500 mt-1">
                     District: {location.congressional_district}
                   </div>
                 )}
                 {location.category && (
-                  <div className="text-xs text-green-600 mt-1" style={getRgbStyle('text-green-600')}>
+                  <div className="text-xs text-green-600 mt-1">
                     Category: {location.category}
                   </div>
                 )}
@@ -268,8 +217,8 @@ const MapToolbar = ({ mapInstance, onSearch, onReset, onApplyFilters, selectedFi
         )}
 
         {showResults && searchResults.length === 0 && !isSearching && searchTerm.trim() !== '' && (
-          <div className="absolute z-20 mt-1 w-[280px] bg-white rounded shadow-lg p-3 text-gray-700 text-sm" style={mergeRgbStyles('bg-white', 'text-gray-700')}>
-            <div className="text-center text-gray-500" style={getRgbStyle('text-gray-500')}>
+          <div className="absolute z-20 mt-1 w-[280px] bg-white rounded shadow-lg p-3 text-gray-700 text-sm">
+            <div className="text-center text-gray-500">
               No locations found for "{searchTerm}"
             </div>
           </div>
@@ -279,10 +228,6 @@ const MapToolbar = ({ mapInstance, onSearch, onReset, onApplyFilters, selectedFi
       <button
         onClick={handleReset}
         className={`px-3 py-2 mr-4 bg-red-500 text-white rounded-full text-xs whitespace-nowrap transition-all duration-200 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300 ${hoveredButton === 'reset' ? 'bg-red-600' : ''}`}
-        style={{
-          ...mergeRgbStyles('bg-red-500', 'text-white', 'focus:ring-red-300'),
-          ...(hoveredButton === 'reset' ? getRgbStyle('bg-red-600') : {})
-        }}
         onMouseEnter={() => setHoveredButton('reset')}
         onMouseLeave={() => setHoveredButton(null)}
         title="Reset map view and clear all panels"
@@ -290,10 +235,10 @@ const MapToolbar = ({ mapInstance, onSearch, onReset, onApplyFilters, selectedFi
         Reset
       </button>
 
-      <div className="text-gray-700 mr-2 text-sm whitespace-nowrap" style={getRgbStyle('text-gray-700')}>
+      <div className="text-gray-700 mr-2 text-sm whitespace-nowrap">
         Filters
         {Object.values(selectedFilters).filter(val => val !== null).length > 0 && (
-          <span className="ml-1 px-2 py-1 bg-blue-500 text-white text-xs rounded-full" style={mergeRgbStyles('bg-blue-500', 'text-white')}>
+          <span className="ml-1 px-2 py-1 bg-blue-500 text-white text-xs rounded-full">
             {Object.values(selectedFilters).filter(val => val !== null).length}
           </span>
         )}
@@ -308,16 +253,6 @@ const MapToolbar = ({ mapInstance, onSearch, onReset, onApplyFilters, selectedFi
                 ${selectedFilters[item.id] ? 'bg-blue-100 border-blue-500 text-blue-700' : 'border-gray-300 hover:bg-gray-50'}
                 ${hoveredButton === item.id ? 'bg-blue-50 border-blue-300 text-blue-600' : ''}
               `}
-              style={{
-                ...(selectedFilters[item.id] 
-                  ? mergeRgbStyles('bg-blue-100', 'border-blue-500', 'text-blue-700')
-                  : getRgbStyle('border-gray-300')
-                ),
-                ...(hoveredButton === item.id 
-                  ? mergeRgbStyles('bg-blue-50', 'border-blue-300', 'text-blue-600')
-                  : {}
-                )
-              }}
               onMouseEnter={() => setHoveredButton(item.id)}
               onMouseLeave={() => setHoveredButton(null)}
               onClick={() => openFilterModal(item.id)}
@@ -336,16 +271,12 @@ const MapToolbar = ({ mapInstance, onSearch, onReset, onApplyFilters, selectedFi
           </div>
         ))}
 
-        {/* Clear All Filters Button */}
+        {/* NEW: Clear All Filters Button */}
         {Object.values(selectedFilters).filter(val => val !== null).length > 0 && (
           <button
             onClick={handleClearAllFilters}
             className={`px-3 py-1 border border-gray-300 rounded-full flex items-center text-xs whitespace-nowrap transition-all duration-200
                         bg-gray-100 hover:bg-gray-200 text-gray-700`}
-            style={{
-              ...mergeRgbStyles('border-gray-300', 'bg-gray-100', 'text-gray-700'),
-              ...(hoveredButton === 'clearAllFilters' ? getRgbStyle('bg-gray-200') : {})
-            }}
             onMouseEnter={() => setHoveredButton('clearAllFilters')}
             onMouseLeave={() => setHoveredButton(null)}
             title="Clear all active filters"
@@ -362,10 +293,6 @@ const MapToolbar = ({ mapInstance, onSearch, onReset, onApplyFilters, selectedFi
             ? 'bg-gray-200'
             : 'bg-gray-100 hover:bg-gray-200'
             }`}
-          style={{
-            ...mergeRgbStyles('border-gray-300', 'bg-gray-100'),
-            ...(hoveredButton === 'more' ? getRgbStyle('bg-gray-200') : {})
-          }}
           onMouseEnter={() => setHoveredButton('more')}
           onMouseLeave={() => setHoveredButton(null)}
         >

@@ -27,30 +27,20 @@ const FilterModal = ({ filterItem, selectedValue, onSelectOption, onClose }) => 
   return (
     // The outermost div acts as the overlay. Add onClick to this.
     <div
-      className="fixed inset-0 bg-opacity-0 flex items-center justify-center z-50"
-      style={{ backgroundColor: 'rgba(0, 0, 0, 0)' }} // RGB override for transparency
+      className="fixed inset-0  bg-opacity-0 flex items-center justify-center z-50" // Added a slight background opacity for better visual cue
       onClick={onClose} // This handles clicks directly on the overlay
     >
       {/* Attach the ref to the modal content div */}
       <div
-        className="rounded-lg shadow-xl p-8 w-full max-w-md mx-8"
-        style={{ 
-          backgroundColor: 'rgb(255, 255, 255)', // RGB override for white
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)' // RGB shadow override
-        }}
+        className="bg-white rounded-lg shadow-xl p-8 w-full max-w-md mx-8"
         onClick={(e) => e.stopPropagation()} // Prevent clicks inside the modal from bubbling up to the overlay
         ref={modalContentRef} // Attach the ref here
       >
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold" style={{ color: 'rgb(31, 41, 55)' }}>
-            Select {filterItem.label}
-          </h2>
+          <h2 className="text-xl font-semibold text-gray-800">Select {filterItem.label}</h2>
           <button
             onClick={onClose}
-            className="hover:text-gray-700"
-            style={{ color: 'rgb(107, 114, 128)' }}
-            onMouseEnter={(e) => e.target.style.color = 'rgb(55, 65, 81)'}
-            onMouseLeave={(e) => e.target.style.color = 'rgb(107, 114, 128)'}
+            className="text-gray-500 hover:text-gray-700"
             aria-label="Close"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -63,25 +53,11 @@ const FilterModal = ({ filterItem, selectedValue, onSelectOption, onClose }) => 
           {filterItem.options.map(option => (
             <button
               key={option}
-              className="block w-full text-left px-4 py-2 text-sm rounded-md transition-colors duration-150"
-              style={{
-                backgroundColor: selectedValue === option ? 'rgb(59, 130, 246)' : 'transparent',
-                color: selectedValue === option ? 'rgb(255, 255, 255)' : 'rgb(55, 65, 81)'
-              }}
-              onMouseEnter={(e) => {
-                if (selectedValue === option) {
-                  e.target.style.backgroundColor = 'rgb(37, 99, 235)'; // blue-600
-                } else {
-                  e.target.style.backgroundColor = 'rgb(243, 244, 246)'; // gray-100
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (selectedValue === option) {
-                  e.target.style.backgroundColor = 'rgb(59, 130, 246)'; // blue-500
-                } else {
-                  e.target.style.backgroundColor = 'transparent';
-                }
-              }}
+              className={`block w-full text-left px-4 py-2 text-sm rounded-md transition-colors duration-150
+                          ${selectedValue === option
+                              ? 'bg-blue-500 text-white hover:bg-blue-600'
+                              : 'text-gray-700 hover:bg-gray-100'
+                          }`}
               onClick={() => {
                 onSelectOption(filterItem.id, option);
                 onClose(); // Close modal after selection
@@ -94,20 +70,7 @@ const FilterModal = ({ filterItem, selectedValue, onSelectOption, onClose }) => 
 
         {/* Option to clear the filter */}
         <button
-          className="mt-4 w-full text-center px-4 py-2 text-sm rounded-md transition-colors duration-150"
-          style={{
-            color: 'rgb(107, 114, 128)', // gray-500
-            borderColor: 'rgb(209, 213, 219)', // gray-300
-            borderWidth: '1px',
-            borderStyle: 'solid',
-            backgroundColor: 'transparent'
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.backgroundColor = 'rgb(243, 244, 246)'; // gray-100
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.backgroundColor = 'transparent';
-          }}
+          className="mt-4 w-full text-center px-4 py-2 text-sm text-gray-500 border border-gray-300 rounded-md hover:bg-gray-100 transition-colors duration-150"
           onClick={() => {
             onSelectOption(filterItem.id, null); // Set to null to clear
             onClose(); // Close modal after clearing

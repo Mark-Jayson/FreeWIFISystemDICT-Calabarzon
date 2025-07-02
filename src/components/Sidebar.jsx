@@ -33,71 +33,6 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
 
   const { logout } = useAuth();
 
-  // RGB color palette to override Tailwind OKLCH defaults
-  const colors = {
-    // Blue palette
-    blue800: 'rgb(30, 64, 175)',
-    blue700: 'rgb(29, 78, 216)',
-    blue900: 'rgb(30, 58, 138)',
-    
-    // Gray palette
-    white: 'rgb(255, 255, 255)',
-    gray200: 'rgb(229, 231, 235)',
-    gray300: 'rgb(209, 213, 219)',
-    gray700: 'rgb(55, 65, 81)',
-    gray900: 'rgb(17, 24, 39)',
-    
-    // Red palette
-    red500: 'rgb(239, 68, 68)',
-    red600: 'rgb(220, 38, 38)',
-    
-    // Overlay
-    whiteOverlay: 'rgba(255, 255, 255, 0.2)',
-    transparent: 'rgba(0, 0, 0, 0)'
-  };
-
-  useEffect(() => {
-    // Inject CSS custom properties to override Tailwind colors
-    const style = document.createElement('style');
-    style.innerHTML = `
-      :root {
-        --color-blue-800: ${colors.blue800};
-        --color-blue-700: ${colors.blue700};
-        --color-blue-900: ${colors.blue900};
-        --color-white: ${colors.white};
-        --color-gray-200: ${colors.gray200};
-        --color-gray-300: ${colors.gray300};
-        --color-gray-700: ${colors.gray700};
-        --color-gray-900: ${colors.gray900};
-        --color-red-500: ${colors.red500};
-        --color-red-600: ${colors.red600};
-      }
-      
-      /* Override Tailwind classes with RGB values */
-      .bg-blue-800 { background-color: ${colors.blue800} !important; }
-      .bg-blue-700 { background-color: ${colors.blue700} !important; }
-      .bg-blue-900 { background-color: ${colors.blue900} !important; }
-      .bg-white { background-color: ${colors.white} !important; }
-      .bg-gray-200 { background-color: ${colors.gray200} !important; }
-      .bg-red-500 { background-color: ${colors.red500} !important; }
-      
-      .text-white { color: ${colors.white} !important; }
-      .text-gray-700 { color: ${colors.gray700} !important; }
-      .text-gray-900 { color: ${colors.gray900} !important; }
-      
-      .border-gray-200 { border-color: ${colors.gray200} !important; }
-      
-      .hover\\:bg-blue-700:hover { background-color: ${colors.blue700} !important; }
-      .hover\\:bg-gray-300:hover { background-color: ${colors.gray300} !important; }
-      .hover\\:bg-red-600:hover { background-color: ${colors.red600} !important; }
-    `;
-    document.head.appendChild(style);
-    
-    return () => {
-      document.head.removeChild(style);
-    };
-  }, []);
-
   useEffect(() => {
     const path = location.pathname.split('/')[1] || 'dashboard';
     setActiveTab(path);
@@ -115,7 +50,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
   const handleNavigation = (item) => {
     setActiveTab(item.id);
     if (item.id === 'logout') {
-      setShowLogoutConfirm(true);
+      setShowLogoutConfirm(true); // show confirmation modal
     } else if (item.path) {
       navigate(item.path);
     }
@@ -145,7 +80,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
         onMouseEnter={() => setHoveredItem(item.id)}
         onMouseLeave={() => setHoveredItem(null)}
         style={{ 
-          WebkitTapHighlightColor: colors.transparent
+          WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)' 
         }}
       >
         {item.icon === 'wifi-icon' ? (
@@ -168,21 +103,38 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
   return (
     <>
       <div 
-        className="bg-blue-800 text-white w-16 flex flex-col h-full overflow-hidden shadow-black-100"
+        className="text-white w-16 flex flex-col h-full overflow-hidden shadow-black-100"
         style={{ 
-          WebkitTapHighlightColor: colors.transparent
+          backgroundColor: 'rgba(30, 64, 175, 1)', // Blue-800 equivalent
+          WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
         }}
       >
         <div 
-          className="bg-white border-b border-gray-200 h-40"
+          className="h-40"
+          style={{ 
+            backgroundColor: 'rgba(255, 255, 255, 1)',
+            borderBottomColor: 'rgba(229, 231, 235, 1)', // Gray-200 equivalent
+            borderBottomWidth: '1px',
+            borderBottomStyle: 'solid'
+          }}
         >
           <div className="w-full flex justify-center py-3">
-            <div className="bg-white rounded-full p-1">
+            <div 
+              className="rounded-full p-1"
+              style={{ 
+                backgroundColor: 'rgba(255, 255, 255, 1)' 
+              }}
+            >
               <img src={DICTLogo} alt="DICT Logo" className="w-10 h-10" />
             </div>
           </div>
           <div className="w-full flex justify-center py-3 mb-8">
-            <div className="bg-white rounded-full p-1">
+            <div 
+              className="rounded-full p-1"
+              style={{ 
+                backgroundColor: 'rgba(255, 255, 255, 1)' 
+              }}
+            >
               <img src={FreeWifi} alt="Free WiFi Logo" className="w-10 h-10" />
             </div>
           </div>
@@ -199,33 +151,59 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
         <div 
           className="fixed inset-0 z-50 backdrop-blur-sm flex items-center justify-center"
           style={{ 
-            backgroundColor: colors.whiteOverlay,
-            WebkitTapHighlightColor: colors.transparent
+            backgroundColor: 'rgba(255, 255, 255, 0.2)',
+            WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
           }}
         >
-          <div className="bg-white border border-gray-200 rounded-lg shadow-xl p-6 max-w-sm w-full">
-            <h3 className="text-gray-900 text-lg font-semibold mb-4">
+          <div 
+            className="rounded-lg shadow-xl p-6 max-w-sm w-full"
+            style={{ 
+              backgroundColor: 'rgba(255, 255, 255, 1)',
+              borderColor: 'rgba(229, 231, 235, 1)', // Gray-200 equivalent
+              borderWidth: '1px',
+              borderStyle: 'solid'
+            }}
+          >
+            <h3 
+              className="text-lg font-semibold mb-4"
+              style={{ 
+                color: 'rgba(17, 24, 39, 1)' // Gray-900 equivalent
+              }}
+            >
               Confirm Logout
             </h3>
-            <p className="text-gray-700 mb-6">
+            <p 
+              className="mb-6"
+              style={{ 
+                color: 'rgba(55, 65, 81, 1)' // Gray-700 equivalent
+              }}
+            >
               Are you sure you want to log out?
             </p>
             <div className="flex justify-end gap-3">
               <button
                 onClick={handleCancelLogout}
-                className="bg-gray-200 text-gray-900 hover:bg-gray-300 px-4 py-2 text-sm rounded transition-colors duration-200"
+                className="px-4 py-2 text-sm rounded transition-colors duration-200"
                 style={{ 
-                  WebkitTapHighlightColor: colors.transparent
+                  backgroundColor: 'rgba(229, 231, 235, 1)', // Gray-200 equivalent
+                  color: 'rgba(17, 24, 39, 1)', // Gray-900 equivalent
+                  WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
                 }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(209, 213, 219, 1)'} // Gray-300 equivalent
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(229, 231, 235, 1)'} // Gray-200 equivalent
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmLogout}
-                className="bg-red-500 text-white hover:bg-red-600 px-4 py-2 text-sm rounded transition-colors duration-200"
+                className="px-4 py-2 text-sm rounded transition-colors duration-200"
                 style={{ 
-                  WebkitTapHighlightColor: colors.transparent
+                  backgroundColor: 'rgba(239, 68, 68, 1)', // Red-500 equivalent
+                  color: 'rgba(255, 255, 255, 1)',
+                  WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
                 }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(220, 38, 38, 1)'} // Red-600 equivalent
+                onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(239, 68, 68, 1)'} // Red-500 equivalent
               >
                 Logout
               </button>
@@ -233,6 +211,7 @@ const Sidebar = ({ activeTab, setActiveTab }) => {
           </div>
         </div>
       )}
+
     </>
   );
 };

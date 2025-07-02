@@ -133,29 +133,17 @@ const MapToolbar = ({ mapInstance, setPanelData, onSearch, onLocationSelected })
   };
 
   return (
-    <div className="p-3 shadow-md flex items-center" style={{ backgroundColor: 'rgb(255, 255, 255)' }}>
+    <div className="bg-white p-3 shadow-md flex items-center">
       <div className="relative mr-4">
         <input
           type="text"
           placeholder="Search Location"
-          className="w-48 pl-8 pr-4 py-2 rounded-full focus:outline-none focus:ring-2 transition-all duration-200 text-m"
-          style={{ 
-            border: '1px solid rgb(209, 213, 219)',
-            color: 'rgb(17, 24, 39)'
-          }}
-          onFocus={(e) => {
-            e.target.style.borderColor = 'rgb(59, 130, 246)';
-            e.target.style.boxShadow = '0 0 0 2px rgba(59, 130, 246, 0.5)';
-            if (searchResults.length > 0) setShowResults(true);
-          }}
-          onBlur={(e) => {
-            e.target.style.borderColor = 'rgb(209, 213, 219)';
-            e.target.style.boxShadow = 'none';
-          }}
+          className="w-48 pl-8 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 text-m"
           value={searchTerm}
           onChange={handleSearchChange}
+          onFocus={() => searchResults.length > 0 && setShowResults(true)}
         />
-        <div className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'rgb(107, 114, 128)' }}>
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
@@ -163,18 +151,9 @@ const MapToolbar = ({ mapInstance, setPanelData, onSearch, onLocationSelected })
 
         {/* Loading indicator */}
         {isSearching && (
-          <div 
-            className="absolute z-20 mt-1 w-[280px] rounded shadow-lg p-2 text-sm"
-            style={{ 
-              backgroundColor: 'rgb(255, 255, 255)',
-              color: 'rgb(55, 65, 81)'
-            }}
-          >
+          <div className="absolute z-20 mt-1 w-[280px] bg-white rounded shadow-lg p-2 text-gray-700 text-sm">
             <div className="flex items-center">
-              <div 
-                className="animate-spin rounded-full h-4 w-4 border-b-2 mr-2"
-                style={{ borderColor: 'rgb(59, 130, 246)' }}
-              ></div>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2"></div>
               Searching database...
             </div>
           </div>
@@ -182,36 +161,24 @@ const MapToolbar = ({ mapInstance, setPanelData, onSearch, onLocationSelected })
 
         {/* Search results dropdown - UPDATED for database structure */}
         {showResults && searchResults.length > 0 && !isSearching && (
-          <div 
-            className="absolute z-20 mt-1 w-[280px] max-h-60 overflow-y-auto rounded shadow-lg" 
-            ref={searchResultsRef}
-            style={{ backgroundColor: 'rgb(255, 255, 255)' }}
-          >
+          <div className="absolute z-20 mt-1 w-[280px] max-h-60 overflow-y-auto bg-white rounded shadow-lg" ref={searchResultsRef}>
             {searchResults.map((location, index) => (
               <div
                 key={location.loc_id || index}
-                className="p-3 cursor-pointer text-sm last:border-b-0"
-                style={{ 
-                  color: 'rgb(55, 65, 81)',
-                  borderBottom: index < searchResults.length - 1 ? '1px solid rgb(243, 244, 246)' : 'none'
-                }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = 'rgb(243, 244, 246)'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                className="p-3 hover:bg-gray-100 cursor-pointer text-gray-700 text-sm border-b border-gray-100 last:border-b-0"
                 onClick={() => handleResultClick(location)}
               >
-                <div className="font-medium" style={{ color: 'rgb(37, 99, 235)' }}>
-                  {location.location_name}
-                </div>
-                <div className="text-sm mt-1" style={{ color: 'rgb(75, 85, 99)' }}>
+                <div className="font-medium text-blue-600">{location.location_name}</div>
+                <div className="text-sm text-gray-600 mt-1">
                   {location.locality && `${location.locality}, `}{location.province}
                 </div>
                 {location.congressional_district && (
-                  <div className="text-xs mt-1" style={{ color: 'rgb(107, 114, 128)' }}>
+                  <div className="text-xs text-gray-500 mt-1">
                     District: {location.congressional_district}
                   </div>
                 )}
                 {location.category && (
-                  <div className="text-xs mt-1" style={{ color: 'rgb(34, 197, 94)' }}>
+                  <div className="text-xs text-green-600 mt-1">
                     Category: {location.category}
                   </div>
                 )}
@@ -222,18 +189,15 @@ const MapToolbar = ({ mapInstance, setPanelData, onSearch, onLocationSelected })
 
         {/* No results message */}
         {showResults && searchResults.length === 0 && !isSearching && searchTerm.trim() !== '' && (
-          <div 
-            className="absolute z-20 mt-1 w-[280px] rounded shadow-lg p-3 text-sm"
-            style={{ backgroundColor: 'rgb(255, 255, 255)', color: 'rgb(55, 65, 81)' }}
-          >
-            <div className="text-center" style={{ color: 'rgb(107, 114, 128)' }}>
+          <div className="absolute z-20 mt-1 w-[280px] bg-white rounded shadow-lg p-3 text-gray-700 text-sm">
+            <div className="text-center text-gray-500">
               No locations found for "{searchTerm}"
             </div>
           </div>
         )}
       </div>
 
-      <div className="mr-2 text-sm whitespace-nowrap" style={{ color: 'rgb(55, 65, 81)' }}>
+      <div className="text-gray-700 mr-2 text-sm whitespace-nowrap">
         Filters
       </div>
 
@@ -241,12 +205,10 @@ const MapToolbar = ({ mapInstance, setPanelData, onSearch, onLocationSelected })
         {filterItems.map(item => (
           <button
             key={item.id}
-            className="px-3 py-1 rounded-full flex items-center text-xs whitespace-nowrap transition-all duration-200"
-            style={{
-              border: hoveredButton === item.id ? '1px solid rgb(147, 197, 253)' : '1px solid rgb(209, 213, 219)',
-              backgroundColor: hoveredButton === item.id ? 'rgb(239, 246, 255)' : 'rgb(249, 250, 251)',
-              color: hoveredButton === item.id ? 'rgb(37, 99, 235)' : 'rgb(55, 65, 81)'
-            }}
+            className={`px-3 py-1 border border-gray-300 rounded-full flex items-center text-xs whitespace-nowrap transition-all duration-200 ${hoveredButton === item.id
+              ? 'bg-blue-50 border-blue-300 text-blue-600'
+              : 'hover:bg-gray-50'
+              }`}
             onMouseEnter={() => setHoveredButton(item.id)}
             onMouseLeave={() => setHoveredButton(null)}
           >
@@ -264,15 +226,12 @@ const MapToolbar = ({ mapInstance, setPanelData, onSearch, onLocationSelected })
         ))}
 
         <button
-          className="p-1 rounded-full flex items-center justify-center text-xs transition-all duration-200"
-          style={{
-            border: '1px solid rgb(209, 213, 219)',
-            backgroundColor: hoveredButton === 'more' ? 'rgb(229, 231, 235)' : 'rgb(243, 244, 246)'
-          }}
+          className={`p-1 border border-gray-300 rounded-full flex items-center justify-center text-xs transition-all duration-200 ${hoveredButton === 'more'
+            ? 'bg-gray-200'
+            : 'bg-gray-100 hover:bg-gray-200'
+            }`}
           onMouseEnter={() => setHoveredButton('more')}
           onMouseLeave={() => setHoveredButton(null)}
-          onFocus={(e) => e.target.style.backgroundColor = 'rgb(229, 231, 235)'}
-          onBlur={(e) => e.target.style.backgroundColor = hoveredButton === 'more' ? 'rgb(229, 231, 235)' : 'rgb(243, 244, 246)'}
         >
           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h.01M12 12h.01M19 12h.01" />
