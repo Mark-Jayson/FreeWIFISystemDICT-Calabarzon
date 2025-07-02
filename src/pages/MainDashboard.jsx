@@ -18,6 +18,11 @@ const PHILIPPINES_BOUNDS = [
   [126.8039607, 21.1217806],
 ];
 
+const markerBluePNG = '/marker-blue.png';   // For default/blue markers
+const markerGreenPNG = '/marker-green.png'; // For active/green markers
+const markerRedPNG = '/marker-red.png';     // For terminated/red markers
+
+
 const MainDashboard = () => {
   const location = useLocation();
   const currentPath = location.pathname.split('/')[1];
@@ -33,7 +38,7 @@ const MainDashboard = () => {
   const [selectedFilters, setSelectedFilters] = useState({
     district: null,
     Province: null,
-    contractStatus: 'All', // Default to 'All' for contract statu
+    contractStatus: null, // Default to 'All' for contract statu
     category: null
   });
 
@@ -528,162 +533,159 @@ const MainDashboard = () => {
     setPanelData(null);
     clearNavigationStack();
   };
+
+
   const addFWSMarkers = async (mapInstance, filters = {
     district: null,
     Province: null,
-    contractStatus: 'All', // Default to 'All' for contract status
+    contractStatus: null, // Default to 'All' for contract status
     category: null
   }) => {
     // Clear any existing markers on the map before adding new ones.
-    // Assuming clearMarkers clears all markers when called with an empty string or similar logic.
     if (markers.length > 0) {
       clearMarkers('');
     }
 
     try {
-      // Fetch map pin data from the server endpoint.
-      // This endpoint is expected to return site data joined with location data.
       const response = await fetch('http://localhost:5000/api/map-pins');
       const data = await response.json();
 
-      // Define a mapping for category names to their simplified/coded forms.
-      // Note: If there are duplicate keys, the last definition will take precedence.
       const categ = {
         'Public High School': "PHS",
         'Tourism Sea': 'TRM-SEA',
         'Rural Health Unit': "RHU",
         'Library': "LIB",
         'Local Government Unit - Tourism': "LGU-TOUR",
-        'Local Government Unit - Municipal Hall/City Hall': 'LGU-BRGY', // This will overwrite previous 'PHS' mapping for the same key
+        'Local Government Unit - Municipal Hall/City Hall': 'LGU-BRGY',
         'Integrated High School': 'Integrated HS',
         'Parks and Playground': 'PP',
         'Transport Terminals': 'Transport Terminals',
-        'Public Librarie': 'Public Librarie', // Typo: 'Public Librarie' instead of 'Public Libraries'?
+        'Public Librarie': 'Public Librarie',
         'State Universities and Colleges': 'SUC',
         'Elementary School': 'Elementary School',
         'National and Local Government Offices': 'National and Local Government Offices',
         'National Government Agency': 'NGA',
-        'Market': 'MKT'
+        'Market': 'MKT',
+        'Barangay': 'BGY',
+        'High School': 'High School',
+        'Local Government Unit - Municipal / City Hall': 'LGU-HALL',
+        'Local Government Unit - Health Services': 'LGU-HEALTH',
+        'Tourism Sites': 'Tourism Sites',
+        'Clinical Quality Framework': 'CQF',
+        'Plaza':'PLZ',
+        'Government Hospitals and RHUs': 'Government Hospitals and RHUs',
+        'Public Elementary School': 'PES',
+        'Local Government Unit': 'LGU',
+        'Health Service Provider': 'HSP',
+        'Plazas and Open Areas': 'Plazas and Open Areas'
       };
 
       const contract = {
-        'Active': true,
-        'Terminated': false,
-        'All': null // This will be used to indicate no specific contract status filter
+        'Active': false,
+        'Terminated': true
       }
 
-      // Initialize an empty array to store the new Mapbox GL JS marker objects.
       const newMarkers = [];
-      // Use a Set to keep track of unique location IDs for which we've already created a marker.
-      // This prevents duplicate markers if a location has multiple associated sites in the data.
       const processedLocationIds = new Set();
 
-      // Prepare filter values by converting them to lowercase for case-insensitive comparison,
-      // or getting the mapped category value, or setting to null if no filter is applied.
       const filterProvince = filters.Province ? filters.Province.toLowerCase() : null;
       const filterDistrict = filters.district ? filters.district.toLowerCase() : null;
-      const filterContractStatus = contract[filters.contractStatus]; // Contract status is likely exact, no toLowerCase
-      // Map the category filter name to its coded value, then convert to lowercase.
+      const filterContractStatus = contract[filters.contractStatus];
       const filterCategory = categ[filters.category] ? categ[filters.category].toLowerCase() : null;
 
-      // Iterate through each item received from the API.
-      // Each 'item' represents a site, but includes location details (latitude, longitude, location_id, isterminated, etc.).
       data.forEach(item => {
-        // Check if a marker for this location_id has already been created.
-        // If it has, skip this item to avoid placing multiple markers for the same location.
         if (processedLocationIds.has(item.location_id)) {
-          return; // Skip to the next item in the loop
+          return;
         }
 
-        // --- Primary Filtering Logic ---
-        // If a filter is provided, check if the item's corresponding property matches the filter.
-        // If it doesn't match, skip this item and do not create a marker.
-
-        // Filter by Province:
         if (filterProvince && (!item.province || item.province.toLowerCase() !== filterProvince)) {
           console.log(`Filtering out marker for province: ${item.province} (Does not match filter: ${filters.Province})`);
           return;
         }
 
-        // Filter by District:
         if (filterDistrict && (!item.congressional_district || item.congressional_district.toLowerCase() !== filterDistrict)) {
           console.log(`Filtering out marker for district: ${item.congressional_district} (Does not match filter: ${filters.district})`);
           return;
         }
 
-        // Filter by Contract Status:
-        // This is the corrected line. It checks if a filterContractStatus is provided
-        // AND if the item's contract_status does NOT match the provided filter.
-        if (item.isterminated !== filterContractStatus || filterContractStatus === null) {
-          console.log(`Filtering out marker for contract status: ${item.isterminated} (Does not match filter: ${filters.contractStatus})`);
-          return;
+          let markerPNGPath = markerBluePNG; // Default to blue PNG
+        if (filterContractStatus === false || filterContractStatus === true) {
+            // Decide which PNG to use based on contract status
+            markerPNGPath = item.isterminated === true ? markerRedPNG : markerGreenPNG;
+            if (item.isterminated !== filterContractStatus) {
+                return;
+            }
         }
 
-        // Filter by Category:
         if (filterCategory && (!item.category || item.category.toLowerCase() !== filterCategory)) {
           console.log(`Filtering out marker for category: ${item.category} (Does not match filter: ${filters.category})`);
           return;
         }
 
-        // --- Fixed Filter: Handle 'isterminated' property ---
-        // If the location is terminated (isterminated is true), skip creating a marker for it.
-        // This acts as an always-on filter, removing terminated locations regardless of other filters.
-
-        // if (item.isterminated === true) {
-        //     console.log(`Filtering marker for terminated location: ${item.location_name} (ID: ${item.location_id})`);
-        //     return; // Skip this item
-        // }
-
-
-        // --- End of fixed functionality ---
-
-        // Add the current location_id to the set of processed IDs.
-        // This marks it as handled, ensuring no further markers are created for this specific location.
         processedLocationIds.add(item.location_id);
 
-        // Parse latitude and longitude from the current item.
-        // Mapbox GL JS expects coordinates in [longitude, latitude] format.
         const lat = parseFloat(item.latitude);
         const lng = parseFloat(item.longitude);
 
-        // Validate latitude and longitude before creating a marker.
-        // Invalid coordinates can cause errors or unexpected behavior with map rendering.
         if (isNaN(lat) || isNaN(lng) || lat < -90 || lat > 90 || lng < -180 || lng > 180) {
           console.warn(
             `Skipping marker for location_id ${item.location_id || 'N/A'} ` +
             `(${item.location_name || 'Unnamed Location'}) due to invalid coordinates: ` +
             `Lat ${item.latitude}, Lng ${item.longitude}`
           );
-          return; // Skip this item if coordinates are invalid
+          return;
         }
 
-        // Determine marker color based on 'isterminated' status.
-        // Markers will be green for non-terminated sites and the default Mapbox blue otherwise (though isterminated=true are filtered out above).
-        // The logic here for `item.isterminated === false ? '#11aa10' : '#00FF00'` implies green for non-terminated.
-        const markerColor = '#11aa10'; // Since terminated ones are filtered out, all visible markers should be green.
+       // --- Custom Marker Element with SVG Image ---
+                 const el = document.createElement('div');
+        el.className = 'mapbox-custom-marker';
 
-        // Create a new Mapbox GL JS marker instance.
-        const marker = new mapboxgl.Marker({ color: markerColor, scale: 1.0 })
-          .setLngLat([lng, lat]) // Set coordinates (longitude, latitude)
-          .addTo(mapInstance);   // Add the marker to the provided map instance.
+        const img = document.createElement('img');
+        img.src = markerPNGPath; // Set the source to your chosen PNG file
+        img.alt = 'Location Marker';
+        img.style.width = '100%'; // Make img fill the div
+        img.style.height = '100%'; // Make img fill the div
+        el.appendChild(img);
 
-        // Attach a click event listener to the marker's underlying DOM element.
+
+        // Set initial size and transform for positioning
+        // The 'transform' is crucial to correctly anchor the pointed bottom.
+        // Mapbox markers are typically anchored at the bottom-center of their icon.
+        const initialZoom = mapInstance.getZoom();
+        // Adjust this formula for desired scaling. This formula makes the marker bigger as zoom increases.
+        // The values here (base size 20, zoom 5, factor 1.5) are examples.
+        const baseMarkerSize = 20; // Size at reference zoom
+        const zoomReference = 5;    // Zoom level where marker is baseMarkerSize
+        const scaleFactor = 1.5;   // How much it grows per zoom level
+        let newSize = baseMarkerSize + (initialZoom - zoomReference) * scaleFactor;
+
+        // Clamp the size to prevent it from becoming too small or too large
+        newSize = Math.max(10, Math.min(60, newSize)); // Example: min 10px, max 60px
+
+        el.style.width = `${newSize}px`;
+        el.style.height = `${newSize * 1.5}px`; // Adjust height to account for the pointer
+        // The transform origin and translate are key for correct anchoring
+        el.style.transform = `translate(-50%, -100%)`; // Centers the marker horizontally, aligns bottom to coordinates
+
+        const marker = new mapboxgl.Marker({
+            element: el,
+            anchor: 'bottom' // Explicitly set anchor to 'bottom'
+          })
+          .setLngLat([lng, lat])
+          .addTo(mapInstance);
+
         marker.getElement().addEventListener('click', async () => {
           try {
-            // Ensure location_id is valid before attempting to fetch detailed data.
             if (item.location_id) {
-              // Fetch comprehensive data for the clicked location using its unique ID.
               const response = await fetch(`http://localhost:5000/api/location-with-sites/${item.location_id}`);
               const fullData = await response.json();
 
-              // Animate the map to fly to the clicked marker's location.
               mapInstance.flyTo({
                 center: [parseFloat(fullData.longitude), parseFloat(fullData.latitude)],
                 zoom: 15,
-                essential: true // Ensures the animation happens even if the map is already at the target
+                essential: true
               });
 
-              // Fetch additional data related to the locality (city/municipality) and province.
               const siteOfCity = await fetch(`http://localhost:5000/api/sitesByLocality/${fullData.locality}`);
               const locOfCity = await fetch(`http://localhost:5000/api/getLocationsOfProvince/${fullData.locality}`);
               const province = await fetch(`http://localhost:5000/api/getProvince/${fullData.locality}`);
@@ -691,7 +693,6 @@ const MainDashboard = () => {
               const getprovince = await province.json();
               console.log('Province Data:', getprovince);
 
-              // Error handling for HTTP responses.
               if (!locOfCity.ok) {
                 const errorData = await locOfCity.json();
                 throw new Error(errorData.error || `HTTP error! Status: ${locOfCity.status}`);
@@ -707,44 +708,39 @@ const MainDashboard = () => {
               console.log('Locations', locationsOfCity);
               console.log('Site', siteOfCityData.totalSitesCount);
 
-              // Construct minimal city data for navigation and display.
               const cityData = {
                 name: fullData.locality || 'Unknown City',
                 provinceName: fullData.province || 'Unknown Province',
                 totalSites: siteOfCityData.totalSitesCount,
-                mayor: 'Unknown', // Placeholder, ideally fetched from API
-                totalAPSites: locationsOfCity.length, // Total access point sites in the city
-                digitizationRate: 0, // Placeholder, requires calculation
-                siteTypes: [], // Placeholder, populate by iterating locationsOfCity
-                freeWifiLocations: locationsOfCity // List of locations with free WiFi
+                mayor: 'Unknown',
+                totalAPSites: locationsOfCity.length,
+                digitizationRate: 0,
+                siteTypes: [],
+                freeWifiLocations: locationsOfCity
               };
 
-              // Construct province data for higher-level navigation.
               const provinceData = {
                 provinceName: getprovince.province,
                 freeWiFiSites: getprovince.numberOfSites,
-                governor: 'Unknown Governor', // Placeholder
-                totalAPSites: getprovince.numberOfLocations, // Total AP sites in the province
-                digitizationRate: 0, // Placeholder
-                siteTypes: [ // Example site types, ideally dynamic from API
+                governor: 'Unknown Governor',
+                totalAPSites: getprovince.numberOfLocations,
+                digitizationRate: 0,
+                siteTypes: [
                   { type: "Municipal", count: 34 },
                   { type: "Hospitals", count: 12 },
                   { type: "Fire Stations", count: 8 },
-                  { type: "Public Market", count: 15 }, // Corrected key from '15: ""'
+                  { type: "Public Market", count: 15 },
                   { type: "Schools", count: 45 },
                   { type: "Parks", count: 36 }
                 ],
-                cities: getprovince.cities // List of cities within the province
+                cities: getprovince.cities
               };
               console.log('Constructed Province Data:', provinceData);
 
-              // Update state variables (assuming these are defined in a higher scope, e.g., React context or component state).
-              // These functions would typically trigger UI updates.
               setSearchQuery(fullData.location_name);
               setPanelData(provinceData);
               setSelectedCity(cityData);
 
-              // Call a handler function to manage the navigation stack and display relevant details.
               handleLocationMarkerClick(fullData, cityData, provinceData);
 
             } else {
@@ -758,20 +754,36 @@ const MainDashboard = () => {
           }
         });
 
-        // Add the newly created valid marker object to our array.
         newMarkers.push(marker);
       });
 
-      // Update the state variable that holds all currently displayed markers.
-      // This is crucial for managing markers (e.g., clearing them later).
       setMarkers(newMarkers);
       console.log(`Added ${newMarkers.length} unique location markers from database`);
+
+      // --- Add Map Zoom Event Listener ---
+      if (!mapInstance._zoomListenerAdded) { // Simple flag to prevent duplicate listeners
+                mapInstance.on('zoom', () => {
+                    const currentZoom = mapInstance.getZoom();
+                    newMarkers.forEach(marker => { // newMarkers will be scoped to this addFWSMarkers call
+                        const el = marker.getElement();
+                        const baseMarkerSize = 15;
+                        const zoomReference = 5;
+                        const scaleFactor = 2.5;
+                        let newSize = baseMarkerSize + (currentZoom - zoomReference) * scaleFactor;
+                        newSize = Math.max(10, Math.min(60, newSize));
+
+                        el.style.width = `${newSize}px`;
+                        el.style.height = `${newSize * 1.5}px`;
+                        el.style.transform = `translate(-50%, -100%)`;
+                    });
+                });
+                mapInstance._zoomListenerAdded = true; // Set flag
+            }
+
     } catch (err) {
       console.error('Failed to fetch map pins:', err);
     }
   };
-
-
   // Initialize and configure the Mapbox map
   useEffect(() => {
     if (activeTab !== 'map') return;
