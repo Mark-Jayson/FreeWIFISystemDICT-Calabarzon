@@ -2,6 +2,47 @@
 import React, { useState } from 'react';
 import { AlertTriangle, Calendar, Clock, MapPin, ChevronDown, ChevronUp, Filter } from 'lucide-react';
 
+// RGB Color Overrides for Tailwind Classes
+const rgbColors = {
+  // Gray colors
+  'text-gray-900': { color: 'rgb(17, 24, 39)' },
+  'text-gray-600': { color: 'rgb(75, 85, 99)' },
+  'text-gray-500': { color: 'rgb(107, 114, 128)' },
+  'text-gray-400': { color: 'rgb(156, 163, 175)' },
+  'bg-gray-100': { backgroundColor: 'rgb(243, 244, 246)' },
+  'bg-gray-200': { backgroundColor: 'rgb(229, 231, 235)' },
+  
+  // Red colors
+  'text-red-500': { color: 'rgb(239, 68, 68)' },
+  'text-red-600': { color: 'rgb(220, 38, 38)' },
+  'text-red-800': { color: 'rgb(153, 27, 27)' },
+  'bg-red-100': { backgroundColor: 'rgb(254, 226, 226)' },
+  'border-red-400': { borderLeftColor: 'rgb(248, 113, 113)' },
+  'border-red-500': { borderLeftColor: 'rgb(239, 68, 68)' },
+  
+  // Amber colors
+  'text-amber-600': { color: 'rgb(217, 119, 6)' },
+  'text-amber-800': { color: 'rgb(146, 64, 14)' },
+  'bg-amber-100': { backgroundColor: 'rgb(254, 243, 199)' },
+  'border-amber-400': { borderLeftColor: 'rgb(251, 191, 36)' },
+  
+  // Green colors
+  'text-green-600': { color: 'rgb(22, 163, 74)' },
+  'text-green-800': { color: 'rgb(22, 101, 52)' },
+  'bg-green-100': { backgroundColor: 'rgb(220, 252, 231)' },
+  'border-green-400': { borderLeftColor: 'rgb(74, 222, 128)' },
+  
+  // Blue colors
+  'text-blue-600': { color: 'rgb(37, 99, 235)' },
+  'text-blue-700': { color: 'rgb(29, 78, 216)' },
+  
+  // Hover states
+  'hover:text-blue-700': { color: 'rgb(29, 78, 216)' },
+};
+
+// Helper function to get RGB styles
+const getRgbStyle = (className) => rgbColors[className] || {};
+
 const ExpiringContractsTable = ({ contracts }) => {
   const [sortOrder, setSortOrder] = useState('asc');
   const [showAll, setShowAll] = useState(false);
@@ -51,15 +92,15 @@ const ExpiringContractsTable = ({ contracts }) => {
         }}
       >
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-gray-900 font-semibold">
+          <h3 className="text-gray-900 font-semibold" style={getRgbStyle('text-gray-900')}>
             Expiring Contracts
           </h3>
-          <Calendar className="w-5 h-5 text-gray-600" />
+          <Calendar className="w-5 h-5 text-gray-600" style={getRgbStyle('text-gray-600')} />
         </div>
         
         <div className="text-center py-8">
-          <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-3" />
-          <p className="text-gray-500 text-sm">
+          <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-3" style={getRgbStyle('text-gray-400')} />
+          <p className="text-gray-500 text-sm" style={getRgbStyle('text-gray-500')}>
             No expiring contracts found
           </p>
         </div>
@@ -86,18 +127,24 @@ const ExpiringContractsTable = ({ contracts }) => {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-gray-900 font-semibold">
+          <h3 className="text-gray-900 font-semibold" style={getRgbStyle('text-gray-900')}>
             Expiring Contracts
           </h3>
-          <p className="text-gray-600 text-sm">
+          <p className="text-gray-600 text-sm" style={getRgbStyle('text-gray-600')}>
             Monitor upcoming contract renewals
           </p>
         </div>
         <div className="flex items-center space-x-2">
           {criticalCount > 0 && (
             <div className="flex items-center space-x-1">
-              <AlertTriangle className="w-4 h-4 text-red-500" />
-              <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full font-medium">
+              <AlertTriangle className="w-4 h-4 text-red-500" style={getRgbStyle('text-red-500')} />
+              <span 
+                className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full font-medium"
+                style={{
+                  ...getRgbStyle('bg-red-100'),
+                  ...getRgbStyle('text-red-800')
+                }}
+              >
                 {criticalCount} urgent
               </span>
             </div>
@@ -109,7 +156,8 @@ const ExpiringContractsTable = ({ contracts }) => {
               backgroundColor: 'rgba(243, 244, 246, 1)',
               borderColor: 'rgba(233, 236, 239, 1)',
               borderWidth: '1px',
-              borderStyle: 'solid'
+              borderStyle: 'solid',
+              ...getRgbStyle('text-gray-600')
             }}
             onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(229, 231, 235, 1)'}
             onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(243, 244, 246, 1)'}
@@ -128,12 +176,7 @@ const ExpiringContractsTable = ({ contracts }) => {
           return (
             <div
               key={index}
-              className={`rounded-xl p-4 transition-all duration-200 border-l-4 ${
-                urgency.level === 'expired' ? 'border-red-500' :
-                urgency.level === 'critical' ? 'border-red-400' :
-                urgency.level === 'warning' ? 'border-amber-400' :
-                'border-green-400'
-              }`}
+              className={`rounded-xl p-4 transition-all duration-200 border-l-4`}
               style={{ 
                 backgroundColor: 'rgba(249, 250, 251, 1)',
                 borderTopColor: 'rgba(233, 236, 239, 1)',
@@ -144,7 +187,11 @@ const ExpiringContractsTable = ({ contracts }) => {
                 borderBottomWidth: '1px',
                 borderTopStyle: 'solid',
                 borderRightStyle: 'solid',
-                borderBottomStyle: 'solid'
+                borderBottomStyle: 'solid',
+                ...(urgency.level === 'expired' ? getRgbStyle('border-red-500') :
+                   urgency.level === 'critical' ? getRgbStyle('border-red-400') :
+                   urgency.level === 'warning' ? getRgbStyle('border-amber-400') :
+                   getRgbStyle('border-green-400'))
               }}
               onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(243, 244, 246, 1)'}
               onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(249, 250, 251, 1)'}
@@ -152,38 +199,44 @@ const ExpiringContractsTable = ({ contracts }) => {
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start space-x-3">
-                    <div className={`p-2 rounded-lg ${
-                      urgency.level === 'expired' ? 'bg-red-100' :
-                      urgency.level === 'critical' ? 'bg-red-100' :
-                      urgency.level === 'warning' ? 'bg-amber-100' :
-                      'bg-green-100'
-                    }`}>
-                      <Calendar className={`w-4 h-4 ${
-                        urgency.level === 'expired' ? 'text-red-600' :
-                        urgency.level === 'critical' ? 'text-red-600' :
-                        urgency.level === 'warning' ? 'text-amber-600' :
-                        'text-green-600'
-                      }`} />
+                    <div 
+                      className={`p-2 rounded-lg`}
+                      style={{
+                        ...(urgency.level === 'expired' ? getRgbStyle('bg-red-100') :
+                           urgency.level === 'critical' ? getRgbStyle('bg-red-100') :
+                           urgency.level === 'warning' ? getRgbStyle('bg-amber-100') :
+                           getRgbStyle('bg-green-100'))
+                      }}
+                    >
+                      <Calendar 
+                        className={`w-4 h-4`}
+                        style={{
+                          ...(urgency.level === 'expired' ? getRgbStyle('text-red-600') :
+                             urgency.level === 'critical' ? getRgbStyle('text-red-600') :
+                             urgency.level === 'warning' ? getRgbStyle('text-amber-600') :
+                             getRgbStyle('text-green-600'))
+                        }}
+                      />
                     </div>
                     
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-gray-900 font-medium text-sm truncate">
+                      <h4 className="text-gray-900 font-medium text-sm truncate" style={getRgbStyle('text-gray-900')}>
                         {contract.site_name || contract.site || 'Unknown Site'}
                       </h4>
                       
                       <div className="flex items-center space-x-4 mt-1">
                         {contract.location && (
                           <div className="flex items-center space-x-1">
-                            <MapPin className="w-3 h-3 text-gray-500" />
-                            <span className="text-gray-600 text-xs">
+                            <MapPin className="w-3 h-3 text-gray-500" style={getRgbStyle('text-gray-500')} />
+                            <span className="text-gray-600 text-xs" style={getRgbStyle('text-gray-600')}>
                               {contract.location}
                             </span>
                           </div>
                         )}
                         
                         <div className="flex items-center space-x-1">
-                          <Clock className="w-3 h-3 text-gray-500" />
-                          <span className="text-gray-600 text-xs">
+                          <Clock className="w-3 h-3 text-gray-500" style={getRgbStyle('text-gray-500')} />
+                          <span className="text-gray-600 text-xs" style={getRgbStyle('text-gray-600')}>
                             Expires: {formatDate(contract.contract_expiry_date || contract.date)}
                           </span>
                         </div>
@@ -193,17 +246,20 @@ const ExpiringContractsTable = ({ contracts }) => {
                 </div>
                 
                 <div className="flex flex-col items-end ml-4">
-                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                    urgency.level === 'expired' ? 'bg-red-100 text-red-800' :
-                    urgency.level === 'critical' ? 'bg-red-100 text-red-800' :
-                    urgency.level === 'warning' ? 'bg-amber-100 text-amber-800' :
-                    'bg-green-100 text-green-800'
-                  }`}>
+                  <span 
+                    className={`text-xs px-2 py-1 rounded-full font-medium`}
+                    style={{
+                      ...(urgency.level === 'expired' ? { ...getRgbStyle('bg-red-100'), ...getRgbStyle('text-red-800') } :
+                         urgency.level === 'critical' ? { ...getRgbStyle('bg-red-100'), ...getRgbStyle('text-red-800') } :
+                         urgency.level === 'warning' ? { ...getRgbStyle('bg-amber-100'), ...getRgbStyle('text-amber-800') } :
+                         { ...getRgbStyle('bg-green-100'), ...getRgbStyle('text-green-800') })
+                    }}
+                  >
                     {urgency.text}
                   </span>
                   
                   {urgency.level === 'expired' && (
-                    <span className="text-xs text-red-600 font-medium mt-1">
+                    <span className="text-xs text-red-600 font-medium mt-1" style={getRgbStyle('text-red-600')}>
                       Action Required
                     </span>
                   )}
@@ -220,6 +276,9 @@ const ExpiringContractsTable = ({ contracts }) => {
           <button
             onClick={() => setShowAll(!showAll)}
             className="text-blue-600 hover:text-blue-700 text-sm font-medium transition-colors duration-200"
+            style={getRgbStyle('text-blue-600')}
+            onMouseEnter={(e) => Object.assign(e.target.style, getRgbStyle('hover:text-blue-700'))}
+            onMouseLeave={(e) => Object.assign(e.target.style, getRgbStyle('text-blue-600'))}
           >
             {showAll ? 'Show Less' : `Show All ${contracts.length} Contracts`}
           </button>
@@ -236,11 +295,11 @@ const ExpiringContractsTable = ({ contracts }) => {
         }}
       >
         <div className="flex items-center justify-between text-xs">
-          <span className="text-gray-600">
+          <span className="text-gray-600" style={getRgbStyle('text-gray-600')}>
             Total: {contracts.length} contracts
           </span>
           {criticalCount > 0 && (
-            <span className="text-red-600 font-medium">
+            <span className="text-red-600 font-medium" style={getRgbStyle('text-red-600')}>
               {criticalCount} require immediate attention
             </span>
           )}

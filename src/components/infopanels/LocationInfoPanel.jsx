@@ -143,6 +143,7 @@ const LocationInfoPanel = ({ locationData, onBack }) => {
         </div>
 
         <style>{`
+          /* Custom scrollbar styles */
           .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
           }
@@ -156,6 +157,30 @@ const LocationInfoPanel = ({ locationData, onBack }) => {
           }
           .custom-scrollbar::-webkit-scrollbar-thumb:hover {
             background: #a8a8a8;
+          }
+
+          /* Override Tailwind OKLCH colors with RGB equivalents */
+          .text-gray-400 { color: rgb(156, 163, 175) !important; }
+          .text-gray-500 { color: rgb(107, 114, 128) !important; }
+          .text-gray-600 { color: rgb(75, 85, 99) !important; }
+          .hover\\:text-gray-600:hover { color: rgb(75, 85, 99) !important; }
+          
+          .bg-white { background-color: rgb(255, 255, 255) !important; }
+          .bg-red-100 { background-color: rgb(254, 226, 226) !important; }
+          .bg-green-500 { background-color: rgb(34, 197, 94) !important; }
+          .bg-purple-100 { background-color: rgb(243, 232, 255) !important; }
+          
+          .text-red-600 { color: rgb(220, 38, 38) !important; }
+          .text-purple-600 { color: rgb(147, 51, 234) !important; }
+          
+          .border-gray-100 { border-color: rgb(243, 244, 246) !important; }
+          .border-gray-200 { border-color: rgb(229, 231, 235) !important; }
+          
+          .shadow-lg { 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important; 
+          }
+          .hover\\:shadow-md:hover { 
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important; 
           }
         `}</style>
       </div>

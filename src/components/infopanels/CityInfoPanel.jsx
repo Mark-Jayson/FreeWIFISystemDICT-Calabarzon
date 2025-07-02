@@ -257,19 +257,45 @@ const handleBackToCity = () => {
       </div>
         
         <style>{`
+          /* RGB Color Overrides for Tailwind OKLCH colors */
+          .bg-white { background-color: rgb(255, 255, 255) !important; }
+          .bg-gray-50 { background-color: rgb(249, 250, 251) !important; }
+          .bg-gray-100 { background-color: rgb(243, 244, 246) !important; }
+          .bg-gray-200 { background-color: rgb(229, 231, 235) !important; }
+          .bg-gray-500 { background-color: rgb(107, 114, 128) !important; }
+          .bg-blue-500 { background-color: rgb(59, 130, 246) !important; }
+          .bg-orange-500 { background-color: rgb(249, 115, 22) !important; }
+          
+          .text-white { color: rgb(255, 255, 255) !important; }
+          .text-gray-400 { color: rgb(156, 163, 175) !important; }
+          .text-gray-500 { color: rgb(107, 114, 128) !important; }
+          .text-gray-600 { color: rgb(75, 85, 99) !important; }
+          
+          .border-gray-100 { border-color: rgb(243, 244, 246) !important; }
+          .border-gray-200 { border-color: rgb(229, 231, 235) !important; }
+          
+          .hover\\:text-gray-600:hover { color: rgb(75, 85, 99) !important; }
+          .hover\\:shadow-md:hover { 
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important; 
+          }
+          
+          .shadow-lg { 
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1) !important; 
+          }
+          
           .custom-scrollbar::-webkit-scrollbar {
             width: 6px;
           }
           .custom-scrollbar::-webkit-scrollbar-track {
-            background: #f1f1f1;
+            background: rgb(241, 241, 241);
             border-radius: 10px;
           }
           .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
+            background: rgb(193, 193, 193);
             border-radius: 10px;
           }
           .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
+            background: rgb(168, 168, 168);
           }
         `}</style>
       </div>

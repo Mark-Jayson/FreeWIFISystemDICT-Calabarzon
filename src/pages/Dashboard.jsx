@@ -17,6 +17,54 @@ import RecentActivitySummaryCard from '../components/dashboard/RecentActivitySum
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
+// RGB Color Override Styles
+const rgbColors = {
+  // Background colors
+  bgWhite: { backgroundColor: 'rgb(255, 255, 255)' },
+  bgGray50: { backgroundColor: 'rgb(249, 250, 251)' },
+  bgGray100: { backgroundColor: 'rgb(243, 244, 246)' },
+  bgGray800: { backgroundColor: 'rgb(31, 41, 55)' },
+  bgGray900: { backgroundColor: 'rgb(17, 24, 39)' },
+  bgBlue50: { backgroundColor: 'rgb(239, 246, 255)' },
+  bgBlue500: { backgroundColor: 'rgb(59, 130, 246)' },
+  bgBlue600: { backgroundColor: 'rgb(37, 99, 235)' },
+  bgRed50: { backgroundColor: 'rgb(254, 242, 242)' },
+  bgGreen50: { backgroundColor: 'rgb(240, 253, 244)' },
+  bgYellow50: { backgroundColor: 'rgb(254, 252, 232)' },
+  bgTransparent: { backgroundColor: 'transparent' },
+  
+  // Text colors
+  textGray600: { color: 'rgb(75, 85, 99)' },
+  textGray700: { color: 'rgb(55, 65, 81)' },
+  textGray800: { color: 'rgb(31, 41, 55)' },
+  textGray900: { color: 'rgb(17, 24, 39)' },
+  textBlue600: { color: 'rgb(37, 99, 235)' },
+  textWhite: { color: 'rgb(255, 255, 255)' },
+  
+  // Border colors
+  borderGray200: { borderColor: 'rgb(229, 231, 235)' },
+  borderGray300: { borderColor: 'rgb(209, 213, 219)' },
+  borderBlue200: { borderColor: 'rgb(191, 219, 254)' },
+  
+  // Combined styles for common patterns
+  cardStyle: {
+    backgroundColor: 'rgb(255, 255, 255)',
+    borderColor: 'rgb(229, 231, 235)',
+    borderWidth: '1px',
+    borderStyle: 'solid',
+    WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
+  },
+  
+  overlayStyle: {
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
+  },
+  
+  transparentBg: {
+    backgroundColor: 'rgba(255, 255, 255, 0)',
+    WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
+  }
+};
 
 const Dashboard = () => {
   const [selectedProvince, setSelectedProvince] = useState('all');
@@ -25,7 +73,6 @@ const Dashboard = () => {
   const [noDateCount, setNoDateCount] = useState(0);
   const [siteTypeData, setSiteTypeData] = useState([]);
   const [topLGUs, setTopLGUs] = useState([]);
-  const [darkMode, setDarkMode] = useState(false); // Added missing darkMode state
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   
   // New state for recent sites
@@ -65,37 +112,28 @@ const Dashboard = () => {
 
   const handleProvinceSelect = (provinceId) => setSelectedProvince(provinceId);
 
-  // Add dark mode toggle handler
-  const handleDarkModeToggle = () => {
-    setDarkMode(!darkMode);
-  };
+
 
   // Single unified report generation handler
   const handleGenerateReport = async () => {
-    setIsGeneratingPdf(true); // Corrected: use setIsGeneratingPdf (capital 'I')
+    setIsGeneratingPdf(true);
     try {
       const input = document.getElementById('dashboard-content');
       if (!input) {
         console.error('Dashboard content element not found!');
         alert('Failed to find dashboard content for PDF generation. Make sure the div has id="dashboard-content".');
-        setIsGeneratingPdf(false); // Corrected: use setIsGeneratingPdf (capital 'I')
+        setIsGeneratingPdf(false);
         return;
       }
 
       // Add a small delay to ensure all content is rendered, especially charts
-      // This can be crucial for html2canvas to capture everything correctly
       await new Promise(resolve => setTimeout(resolve, 500));
 
       const canvas = await html2canvas(input, {
         scale: 2, // Increase scale for better resolution
         logging: true, // Enable logging for debugging
         useCORS: true, // Important if you have images from different origins
-        // Consider increasing the timeout for very large or complex dashboards
-        // timeout: 5000,
       });
-
-      // Optional: Temporarily append the canvas to the body to inspect it
-      // document.body.appendChild(canvas);
 
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF('p', 'mm', 'a4');
@@ -124,7 +162,7 @@ const Dashboard = () => {
       console.error('Error generating report:', error);
       alert('Failed to generate report. Please try again. Check console for details.');
     } finally {
-      setIsGeneratingPdf(false); // Corrected: use setIsGeneratingPdf (capital 'I')
+      setIsGeneratingPdf(false);
     }
   };
 
@@ -305,8 +343,8 @@ const Dashboard = () => {
     <div 
       className="flex-1 overflow-y-auto"
       style={{ 
-        backgroundColor: 'rgba(255, 255, 255, 0)', // Transparent background
-        WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
+        ...rgbColors.transparentBg,
+        fontFamily: 'ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"'
       }}
     >
       <Header
@@ -319,10 +357,7 @@ const Dashboard = () => {
       <div 
         id="dashboard-content" 
         className="px-6 pb-6 pt-6"
-        style={{ 
-          fontFamily: 'ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji"',
-          WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
-        }}
+        style={rgbColors.transparentBg}
       >
 
         {/* Recent Activity Summary Row */}
@@ -398,27 +433,14 @@ const Dashboard = () => {
           <div className="flex flex-col gap-4">
             <div 
               className="rounded-lg shadow p-4"
-              style={{ 
-                backgroundColor: 'rgba(255, 255, 255, 1)',
-                borderColor: 'rgba(230, 232, 236, 1)', /* Updated RGB equivalent */
-                borderWidth: '1px',
-                borderStyle: 'solid',
-                WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
-              }}
+              style={rgbColors.cardStyle}
             >
               <ExpiringContractsTable contracts={expiringContracts} />
             </div>
 
             <div 
               className="rounded-lg shadow p-4"
-              style={{ 
-                backgroundColor: 'rgba(255, 255, 255, 1)',
-                borderColor: 'rgba(230, 232, 236, 1)', /* Updated RGB equivalent */
-
-                borderWidth: '1px',
-                borderStyle: 'solid',
-                WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
-              }}
+              style={rgbColors.cardStyle}
             >
               <YearlyActivationChart
                 title="No. of WiFi Activated per Year of Activation"
@@ -428,9 +450,7 @@ const Dashboard = () => {
               />
               <div 
                 className="mt-4 text-left text-sm"
-                style={{ 
-                  color: 'rgba(55, 65, 81, 1)' // Gray-700 equivalent
-                }}
+                style={rgbColors.textGray700}
               >
                 <strong>WiFi activated without date:</strong> {noDateCount}
               </div>
@@ -439,23 +459,19 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* PDF Generation Loading Overlay */}
       {isGeneratingPdf && (
         <div 
           className="fixed inset-0 flex items-center justify-center z-50"
-          style={{ 
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            WebkitTapHighlightColor: 'rgba(0, 0, 0, 0)'
-          }}
+          style={rgbColors.overlayStyle}
         >
           <div 
             className="p-6 rounded-lg shadow-xl flex items-center space-x-3"
-            style={{ 
-              backgroundColor: 'rgba(255, 255, 255, 1)'
-            }}
+            style={rgbColors.bgWhite}
           >
             <svg 
               className="animate-spin h-5 w-5" 
-              style={{ color: 'rgba(37, 99, 235, 1)' }} /* Blue-600 equivalent */
+              style={rgbColors.textBlue600}
               xmlns="http://www.w3.org/2000/svg" 
               fill="none" 
               viewBox="0 0 24 24"
@@ -476,9 +492,7 @@ const Dashboard = () => {
             </svg>
             <p 
               className="font-medium"
-              style={{ 
-                color: 'rgba(31, 41, 55, 1)' // Gray-800 equivalent
-              }}
+              style={rgbColors.textGray800}
             >
               Generating PDF report...
             </p>

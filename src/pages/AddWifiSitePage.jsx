@@ -11,30 +11,7 @@ const AddWifiSitePage = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState('');
   const searchResultsRef = useRef(null);
-
-  // const provinceData = {
-  //   'Cavite': {
-  //     localities: ['Bacoor', 'Cavite City', 'Dasmariñas', 'General Trias', 'Imus', 'Tagaytay', 'Trece Martires'],
-  //     congressionals: ['1st District', '2nd District', '3rd District', '4th District', '5th District', '6th District', '7th District', '8th District']
-  //   },
-  //   'Laguna': {
-  //     localities: ['Biñan', 'Cabuyao', 'Calamba', 'Los Baños', 'San Pablo', 'San Pedro', 'Santa Rosa'],
-  //     congressionals: ['1st District', '2nd District', '3rd District', '4th District', '5th District']
-  //   },
-  //   'Batangas': {
-  //     localities: ['Batangas City', 'Lipa', 'Santo Tomas', 'Tanauan', 'Bauan', 'Nasugbu', 'San Juan'],
-  //     congressionals: ['1st District', '2nd District', '3rd District', '4th District', '5th District', '6th District']
-  //   },
-  //   'Rizal': {
-  //     localities: ['Antipolo', 'Cainta', 'Taytay', 'Rodriguez', 'San Mateo', 'Tanay', 'Teresa'],
-  //     congressionals: ['1st District', '2nd District', '3rd District', '4th District']
-  //   },
-  //   'Quezon': {
-  //     localities: ['Lucena', 'Tayabas', 'Candelaria', 'Sariaya', 'Lucban', 'Infanta', 'Pagbilao'],
-  //     congressionals: ['1st District', '2nd District', '3rd District', '4th District']
-  //   }
-  // };
-
+  
   const [formData, setFormData] = useState({
     province: '',
     locality: '',
@@ -279,6 +256,36 @@ const AddWifiSitePage = () => {
 
   return (
     <div className="flex h-screen w-full">
+      <style jsx>{`
+        /* RGB Color Overrides for OKLCH colors */
+        .bg-white { background-color: rgb(255, 255, 255) !important; }
+        .text-gray-600 { color: rgb(75, 85, 99) !important; }
+        .text-gray-500 { color: rgb(107, 114, 128) !important; }
+        .text-gray-700 { color: rgb(55, 65, 81) !important; }
+        .border-gray-200 { border-color: rgb(229, 231, 235) !important; }
+        .border-gray-100 { border-color: rgb(243, 244, 246) !important; }
+        .border-gray-400 { border-color: rgb(156, 163, 175) !important; }
+        .bg-gray-50 { background-color: rgb(249, 250, 251) !important; }
+        .bg-gray-100 { background-color: rgb(243, 244, 246) !important; }
+        .bg-gray-200 { background-color: rgb(229, 231, 235) !important; }
+        .hover\\:bg-gray-100:hover { background-color: rgb(243, 244, 246) !important; }
+        .bg-blue-500 { background-color: rgb(59, 130, 246) !important; }
+        .text-white { color: rgb(255, 255, 255) !important; }
+        .text-red-500 { color: rgb(239, 68, 68) !important; }
+        .bg-opacity-30 { background-color: rgba(0, 0, 0, 0.3) !important; }
+        .shadow-lg { 
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+        }
+        .shadow-lg { 
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+        }
+        .border { border-color: rgb(229, 231, 235) !important; }
+        .border-t-1 { border-top-color: rgb(156, 163, 175) !important; }
+        .text-xs { font-size: 0.75rem !important; line-height: 1rem !important; }
+        .text-sm { font-size: 0.875rem !important; line-height: 1.25rem !important; }
+        .text-lg { font-size: 1.125rem !important; line-height: 1.75rem !important; }
+        .text-md { font-size: 1rem !important; line-height: 1.5rem !important; }
+      `}</style>
 
       <div className="flex-1 bg-white overflow-auto">
         <div className="p-6 max-w-6xl mx-auto">
@@ -471,7 +478,7 @@ const AddWifiSitePage = () => {
                       </select>
                     </div>
                   </div>
-                  <hr class="border-t-1 border-gray-400 my-4" />
+                  <hr className="border-t-1 border-gray-400 my-4" />
                 </div>
               </motion.div>
             )}
@@ -532,7 +539,7 @@ const AddWifiSitePage = () => {
                   className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
                 />
               </div>
-              <div class="break-after-column">
+              <div className="break-after-column">
                 <label className="block text-xs text-gray-600 mb-1">End of Contract</label>
                 <input
                   type="date"
