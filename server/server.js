@@ -1033,7 +1033,7 @@ app.get('/api/getLocationsOfProvince/:locality', async (req, res) => {
 
 // NEW ENDPOINT: Get the total number of sites for a given locality
 app.get('/api/getProvince/:locality', async (req, res) => {
-    const { locality } = req.params; // Extract locality from URL parameters
+    const { locality } = req.params;
 
     try {
         // 1. Get the province from the locality
@@ -1043,13 +1043,10 @@ app.get('/api/getProvince/:locality', async (req, res) => {
             WHERE locality = $1;
         `, [locality]);
 
-        // Check if a province was found for the given locality
         if (provinceResult.rows.length === 0) {
             return res.status(404).json({ error: `No province found for locality: "${locality}"` });
         }
 
-        // Extract the province name.
-        // It's crucial to access the 'province' property from the first row.
         const provinceName = provinceResult.rows[0].province;
 
         const cities = await pool.query(`
@@ -1057,46 +1054,58 @@ app.get('/api/getProvince/:locality', async (req, res) => {
             FROM public.location
             WHERE province = $1;
         `, [provinceName]);
-            
-        const citys = cities.rows.map(row => ({
-            locality: row.locality
-        }));
+        
+        const citys = cities.rows.map(row => ({ locality: row.locality }));
 
-        // 2. Get all locations within that province
         const locationsResult = await pool.query(`
             SELECT *
             FROM public.location
             WHERE province = $1;
-        `, [provinceName]); // Use provinceName here, not the entire provinceResult object
+        `, [provinceName]);
 
         const locationsOfProvince = locationsResult.rows;
         const numberOfLocations = locationsOfProvince.length;
 
-        // 3. Get all sites within that province
         const sitesResult = await pool.query(`
             SELECT
-                s.*, -- Select all columns from the site table
+                s.*,
                 l.locality,
                 l.province,
-                l.location_name -- Include relevant location details if needed
+                l.location_name
             FROM
                 public.site s
             JOIN
                 public.location l ON s.location_id = l.loc_id
             WHERE
                 l.province = $1;
-        `, [provinceName]); // Use provinceName here
+        `, [provinceName]);
 
         const sitesOfProvince = sitesResult.rows;
         const numberOfSites = sitesOfProvince.length;
 
-        // Prepare the response object
+        // 🚀 4. Get the count of locations per category in the province
+        const categoryCountResult = await pool.query(`
+            SELECT category, COUNT(*) AS count
+            FROM public.location
+            WHERE province = $1 AND category IS NOT NULL
+            GROUP BY category
+            HAVING COUNT(*) > 0
+            ORDER BY COUNT(*) DESC;
+        `, [provinceName]);
+
+        const categoryCounts = categoryCountResult.rows.map(row => ({
+            category: row.category,
+            count: parseInt(row.count)
+        }));
+
+        // Final response
         res.status(200).json({
-            province: provinceName, // Return the province name
-            cities: citys, // Array of location objects
-            sites: sitesOfProvince, // Array of site objects
+            province: provinceName,
+            cities: citys,
+            sites: sitesOfProvince,
             numberOfLocations: numberOfLocations,
-            numberOfSites: numberOfSites
+            numberOfSites: numberOfSites,
+            categoryCounts: categoryCounts // 🆕 Include the ordered category counts
         });
 
     } catch (error) {

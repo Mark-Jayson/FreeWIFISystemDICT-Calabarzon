@@ -164,22 +164,17 @@ const MainDashboard = () => {
       };
 
       const provinceData = {
-        provinceName: getprovince.province || 'Unknown Province',
-
-        freeWiFiSites: getprovince.numberOfSites,
-        governor: 'Unknown Governor',
-        totalAPSites: getprovince.numberOfLocations,
-        digitizationRate: 0,
-        siteTypes: [
-          { type: "Municipal", count: 34 },
-          { type: "Hospitals", count: 12 },
-          { type: "Fire Stations", count: 8 },
-          { type: "Public Market", 15: "" },
-          { type: "Schools", count: 45 },
-          { type: "Parks", count: 36 }
-        ],
-        cities: getprovince.cities
-      };
+                provinceName: getprovince.province,
+                freeWiFiSites: getprovince.numberOfSites,
+                governor: 'Unknown Governor',
+                totalAPSites: getprovince.numberOfLocations,
+                digitizationRate: 0,
+                siteTypes: getprovince.categoryCounts.map(item => ({
+                  type: item.category,
+                  count: item.count
+                })),
+                cities: getprovince.cities
+              };
 
       handleLocationMarkerClick(fullData, cityData, provinceData);
       setSearchQuery(fullData.location_name); // Set search query to the selected location name
@@ -341,22 +336,17 @@ const MainDashboard = () => {
     };
 
     const provinceData = {
-      provinceName: getprovince.province,
-
-      freeWiFiSites: getprovince.numberOfSites,
-      governor: 'Unknown Governor',
-      totalAPSites: getprovince.numberOfLocations,
-      digitizationRate: 0,
-      siteTypes: [
-        { type: "Municipal", count: 34 },
-        { type: "Hospitals", count: 12 },
-        { type: "Fire Stations", count: 8 },
-        { type: "Public Market", 15: "" },
-        { type: "Schools", count: 45 },
-        { type: "Parks", count: 36 }
-      ],
-      cities: getprovince.cities
-    };
+                provinceName: getprovince.province,
+                freeWiFiSites: getprovince.numberOfSites,
+                governor: 'Unknown Governor',
+                totalAPSites: getprovince.numberOfLocations,
+                digitizationRate: 0,
+                siteTypes: getprovince.categoryCounts.map(item => ({
+                  type: item.category,
+                  count: item.count
+                })),
+                cities: getprovince.cities
+              };
     setSelectedCity(cityData);
     console.log('MainDashaboard CityData Nig:', cityData);
     pushToNavigationStack('city');
@@ -436,7 +426,7 @@ const MainDashboard = () => {
 
         throw new Error(errorData.error || `HTTP error! Status: ${locOfCity.status}`);
       }
-      console.log('Fetched siteOfCity:', siteOfCity);
+      console.log('Province: ', getprovince);
       console.log('Fetched siteOfCity:', locOfCity);
       const siteOfCityData = await siteOfCity.json();
       console.log('Fetched siteOfCity:', siteOfCityData);
@@ -459,22 +449,17 @@ const MainDashboard = () => {
       };
 
       const provinceData = {
-        provinceName: getprovince.province,
-
-        freeWiFiSites: getprovince.numberOfSites,
-        governor: 'Unknown Governor',
-        totalAPSites: getprovince.numberOfLocations,
-        digitizationRate: 0,
-        siteTypes: [
-          { type: "Municipal", count: 34 },
-          { type: "Hospitals", count: 12 },
-          { type: "Fire Stations", count: 8 },
-          { type: "Public Market", 15: "" },
-          { type: "Schools", count: 45 },
-          { type: "Parks", count: 36 }
-        ],
-        cities: getprovince.cities
-      };
+                provinceName: getprovince.province,
+                freeWiFiSites: getprovince.numberOfSites,
+                governor: 'Unknown Governor',
+                totalAPSites: getprovince.numberOfLocations,
+                digitizationRate: 0,
+                siteTypes: getprovince.categoryCounts.map(item => ({
+                  type: item.category,
+                  count: item.count
+                })),
+                cities: getprovince.cities
+              };
 
       // 4. Call handleLocationMarkerClick with the full data
       setPanelData(provinceData);
@@ -730,6 +715,8 @@ el.innerHTML = svgContent;
               console.log('Locations', locationsOfCity);
               console.log('Site', siteOfCityData.totalSitesCount);
 
+              console.log('Province Data:', getprovince);
+
               const cityData = {
                 name: fullData.locality || 'Unknown City',
                 provinceName: fullData.province || 'Unknown Province',
@@ -747,14 +734,10 @@ el.innerHTML = svgContent;
                 governor: 'Unknown Governor',
                 totalAPSites: getprovince.numberOfLocations,
                 digitizationRate: 0,
-                siteTypes: [
-                  { type: "Municipal", count: 34 },
-                  { type: "Hospitals", count: 12 },
-                  { type: "Fire Stations", count: 8 },
-                  { type: "Public Market", count: 15 },
-                  { type: "Schools", count: 45 },
-                  { type: "Parks", count: 36 }
-                ],
+                siteTypes: getprovince.categoryCounts.map(item => ({
+                  type: item.category,
+                  count: item.count
+                })),
                 cities: getprovince.cities
               };
               console.log('Constructed Province Data:', provinceData);
