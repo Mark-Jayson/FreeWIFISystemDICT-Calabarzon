@@ -18,9 +18,6 @@ const PHILIPPINES_BOUNDS = [
   [126.8039607, 21.1217806],
 ];
 
-const markerBluePNG = '/marker-blue.png';   // For default/blue markers
-const markerGreenPNG = '/marker-green.png'; // For active/green markers
-const markerRedPNG = '/marker-red.png';     // For terminated/red markers
 
 
 const MainDashboard = () => {
@@ -608,14 +605,15 @@ const MainDashboard = () => {
           return;
         }
 
-          let markerPNGPath = markerBluePNG; // Default to blue PNG
-        if (filterContractStatus === false || filterContractStatus === true) {
-            // Decide which PNG to use based on contract status
-            markerPNGPath = item.isterminated === true ? markerRedPNG : markerGreenPNG;
-            if (item.isterminated !== filterContractStatus) {
-                return;
-            }
+        var markerColor = '#3151ba';
+
+        if(filterContractStatus === false || filterContractStatus === true) {
+           markerColor = filterContractStatus === true ? '#DD4040' : '#40bd40';
+        if (item.isterminated !== filterContractStatus) {
+          console.log(`Filtering out marker for contract status: ${item.isterminated} (Does not match filter: ${filterContractStatus})`);
+          return;
         }
+      }
 
         if (filterCategory && (!item.category || item.category.toLowerCase() !== filterCategory)) {
           console.log(`Filtering out marker for category: ${item.category} (Does not match filter: ${filters.category})`);
@@ -636,16 +634,40 @@ const MainDashboard = () => {
           return;
         }
 
-       // --- Custom Marker Element with SVG Image ---
-                 const el = document.createElement('div');
-        el.className = 'mapbox-custom-marker';
+        // --- Custom Marker Element with SVG Icon ---
+        const el = document.createElement('div');
+        el.className = 'mapbox-custom-marker'; // Use a specific class for this marker type
 
-        const img = document.createElement('img');
-        img.src = markerPNGPath; // Set the source to your chosen PNG file
-        img.alt = 'Location Marker';
-        img.style.width = '100%'; // Make img fill the div
-        img.style.height = '100%'; // Make img fill the div
-        el.appendChild(img);
+        // Base SVG path for a Mapbox-like marker (circle with a point)
+        // This SVG is designed to have a base size, which we will scale.
+        // The viewBox attribute ensures it scales correctly.
+        // The path defines the shape. You might need to adjust the path
+        // slightly based on your exact desired look.
+        // It's a circle (M 12 2 C 7.58 2 4 5.58 4 10 S 12 22 12 22 S 20 10 20 10 S 16.42 2 12 2 Z)
+        // with the "point" coming down to (12, 22)
+        const svgContent = `
+  <svg viewBox="0 0 24 24" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+    <path 
+      fill="${markerColor}" 
+      stroke="white" 
+      stroke-width="1" 
+      d="M12 2
+         C8.13 2 5 5.13 5 9
+         c0 4.25 4.68 9.5 6.42 11.45
+         a1 1 0 0 0 1.16 0
+         C14.32 18.5 19 13.25 19 9
+         c0-3.87-3.13-7-7-7
+         Z"
+    />
+    <circle 
+      cx="12" 
+      cy="9" 
+      r="2.5" 
+      fill="white"
+    />
+  </svg>
+`;
+el.innerHTML = svgContent;
 
 
         // Set initial size and transform for positioning
@@ -654,9 +676,9 @@ const MainDashboard = () => {
         const initialZoom = mapInstance.getZoom();
         // Adjust this formula for desired scaling. This formula makes the marker bigger as zoom increases.
         // The values here (base size 20, zoom 5, factor 1.5) are examples.
-        const baseMarkerSize = 20; // Size at reference zoom
-        const zoomReference = 5;    // Zoom level where marker is baseMarkerSize
-        const scaleFactor = 1.5;   // How much it grows per zoom level
+        const baseMarkerSize = 25; // Size at reference zoom
+        const zoomReference = 7;    // Zoom level where marker is baseMarkerSize
+        const scaleFactor = 3.5;   // How much it grows per zoom level
         let newSize = baseMarkerSize + (initialZoom - zoomReference) * scaleFactor;
 
         // Clamp the size to prevent it from becoming too small or too large
@@ -761,24 +783,23 @@ const MainDashboard = () => {
       console.log(`Added ${newMarkers.length} unique location markers from database`);
 
       // --- Add Map Zoom Event Listener ---
-      if (!mapInstance._zoomListenerAdded) { // Simple flag to prevent duplicate listeners
-                mapInstance.on('zoom', () => {
-                    const currentZoom = mapInstance.getZoom();
-                    newMarkers.forEach(marker => { // newMarkers will be scoped to this addFWSMarkers call
-                        const el = marker.getElement();
-                        const baseMarkerSize = 15;
-                        const zoomReference = 5;
-                        const scaleFactor = 2.5;
-                        let newSize = baseMarkerSize + (currentZoom - zoomReference) * scaleFactor;
-                        newSize = Math.max(10, Math.min(60, newSize));
+      mapInstance.on('zoom', () => {
+        const currentZoom = mapInstance.getZoom();
+        newMarkers.forEach(marker => {
+          const el = marker.getElement();
+          // Use the same clamping and scaling logic as during marker creation
+          const baseMarkerSize = 20;
+          const zoomReference = 7;
+          const scaleFactor = 3.5;
+          let newSize = baseMarkerSize + (currentZoom - zoomReference) * scaleFactor;
+          newSize = Math.max(10, Math.min(60, newSize)); // Clamp the size
 
-                        el.style.width = `${newSize}px`;
-                        el.style.height = `${newSize * 1.5}px`;
-                        el.style.transform = `translate(-50%, -100%)`;
-                    });
-                });
-                mapInstance._zoomListenerAdded = true; // Set flag
-            }
+          el.style.width = `${newSize}px`;
+          el.style.height = `${newSize * 1.5}px`; // Maintain aspect ratio of the icon
+          // Transform is fixed, as it's about anchoring the point correctly
+          el.style.transform = `translate(-50%, -100%)`;
+        });
+      });
 
     } catch (err) {
       console.error('Failed to fetch map pins:', err);
