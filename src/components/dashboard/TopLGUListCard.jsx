@@ -1,8 +1,8 @@
 import React from 'react';
 import { Trophy, Medal, Award, MapPin, TrendingUp } from 'lucide-react';
 
-const TopLGUListCard = ({ 
-  title = "Top LGU per Province with Most Free WiFi", 
+const TopLGUListCard = ({
+  title = "Top LGU per Province with Most Free WiFi",
   data = []
 }) => {
   const getRankIcon = (index) => {
@@ -11,7 +11,7 @@ const TopLGUListCard = ({
       case 1: return <Medal className="w-4 h-4 text-gray-400" />;
       case 2: return <Award className="w-4 h-4 text-amber-600" />;
       default: return (
-        <div 
+        <div
           className="w-6 h-6 rounded-full text-gray-600 flex items-center justify-center text-xs font-bold"
           style={{ backgroundColor: 'rgba(229, 231, 235, 1)' }}
         >
@@ -23,34 +23,34 @@ const TopLGUListCard = ({
 
   const getRankColor = (index) => {
     switch (index) {
-      case 0: return { 
-        backgroundColor: 'rgba(255, 251, 235, 1)', 
-        borderColor: 'rgba(254, 240, 138, 1)' 
+      case 0: return {
+        backgroundColor: 'rgba(255, 251, 235, 1)',
+        borderColor: 'rgba(254, 240, 138, 1)'
       };
-      case 1: return { 
-        backgroundColor: 'rgba(249, 250, 251, 1)', 
-        borderColor: 'rgba(229, 231, 235, 1)' 
+      case 1: return {
+        backgroundColor: 'rgba(249, 250, 251, 1)',
+        borderColor: 'rgba(229, 231, 235, 1)'
       };
-      case 2: return { 
-        backgroundColor: 'rgba(255, 251, 235, 1)', 
-        borderColor: 'rgba(252, 211, 77, 1)' 
+      case 2: return {
+        backgroundColor: 'rgba(255, 251, 235, 1)',
+        borderColor: 'rgba(252, 211, 77, 1)'
       };
-      default: return { 
-        backgroundColor: 'rgba(249, 250, 251, 1)', 
-        borderColor: 'rgba(229, 231, 235, 1)' 
+      default: return {
+        backgroundColor: 'rgba(249, 250, 251, 1)',
+        borderColor: 'rgba(229, 231, 235, 1)'
       };
     }
   };
 
   return (
-    <div 
+    <div
       className="rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg"
-      style={{ 
+      style={{
         backgroundColor: 'rgba(255, 255, 255, 1)',
         borderColor: 'rgba(243, 244, 246, 1)'
       }}
     >
-      
+
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
@@ -61,9 +61,9 @@ const TopLGUListCard = ({
             {title}
           </p>
         </div>
-        <div 
+        <div
           className="p-2 rounded-xl"
-          style={{ 
+          style={{
             background: 'linear-gradient(135deg, rgba(74, 222, 128, 1), rgba(34, 197, 94, 1))'
           }}
         >
@@ -77,8 +77,8 @@ const TopLGUListCard = ({
           {data.slice(0, 8).map((lgu, index) => {
             const colors = getRankColor(index);
             return (
-              <div 
-                key={lgu.id || index} 
+              <div
+                key={lgu.id || index}
                 className="border rounded-xl p-4 transition-all duration-200 hover:scale-105 cursor-pointer"
                 style={{
                   backgroundColor: colors.backgroundColor,
@@ -101,7 +101,7 @@ const TopLGUListCard = ({
                     <div className="flex items-center justify-center w-8 h-8">
                       {getRankIcon(index)}
                     </div>
-                    
+
                     {/* LGU Info */}
                     <div className="flex-1">
                       <div className="text-gray-900 font-semibold text-sm">
@@ -115,7 +115,7 @@ const TopLGUListCard = ({
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Count */}
                   <div className="text-right">
                     <div className="text-gray-900 text-lg font-bold">
@@ -126,18 +126,18 @@ const TopLGUListCard = ({
                     </div>
                   </div>
                 </div>
-                
+
                 {/* Progress Bar */}
                 <div className="mt-3">
-                  <div 
+                  <div
                     className="h-2 rounded-full overflow-hidden"
                     style={{ backgroundColor: 'rgba(229, 231, 235, 1)' }}
                   >
-                    <div 
+                    <div
                       className="h-full rounded-full transition-all duration-1000"
-                      style={{ 
+                      style={{
                         background: 'linear-gradient(90deg, rgba(59, 130, 246, 1), rgba(147, 51, 234, 1))',
-                        width: `${data.length > 0 ? ((lgu.value || lgu.count || 0) / Math.max(...data.map(d => d.value || d.count || 0))) * 100 : 0}%` 
+                        width: `${data.length > 0 ? ((lgu.value || lgu.count || 0) / Math.max(...data.map(d => d.value || d.count || 0))) * 100 : 0}%`
                       }}
                     />
                   </div>
@@ -148,7 +148,7 @@ const TopLGUListCard = ({
         </div>
       ) : (
         // Empty State
-        <div 
+        <div
           className="rounded-xl p-8 text-center"
           style={{ backgroundColor: 'rgba(249, 250, 251, 1)' }}
         >
@@ -166,7 +166,7 @@ const TopLGUListCard = ({
 
       {/* Summary Stats */}
       {data && data.length > 0 && (
-        <div 
+        <div
           className="mt-6 pt-4"
           style={{ borderTop: '1px solid rgba(243, 244, 246, 1)' }}
         >
@@ -181,7 +181,9 @@ const TopLGUListCard = ({
             </div>
             <div>
               <div className="text-gray-900 text-lg font-bold">
-                {data.reduce((sum, lgu) => sum + (lgu.value || lgu.count || 0), 0)}
+                {data
+                  .reduce((sum, lgu) => sum + Number(lgu.value || lgu.count || 0), 0)
+                  .toLocaleString()}
               </div>
               <div className="text-gray-600 text-xs">
                 Total Sites
