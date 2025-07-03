@@ -509,15 +509,12 @@ const AddWifiSitePage = () => {
                   value={formData.contractStatus}
                   onChange={handleChange}
                   className="w-full p-2 bg-gray-50 border border-gray-200 rounded-md text-sm"
+                  required
                 >
-                  <option value="" disabled={formData.contractStatus !== ""}>
-                    Select status
-                  </option>
-                  <option value="Active">Active</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Suspended">Suspended</option>
-                  <option value="Terminated">Terminated</option>
-                  <option value="Expired">Expired</option>
+                  <option value="" disabled hidden>Select status</option>
+                  <option value="ACTIVE">Active</option>
+                  <option value="FOR RENEWAL">For Renewal</option>
+                  <option value="TERMINATED">Terminated</option>
                 </select>
               </div>
 
