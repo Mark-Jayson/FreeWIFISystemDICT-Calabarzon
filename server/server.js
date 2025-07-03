@@ -1105,7 +1105,7 @@ app.get('/api/getProvince/:locality', async (req, res) => {
             sites: sitesOfProvince,
             numberOfLocations: numberOfLocations,
             numberOfSites: numberOfSites,
-            categoryCounts: categoryCounts // 🆕 Include the ordered category counts
+            categoryCounts: categoryCounts || [] // 🆕 Include the ordered category counts
         });
 
     } catch (error) {

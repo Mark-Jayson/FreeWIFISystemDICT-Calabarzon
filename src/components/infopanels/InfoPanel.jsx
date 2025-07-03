@@ -8,11 +8,13 @@ const InfoPanel = ({ searchQuery, panelData, onClose, onCityClick }) => {
   const [showPanel, setShowPanel] = useState(false);
   const [provinceData, setProvinceData] = useState(null);
   const [governorName, setGovernorName] = useState('');
+  const [visibleSiteTypesCount, setVisibleSiteTypesCount] = useState(6); // New state for managing visible site types
 
   useEffect(() => {
     if (searchQuery && searchQuery.trim() !== '') {
       setProvinceData(panelData);
       setShowPanel(true);
+      setVisibleSiteTypesCount(6); // Reset visible count when new panel data arrives
 
 
       console.log('Received panelData:', panelData);
@@ -54,6 +56,17 @@ const InfoPanel = ({ searchQuery, panelData, onClose, onCityClick }) => {
     }
   };
 
+  // Function to show more site types
+  const handleSeeMoreSiteTypes = () => {
+    setVisibleSiteTypesCount(provinceData?.siteTypes.length || 0);
+  };
+  const handleSeeLessSiteTypes = () => {
+    setVisibleSiteTypesCount(6);
+  };
+
+  // Only display up to visibleSiteTypesCount
+  const displayedSiteTypes = provinceData?.siteTypes?.slice(0, visibleSiteTypesCount) || [];
+
   if (!showPanel) return null;
 
   return (
@@ -92,55 +105,45 @@ const InfoPanel = ({ searchQuery, panelData, onClose, onCityClick }) => {
           </div>
         </div>
 
-        <div className="text-xs text-gray-500 mb-2">Free WiFi sites location per location types in {provinceData?.provinceName}:</div>
+        <div className="text-xs bold text-gray-800 mb-2">Free WiFi sites location per location types in {provinceData?.provinceName}:</div>
 
-        <div className="flex justify-between mb-4">
-          {provinceData?.siteTypes.slice(0, 6).map((site, index) => {
-            const getIconPath = (type) => {
-              const typeMap = {
-                "Municipal": new URL('../assets/Jeep.png', import.meta.url).href,
-                "Hospitals": new URL('../assets/Hospital.png', import.meta.url).href,
-                "Fire Stations": new URL('../assets/Firestation.png', import.meta.url).href,
-                "Public Market": new URL('../assets/Shop.png', import.meta.url).href,
-                "Schools": new URL('../assets/School.png', import.meta.url).href,
-                "Parks": new URL('../assets/Playground.png', import.meta.url).href
-              };
-
-              // Normalize type for comparison (e.g., case-insensitive)
-              const matchedKey = Object.keys(typeMap).find(key =>
-                key.toLowerCase() === type.toLowerCase()
-              );
-
-              return matchedKey ? typeMap[matchedKey] : new URL('../assets/default.png', import.meta.url).href;
-            };
-
-            return (
-              <div key={index} className="flex flex-col items-center" style={{ width: '16%' }}>
-                <div className="w-8 h-8 mb-1 rounded-full flex items-center justify-center bg-gray-100 overflow-hidden">
-                  <img
-                    src={getIconPath(site.type)}
-                    alt={site.type}
-                    className="w-5 h-5 object-contain"
-                  />
-                </div>
-                <div className="text-xs font-bold text-center">{site.count}</div>
-                <div className="text-xs text-gray-500 text-center" style={{ fontSize: "0.65rem" }}>
-                  {site.type.length > 10 ? site.type.split(' ')[0] : site.type}
-                </div>
+        {/* Start of the new layout for site types */}
+        
+        <div className="flex flex-col">
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+            {displayedSiteTypes.map((site, index) => (
+              <div key={index} className="flex justify-between items-top py-1">
+                <div className="text-sm text-blue-500 leading-tight">{site.type}</div>
+                <div className="text-sm font-medium">{site.count}</div>
+                
               </div>
-            );
-          })}
-
-
-
+            ))}
+          </div>
+          {provinceData?.siteTypes && provinceData.siteTypes.length > visibleSiteTypesCount && (
+            <button
+              className="text-blue-600 text-sm mt-4 self-start hover:underline focus:outline-none"
+              onClick={handleSeeMoreSiteTypes}
+            >
+              See more
+            </button>
+          )}
+          {provinceData?.siteTypes && visibleSiteTypesCount > 6 && (
+           <button
+             className="text-blue-600 text-sm mt-4 self-start hover:underline focus:outline-none"
+             onClick={handleSeeLessSiteTypes}
+           >
+             See less
+           </button>
+         )}
         </div>
+        {/* End of the new layout for site types */}
 
         <div className="flex justify-between items-center mb-4">
           <div className="text-xs text-gray-500">Total no. of AP sites<br />in {provinceData?.provinceName}</div>
           <div className="text-4xl font-bold">{provinceData?.totalAPSites}</div>
         </div>
-
-        <div className="mb-4">
+        {/* COMMENTED DIGITIZATION RATE */}
+        {/* <div className="mb-4">
           <div className="flex justify-between items-start mb-1">
             <div className="text-xs text-gray-500">Digitization Rate<br />No. of Brgy with WiFi Location / Total no. of Brgys</div>
             <div className="text-lg font-bold">{provinceData?.digitizationRate}%</div>
@@ -151,7 +154,7 @@ const InfoPanel = ({ searchQuery, panelData, onClose, onCityClick }) => {
               style={{ width: `${provinceData?.digitizationRate}%` }}
             ></div>
           </div>
-        </div>
+        </div> */}
 
         <div className="mb-4 border-t border-gray-200 pt-3">
           <div className="text-sm text-gray-500 mb-3">Cities/Municipalities with Free WiFi Sites</div>

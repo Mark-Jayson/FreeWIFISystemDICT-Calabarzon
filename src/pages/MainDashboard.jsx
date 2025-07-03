@@ -169,10 +169,11 @@ const MainDashboard = () => {
                 governor: 'Unknown Governor',
                 totalAPSites: getprovince.numberOfLocations,
                 digitizationRate: 0,
-                siteTypes: getprovince.categoryCounts.map(item => ({
-                  type: item.category,
-                  count: item.count
-                })),
+                siteTypes: (getprovince.categoryCounts || []).map(item => ({
+  type: item.category,
+  count: item.count
+})),
+
                 cities: getprovince.cities
               };
 
@@ -307,6 +308,7 @@ const MainDashboard = () => {
     const siteOfCity = await fetch(`http://localhost:5000/api/sitesByLocality/${city}`);
     const locOfCity = await fetch(`http://localhost:5000/api/getLocationsOfProvince/${city}`);
     const getprovince = await fetch(`http://localhost:5000/api/getProvince/${city}`);
+    
     if (!locOfCity.ok) {
       // Handle HTTP errors, e.g., 404 from your backend
       const errorData = await locOfCity.json();
@@ -341,10 +343,11 @@ const MainDashboard = () => {
                 governor: 'Unknown Governor',
                 totalAPSites: getprovince.numberOfLocations,
                 digitizationRate: 0,
-                siteTypes: getprovince.categoryCounts.map(item => ({
-                  type: item.category,
-                  count: item.count
-                })),
+                siteTypes: (getprovince.categoryCounts || []).map(item => ({
+  type: item.category,
+  count: item.count
+})),
+
                 cities: getprovince.cities
               };
     setSelectedCity(cityData);
@@ -361,23 +364,7 @@ const MainDashboard = () => {
       setSelectedCity(associatedCityData);
 
       // Create minimal province data for the info panel
-      const minimalProvinceData = {
-        provinceName: associatedCityData.provinceName,
-        provincialID: 'P-04',
-        freeWiFiSites: 150,
-        governor: 'Hermilando I. Mandanas',
-        totalAPSites: 500,
-        digitizationRate: 75,
-        siteTypes: [
-          { type: "Municipal", count: 34 },
-          { type: "Hospitals", count: 12 },
-          { type: "Fire Stations", count: 8 },
-          { type: "Public Market", count: 15 },
-          { type: "Schools", count: 45 },
-          { type: "Parks", count: 36 }
-        ],
-        cities: [associatedCityData]
-      };
+      
       console.log('Marker Click Province Data:', provinceData);
 
       setPanelData(provinceData);
@@ -454,10 +441,11 @@ const MainDashboard = () => {
                 governor: 'Unknown Governor',
                 totalAPSites: getprovince.numberOfLocations,
                 digitizationRate: 0,
-                siteTypes: getprovince.categoryCounts.map(item => ({
-                  type: item.category,
-                  count: item.count
-                })),
+                siteTypes: (getprovince.categoryCounts || []).map(item => ({
+  type: item.category,
+  count: item.count
+})),
+
                 cities: getprovince.cities
               };
 
@@ -734,10 +722,11 @@ el.innerHTML = svgContent;
                 governor: 'Unknown Governor',
                 totalAPSites: getprovince.numberOfLocations,
                 digitizationRate: 0,
-                siteTypes: getprovince.categoryCounts.map(item => ({
-                  type: item.category,
-                  count: item.count
-                })),
+                siteTypes: (getprovince.categoryCounts || []).map(item => ({
+  type: item.category,
+  count: item.count
+})),
+
                 cities: getprovince.cities
               };
               console.log('Constructed Province Data:', provinceData);
