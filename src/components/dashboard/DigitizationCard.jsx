@@ -56,19 +56,20 @@ const rgbColors = {
 };
 
 const DigitizationCard = ({
-  percentage = 0,
   totalCount = 0,
   activeCount = 0,
   description = "WiFi Location Coverage in Calabarzon"
 }) => {
-  const calculatedPercentage = totalCount > 0 ? Math.round((activeCount / totalCount) * 100) : percentage;
+  const calculatedPercentage = totalCount > 0 ? Math.round((activeCount / totalCount) * 100) : 0;
+
 
   return (
-    <div 
+    <div
       className="rounded-2xl p-6 transition-all duration-300 hover:shadow-lg"
       style={rgbColors.cardStyle}
+
     >
-      
+
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-3">
@@ -95,7 +96,7 @@ const DigitizationCard = ({
           {calculatedPercentage}%
         </span>
       </div>
-      
+
       {/* Description */}
       <p 
         className="text-sm mb-6"
@@ -103,7 +104,7 @@ const DigitizationCard = ({
       >
         {description}
       </p>
-      
+
       {/* Progress Bar */}
       <div className="mb-4">
         <div 
@@ -119,10 +120,10 @@ const DigitizationCard = ({
           />
         </div>
       </div>
-      
+
       {/* Stats */}
       <div className="grid grid-cols-2 gap-4 mb-4">
-        <div 
+        <div
           className="rounded-xl p-3"
           style={rgbColors.blueStatCard}
         >
@@ -139,7 +140,7 @@ const DigitizationCard = ({
             Active Sites
           </div>
         </div>
-        <div 
+        <div
           className="rounded-xl p-3"
           style={rgbColors.grayStatCard}
         >
@@ -157,7 +158,8 @@ const DigitizationCard = ({
           </div>
         </div>
       </div>
-      
+
+
       {/* Additional Info */}
       <div 
         className="text-xs"
@@ -165,7 +167,7 @@ const DigitizationCard = ({
       >
         Coverage across 21,464 Barangays in Calabarzon
       </div>
-      
+
       {/* Trend Indicator */}
       {calculatedPercentage > 0 && (
         <div 

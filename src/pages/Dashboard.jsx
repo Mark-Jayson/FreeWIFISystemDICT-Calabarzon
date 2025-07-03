@@ -158,7 +158,7 @@ const Dashboard = () => {
   const [yearlyActivationData, setYearlyActivationData] = useState([]);
   const [noDateCount, setNoDateCount] = useState(0);
   const [siteTypeData, setSiteTypeData] = useState([]);
-  const [topLGUs, setTopLGUs] = useState([]);
+  const [topLGUs, setTopLGUs] = useState([])
   const [recentlyAddedSites, setRecentlyAddedSites] = useState([]);
   const [recentlyTerminatedSites, setRecentlyTerminatedSites] = useState([]);
 
@@ -489,7 +489,7 @@ const Dashboard = () => {
       fetchTopLGUs, fetchSiteTypes, fetchLocationDistribution, fetchRecentSites]);
 
   return (
-    <div 
+    <div
       className="flex-1 overflow-y-auto"
       style={{ 
         ...rgbColors.transparentBg,
@@ -637,11 +637,11 @@ const Dashboard = () => {
             />
 
             <DigitizationCard
-              percentage={digitizationStats.percentage}
               totalCount={digitizationStats.totalCount}
               activeCount={digitizationStats.activeCount}
               description={digitizationStats.description}
             />
+
 
             <TopLGUListCard
               title="Top LGU per Province with Most Free WiFi"
@@ -651,14 +651,14 @@ const Dashboard = () => {
 
           {/* Right Column - Charts & Tables */}
           <div className="flex flex-col gap-4">
-            <div 
+            <div
               className="rounded-lg shadow p-4"
               style={rgbColors.cardStyle}
             >
               <ExpiringContractsTable contracts={expiringContracts} />
             </div>
 
-            <div 
+            <div
               className="rounded-lg shadow p-4"
               style={rgbColors.cardStyle}
             >
@@ -668,7 +668,7 @@ const Dashboard = () => {
                 highlightYear="2023"
                 noDateCount={noDateCount}
               />
-              <div 
+              <div
                 className="mt-4 text-left text-sm"
                 style={rgbColors.textGray700}
               >
@@ -681,13 +681,13 @@ const Dashboard = () => {
 
       {/* PDF Generation Loading Overlay */}
       {isGeneratingPdf && (
-        <div 
+        <div
           className="fixed inset-0 flex items-center justify-center z-50"
           style={rgbColors.overlayStyle}
           role="dialog"
           aria-label="Generating PDF report"
         >
-          <div 
+          <div
             className="p-6 rounded-lg shadow-xl flex items-center space-x-3"
             style={rgbColors.bgWhite}
           >
@@ -699,21 +699,21 @@ const Dashboard = () => {
               viewBox="0 0 24 24"
               aria-hidden="true"
             >
-              <circle 
-                className="opacity-25" 
-                cx="12" 
-                cy="12" 
-                r="10" 
-                stroke="currentColor" 
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
                 strokeWidth="4"
               ></circle>
-              <path 
-                className="opacity-75" 
-                fill="currentColor" 
+              <path
+                className="opacity-75"
+                fill="currentColor"
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
               ></path>
             </svg>
-            <p 
+            <p
               className="font-medium"
               style={rgbColors.textGray800}
             >
