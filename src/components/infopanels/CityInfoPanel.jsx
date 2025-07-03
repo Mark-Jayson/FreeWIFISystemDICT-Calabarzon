@@ -159,9 +159,9 @@ const CityInfoPanel = ({ cityData, onBack, onLocationClick }) => { // Destructur
           </button>
 
           <div className="mb-3 mt-3 pl-6">
-            
+            <div className="text-xs text-gray-500">Municipality/City of </div>
             <h2 className="text-2xl font-bold">{name}</h2>
-            <div className="text-xs text-gray-500">Province of {provinceName}</div>
+            <div className="text-xs text-gray-500 pt-3">Province of {provinceName}</div>
 
             <div className="flex justify-between mt-3 bg-gray-50 rounded-lg">
               <div className="flex-1 p-2">
