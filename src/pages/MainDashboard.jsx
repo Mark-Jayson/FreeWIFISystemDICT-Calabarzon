@@ -129,15 +129,16 @@ const MainDashboard = () => {
 
       const fullData = await response.json();
 
+           
+              const siteOfCity = await fetch(`http://localhost:5000/api/sitesByLocality/${fullData.locality}`);
+              const locOfCity = await fetch(`http://localhost:5000/api/getLocationsOfProvince/${fullData.locality}`);
+               const province = await fetch(`http://localhost:5000/api/getProvince/${fullData.locality}`);
+              const getprovince = await province.json();
+              console.log('Province Data:', getprovince);
+               if (!locOfCity.ok) {
+                // Handle HTTP errors, e.g., 404 from your backend
+                const errorData = await locOfCity.json();
 
-      const siteOfCity = await fetch(`http://localhost:5000/api/sitesByLocality/${fullData.locality}`);
-      const locOfCity = await fetch(`http://localhost:5000/api/getLocationsOfProvince/${fullData.locality}`);
-      const province = await fetch(`http://localhost:5000/api/getProvince/${fullData.locality}`);
-      const getprovince = await province.json();
-      console.log('Province Data:', getprovince);
-      if (!locOfCity.ok) {
-        // Handle HTTP errors, e.g., 404 from your backend
-        const errorData = await locOfCity.json();
 
         throw new Error(errorData.error || `HTTP error! Status: ${locOfCity.status}`);
       }

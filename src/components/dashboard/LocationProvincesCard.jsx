@@ -8,40 +8,41 @@ const LocationProvincesCard = ({
 }) => {
   const isPositiveTrend = trendValue && trendValue.startsWith('+');
   
-  // Custom RGBA colors
-  const colors = {
-    background: 'rgba(255, 255, 255, 1)', // bg-white
-    border: 'rgba(243, 244, 246, 1)', // border-gray-100
-    text: {
-      primary: 'rgba(17, 24, 39, 1)', // text-gray-900
-      secondary: 'rgba(75, 85, 99, 1)', // text-gray-600
-      tertiary: 'rgba(55, 65, 81, 1)', // text-gray-700
-      muted: 'rgba(107, 114, 128, 1)', // text-gray-500
-    },
-    purple: {
-      400: 'rgba(196, 181, 253, 1)',
-      600: 'rgba(147, 51, 234, 1)',
-    },
-    green: {
-      600: 'rgba(22, 163, 74, 1)',
-    },
-    red: {
-      600: 'rgba(220, 38, 38, 1)',
-    },
-    gray: {
-      50: 'rgba(249, 250, 251, 1)',
-      200: 'rgba(229, 231, 235, 1)',
-    },
-    white: 'rgba(255, 255, 255, 1)',
+  // RGB color overrides for Tailwind's OKLCH defaults
+  const rgbOverrides = {
+    // Background colors
+    'bg-white': { backgroundColor: 'rgb(255, 255, 255)' },
+    'bg-gray-50': { backgroundColor: 'rgb(249, 250, 251)' },
+    'bg-gray-100': { backgroundColor: 'rgb(243, 244, 246)' },
+    'bg-gray-200': { backgroundColor: 'rgb(229, 231, 235)' },
+    'bg-purple-400': { backgroundColor: 'rgb(196, 181, 253)' },
+    'bg-purple-600': { backgroundColor: 'rgb(147, 51, 234)' },
+    
+    // Text colors
+    'text-white': { color: 'rgb(255, 255, 255)' },
+    'text-gray-500': { color: 'rgb(107, 114, 128)' },
+    'text-gray-600': { color: 'rgb(75, 85, 99)' },
+    'text-gray-700': { color: 'rgb(55, 65, 81)' },
+    'text-gray-900': { color: 'rgb(17, 24, 39)' },
+    'text-green-600': { color: 'rgb(22, 163, 74)' },
+    'text-red-600': { color: 'rgb(220, 38, 38)' },
+    
+    // Border colors
+    'border-gray-200': { borderColor: 'rgb(229, 231, 235)' },
+    'border-gray-300': { borderColor: 'rgb(209, 213, 219)' },
+  };
+
+  // Helper function to apply RGB overrides
+  const applyRgbStyle = (tailwindClass, additionalStyles = {}) => {
+    return { ...rgbOverrides[tailwindClass], ...additionalStyles };
   };
 
   return (
     <div 
       className="rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg"
-      style={{ 
-        backgroundColor: colors.background,
-        borderColor: colors.border
-      }}
+      style={applyRgbStyle('bg-white', { 
+        borderColor: 'rgb(236, 237, 240)'
+      })}
     >
       
       {/* Header Section */}
@@ -50,21 +51,21 @@ const LocationProvincesCard = ({
           <div 
             className="p-2 rounded-xl"
             style={{ 
-              background: `linear-gradient(135deg, ${colors.purple[400]}, ${colors.purple[600]})`
+              background: 'linear-gradient(135deg, rgb(196, 181, 253), rgb(147, 51, 234))'
             }}
           >
-            <MapPin className="w-5 h-5 text-white" />
+            <MapPin className="w-5 h-5" style={applyRgbStyle('text-white')} />
           </div>
           <div>
             <h3 
               className="font-semibold text-lg"
-              style={{ color: colors.text.primary }}
+              style={applyRgbStyle('text-gray-900')}
             >
               Locations Served
             </h3>
             <p 
               className="text-sm"
-              style={{ color: colors.text.secondary }}
+              style={applyRgbStyle('text-gray-600')}
             >
               Active WiFi coverage areas
             </p>
@@ -76,14 +77,14 @@ const LocationProvincesCard = ({
       <div className="mb-6">
         <div 
           className="text-4xl font-bold mb-2"
-          style={{ color: colors.text.primary }}
+          style={applyRgbStyle('text-gray-900')}
         >
           {locationCount ? locationCount.toLocaleString() : '0'}
         </div>
         {trendValue && (
           <div 
             className="flex items-center text-sm"
-            style={{ color: isPositiveTrend ? colors.green[600] : colors.red[600] }}
+            style={applyRgbStyle(isPositiveTrend ? 'text-green-600' : 'text-red-600')}
           >
             {isPositiveTrend ? 
               <TrendingUp className="w-4 h-4 mr-1" /> : 
@@ -92,7 +93,7 @@ const LocationProvincesCard = ({
             <span className="font-medium">{trendValue}</span>
             <span 
               className="ml-1"
-              style={{ color: colors.text.muted }}
+              style={applyRgbStyle('text-gray-500')}
             >
               vs last month
             </span>
@@ -105,7 +106,7 @@ const LocationProvincesCard = ({
         <div>
           <h4 
             className="font-medium mb-4 text-sm"
-            style={{ color: colors.text.primary }}
+            style={applyRgbStyle('text-gray-900')}
           >
             Distribution by Province
           </h4>
@@ -119,7 +120,7 @@ const LocationProvincesCard = ({
                   />
                   <span 
                     className="text-sm font-medium"
-                    style={{ color: colors.text.tertiary }}
+                    style={applyRgbStyle('text-gray-700')}
                   >
                     {province.name}
                   </span>
@@ -127,7 +128,7 @@ const LocationProvincesCard = ({
                 <div className="flex items-center space-x-3">
                   <div 
                     className="w-20 h-2 rounded-full overflow-hidden"
-                    style={{ backgroundColor: colors.gray[200] }}
+                    style={applyRgbStyle('bg-gray-200')}
                   >
                     <div 
                       className="h-full rounded-full transition-all duration-1000"
@@ -139,7 +140,7 @@ const LocationProvincesCard = ({
                   </div>
                   <span 
                     className="font-semibold text-sm w-8 text-right"
-                    style={{ color: colors.text.primary }}
+                    style={applyRgbStyle('text-gray-900')}
                   >
                     {province.value}
                   </span>
@@ -154,11 +155,11 @@ const LocationProvincesCard = ({
       {(!provincesData || provincesData.length === 0) && (
         <div 
           className="rounded-xl p-4 text-center"
-          style={{ backgroundColor: colors.gray[50] }}
+          style={applyRgbStyle('bg-gray-50')}
         >
           <p 
             className="text-sm"
-            style={{ color: colors.text.muted }}
+            style={applyRgbStyle('text-gray-500')}
           >
             No province data available
           </p>
@@ -167,5 +168,4 @@ const LocationProvincesCard = ({
     </div>
   );
 };
-
 export default LocationProvincesCard;

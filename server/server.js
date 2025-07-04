@@ -1005,10 +1005,10 @@ app.get('/api/location-distribution', async (req, res) => {
 
 
 app.get('/api/getLocationsOfProvince/:locality', async (req, res) => {
-  const { locality } = req.params;
+    const { locality } = req.params;
 
-  try {
-    const result = await pool.query(`
+    try {
+        const result = await pool.query(`
       SELECT
         l.*
       FROM
@@ -1019,16 +1019,16 @@ app.get('/api/getLocationsOfProvince/:locality', async (req, res) => {
         l.locality = $1
     `, [locality]);
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'No locations found for the specified locality.' });
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'No locations found for the specified locality.' });
+        }
+
+        res.status(200).json(result.rows);
+
+    } catch (error) {
+        console.error('Error fetching locations by locality:', error);
+        res.status(500).json({ error: 'Internal server error while fetching locations.' });
     }
-
-    res.status(200).json(result.rows);
-
-  } catch (error) {
-    console.error('Error fetching locations by locality:', error);
-    res.status(500).json({ error: 'Internal server error while fetching locations.' });
-  }
 });
 
 // NEW ENDPOINT: Get the total number of sites for a given locality
@@ -1196,7 +1196,7 @@ app.get('/api/recently-added-sites', async (req, res) => {
 
     try {
         const values = [];
-        let filterClause = `(s.contract_status = 'ACTIVE' OR s.contract_status IS NULL) AND s.date_accepted IS NOT NULL`;
+        let filterClause = `LOWER(s.contract_status) = 'active' AND s.activation_date IS NOT NULL`;
 
         if (province && province.toLowerCase() !== 'all') {
             filterClause += ` AND l.province ILIKE $1`;
@@ -1210,7 +1210,7 @@ app.get('/api/recently-added-sites', async (req, res) => {
                 s.site_id,
                 s.site_name,
                 s.contract_status AS status,
-                s.date_accepted,
+                s.activation_date,
                 l.province,
                 l.locality AS municipality
             FROM public.site s
@@ -1218,22 +1218,19 @@ app.get('/api/recently-added-sites', async (req, res) => {
             WHERE ${filterClause}
         `, values);
 
-        // Calculate timestamp for the start of yesterday
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-        yesterday.setHours(0, 0, 0, 0);
-        const yesterdayTime = yesterday.getTime();
+        const today = new Date();
+        const thirtyDaysAgo = new Date(today);
+        thirtyDaysAgo.setDate(today.getDate() - 30);
 
         const recentlyAdded = result.rows
             .map(row => {
-                const raw = row.date_accepted;
-                if (!raw) return null;
-
-                const parsedDate = new Date(raw);
+                const parsedDate = new Date(row.activation_date);
                 if (isNaN(parsedDate)) return null;
 
-                // ✅ Compare by timestamp
-                if (parsedDate.getTime() < yesterdayTime) return null;
+                if (parsedDate < thirtyDaysAgo || parsedDate > today) return null;
+
+                const diffTime = Math.abs(today - parsedDate);
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
                 return {
                     site_id: row.site_id,
@@ -1241,14 +1238,12 @@ app.get('/api/recently-added-sites', async (req, res) => {
                     province: row.province,
                     municipality: row.municipality,
                     status: row.status || 'ACTIVE',
-                    date_added: parsedDate.toISOString().split('T')[0],
-                    _timestamp: parsedDate.getTime()
+                    date_added: `${parsedDate.getMonth() + 1}/${parsedDate.getDate()}/${parsedDate.getFullYear()}`,
+                    days_ago: diffDays === 0 ? 'Today' : `${diffDays} day${diffDays > 1 ? 's' : ''} ago`
                 };
             })
             .filter(Boolean)
-            .sort((a, b) => b._timestamp - a._timestamp)
-            .slice(0, 20)
-            .map(({ _timestamp, ...rest }) => rest);
+            .sort((a, b) => new Date(b.date_added) - new Date(a.date_added));
 
         res.status(200).json(recentlyAdded);
     } catch (error) {
@@ -1256,6 +1251,7 @@ app.get('/api/recently-added-sites', async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
+
 
 app.get('/api/recently-terminated-sites', async (req, res) => {
     const { province } = req.query;
