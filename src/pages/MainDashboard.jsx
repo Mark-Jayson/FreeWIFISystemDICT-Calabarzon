@@ -389,7 +389,7 @@ const MainDashboard = () => {
 
   // Handle location click from CityInfoPanel - MODIFIED
   const handleLocationClickFromCity = async (locationDataFromCityPanel) => {
-    console.log(locationDataFromCityPanel.locID);
+    console.log(locationDataFromCityPanel.loc_id);
     if (!locationDataFromCityPanel || !locationDataFromCityPanel.loc_id) {
       console.error("Invalid location data from CityInfoPanel:", locationDataFromCityPanel, locationDataFromCityPanel.loc_id);
       return;
