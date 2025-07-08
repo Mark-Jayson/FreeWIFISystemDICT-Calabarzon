@@ -29,12 +29,12 @@ const MapToolbar = ({ mapInstance, onSearch, onReset, onApplyFilters, selectedFi
     {
       id: 'contractStatus',
       label: 'Contract Status',
-      options: [true, false, 'All']
+      options: ['Active', 'Terminated']
     },
     {
       id: 'category',
       label: 'Category',
-      options: ['Plaza', 'Public High School', 'Tourism Sea', 'Rural Health Unit', 'Library', 'Local Government Unit - Tourism', 'Local Government Unit - Municipal Hall/City Hall', 'Integrated High School', 'Parks and Playground', 'Transport Terminals', 'Public Libraries', 'State Universities and Colleges', 'Elementary School', 'National and Local Government Offices', 'National Government Agency', 'Market']
+      options: ['Public High School', 'Tourism Sea', 'Rural Health Unit', 'Library', 'Local Government Unit - Tourism', 'Local Government Unit - Municipal Hall/City Hall', 'Integrated High School', 'Parks and Playground', 'Transport Terminals', 'Public Libraries','State Universities and Colleges', 'Elementary School', 'National and Local Government Offices', 'National Government Agency', 'Market', 'Brgy Health Station', 'Barangay','High School','Local Government Unit - Municipal Hall / City Hall', 'Tourism Sites','Clinical Quality Framework', 'Plaza', 'Government Hospitals and RHUs', 'Public Elementary School', 'Local Government Unit', 'Local Government Unit', 'Health Service Provider', 'Plazas and Open Areas']
     }
   ];
 
@@ -108,7 +108,7 @@ const MapToolbar = ({ mapInstance, onSearch, onReset, onApplyFilters, selectedFi
     const resetFilters = {
       district: null,
       Province: null,
-      contractStatus: null,
+      contractStatus: null, // Reset contract status to null
       category: null
     };
     // Call onApplyFilters to update the parent's state
@@ -257,7 +257,7 @@ const MapToolbar = ({ mapInstance, onSearch, onReset, onApplyFilters, selectedFi
               onMouseLeave={() => setHoveredButton(null)}
               onClick={() => openFilterModal(item.id)}
             >
-              {item.label}: {selectedFilters[item.id] || 'All'}
+              {item.label}: {selectedFilters[item.id] }
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-3 w-3 ml-1"
