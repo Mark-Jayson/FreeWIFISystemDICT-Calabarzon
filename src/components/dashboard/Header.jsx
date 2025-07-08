@@ -60,11 +60,7 @@ const Header = ({
   onProvinceSelect,
   selectedProvince = "all",
   onGenerateReport,
-<<<<<<< HEAD
   isGeneratingPdf,
-
-=======
->>>>>>> 16aebd70dbd3af0ef3c383feedc8243d5b49fb97
 }) => {
   const provinces = [
     { id: "all", name: "Region IV - A Calabarzon" },
@@ -114,7 +110,6 @@ const Header = ({
               <select
                 value={selectedProvince}
                 onChange={(e) => onProvinceSelect && onProvinceSelect(e.target.value)}
-<<<<<<< HEAD
                 className="appearance-none border rounded-xl px-4 py-2 pr-10 text-sm font-medium focus:ring-2 focus:border-transparent transition-all duration-200 cursor-pointer"
                 style={rgbColors.selectStyle}
                 onFocus={(e) => {
@@ -133,9 +128,6 @@ const Header = ({
                     e.target.style.borderColor = rgbColors.borderGray300.borderColor;
                   }
                 }}
-=======
-                className="appearance-none bg-white border-gray-300 text-gray-900 border rounded-xl px-4 py-2 pr-10 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 cursor-pointer hover:border-blue-400"
->>>>>>> 16aebd70dbd3af0ef3c383feedc8243d5b49fb97
               >
                 {provinces.map((province) => (
                   <option key={province.id} value={province.id}>
@@ -154,12 +146,9 @@ const Header = ({
           <div className="flex items-center">
             <button
               onClick={onGenerateReport}
-<<<<<<< HEAD
-              className="px-4 py-2 rounded-xl shadow-md transition-colors duration-200 flex items-center gap-2 text-sm font-medium cursor-pointer hover:shadow-lg"
-              style={{
-                backgroundColor: colors.blue[600],
-                color: colors.white
-              }}
+              disabled={isGeneratingPdf}
+              className="px-4 py-2 rounded-xl shadow-md transition-colors duration-200 flex items-center gap-2 text-sm font-medium cursor-pointer hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              style={rgbColors.buttonStyle}
               onMouseEnter={(e) => {
                 if (!isGeneratingPdf) {
                   e.target.style.backgroundColor = rgbColors.blue700;
@@ -170,9 +159,6 @@ const Header = ({
                   e.target.style.backgroundColor = rgbColors.blue600;
                 }
               }}
-=======
-              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl shadow-md transition-colors duration-200 flex items-center gap-2 text-sm font-medium cursor-pointer hover:shadow-lg"
->>>>>>> 16aebd70dbd3af0ef3c383feedc8243d5b49fb97
             >
               <Download className="w-4 h-4" />
               {isGeneratingPdf ? 'Generating...' : 'Generate Report'}

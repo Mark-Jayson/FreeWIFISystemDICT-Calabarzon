@@ -32,7 +32,6 @@ const MainDashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [markers, setMarkers] = useState([]);
   const [panelData, setPanelData] = useState(null);
-
   const [selectedFilters, setSelectedFilters] = useState({
     district: null,
     Province: null,
@@ -141,15 +140,6 @@ const MainDashboard = () => {
         const errorData = await locOfCity.json();
 
 
-          throw new Error(errorData.error || `HTTP error! Status: ${locOfCity.status}`);
-        }
-        console.log('Fetched siteOfCity:', siteOfCity);
-        console.log('Fetched siteOfCity:', locOfCity);
-        const siteOfCityData = await siteOfCity.json();
-        console.log('Fetched siteOfCity:', siteOfCityData);
-        const locationsOfCity = await locOfCity.json();
-        console.log('Locations', locationsOfCity);
-        console.log('Site', siteOfCityData.totalSitesCount);
         throw new Error(errorData.error || `HTTP error! Status: ${locOfCity.status}`);
       }
       console.log('Fetched siteOfCity:', siteOfCity);
@@ -707,23 +697,23 @@ const MainDashboard = () => {
               const locOfCity = await fetch(`http://localhost:5000/api/getLocationsOfProvince/${fullData.locality}`);
               const province = await fetch(`http://localhost:5000/api/getProvince/${fullData.locality}`);
 
-                const getprovince = await province.json();
-                console.log('Province Data:', getprovince);
+              const getprovince = await province.json();
+              console.log('Province Data:', getprovince);
 
               if (!locOfCity.ok) {
                 const errorData = await locOfCity.json();
                 throw new Error(errorData.error || `HTTP error! Status: ${locOfCity.status}`);
               }
 
-                console.log('Fetched siteOfCity:', siteOfCity);
-                console.log('Fetched siteOfCity:', locOfCity);
+              console.log('Fetched siteOfCity:', siteOfCity);
+              console.log('Fetched siteOfCity:', locOfCity);
 
-                const siteOfCityData = await siteOfCity.json();
-                console.log('Fetched siteOfCity:', siteOfCityData);
+              const siteOfCityData = await siteOfCity.json();
+              console.log('Fetched siteOfCity:', siteOfCityData);
 
-                const locationsOfCity = await locOfCity.json();
-                console.log('Locations', locationsOfCity);
-                console.log('Site', siteOfCityData.totalSitesCount);
+              const locationsOfCity = await locOfCity.json();
+              console.log('Locations', locationsOfCity);
+              console.log('Site', siteOfCityData.totalSitesCount);
 
               console.log('Province Data:', getprovince);
 
@@ -759,16 +749,16 @@ const MainDashboard = () => {
 
               handleLocationMarkerClick(fullData, cityData, provinceData);
 
-              } else {
-                console.warn(
-                  `Cannot fetch location-with-sites: location_id is undefined for location ` +
-                  `${item.location_name || 'N/A'}`
-                );
-              }
-            } catch (err) {
-              console.error('Error fetching location with sites or processing click:', err);
+            } else {
+              console.warn(
+                `Cannot fetch location-with-sites: location_id is undefined for location ` +
+                `${item.location_name || 'N/A'}`
+              );
             }
-          });
+          } catch (err) {
+            console.error('Error fetching location with sites or processing click:', err);
+          }
+        });
 
         newMarkers.push(marker);
       });
