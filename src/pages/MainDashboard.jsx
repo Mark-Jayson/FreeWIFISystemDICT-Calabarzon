@@ -129,15 +129,15 @@ const MainDashboard = () => {
 
       const fullData = await response.json();
 
-           
-              const siteOfCity = await fetch(`http://localhost:5000/api/sitesByLocality/${fullData.locality}`);
-              const locOfCity = await fetch(`http://localhost:5000/api/getLocationsOfProvince/${fullData.locality}`);
-               const province = await fetch(`http://localhost:5000/api/getProvince/${fullData.locality}`);
-              const getprovince = await province.json();
-              console.log('Province Data:', getprovince);
-               if (!locOfCity.ok) {
-                // Handle HTTP errors, e.g., 404 from your backend
-                const errorData = await locOfCity.json();
+
+      const siteOfCity = await fetch(`http://localhost:5000/api/sitesByLocality/${fullData.locality}`);
+      const locOfCity = await fetch(`http://localhost:5000/api/getLocationsOfProvince/${fullData.locality}`);
+      const province = await fetch(`http://localhost:5000/api/getProvince/${fullData.locality}`);
+      const getprovince = await province.json();
+      console.log('Province Data:', getprovince);
+      if (!locOfCity.ok) {
+        // Handle HTTP errors, e.g., 404 from your backend
+        const errorData = await locOfCity.json();
 
 
         throw new Error(errorData.error || `HTTP error! Status: ${locOfCity.status}`);
@@ -165,18 +165,18 @@ const MainDashboard = () => {
       };
 
       const provinceData = {
-                provinceName: getprovince.province,
-                freeWiFiSites: getprovince.numberOfSites,
-                governor: 'Unknown Governor',
-                totalAPSites: getprovince.numberOfLocations,
-                digitizationRate: 0,
-                siteTypes: (getprovince.categoryCounts || []).map(item => ({
-  type: item.category,
-  count: item.count
-})),
+        provinceName: getprovince.province,
+        freeWiFiSites: getprovince.numberOfSites,
+        governor: 'Unknown Governor',
+        totalAPSites: getprovince.numberOfLocations,
+        digitizationRate: 0,
+        siteTypes: (getprovince.categoryCounts || []).map(item => ({
+          type: item.category,
+          count: item.count
+        })),
 
-                cities: getprovince.cities
-              };
+        cities: getprovince.cities
+      };
 
       handleLocationMarkerClick(fullData, cityData, provinceData);
       setSearchQuery(fullData.location_name); // Set search query to the selected location name
@@ -308,8 +308,9 @@ const MainDashboard = () => {
 
     const siteOfCity = await fetch(`http://localhost:5000/api/sitesByLocality/${city}`);
     const locOfCity = await fetch(`http://localhost:5000/api/getLocationsOfProvince/${city}`);
-    const getprovince = await fetch(`http://localhost:5000/api/getProvince/${city}`);
-    
+    const province = await fetch(`http://localhost:5000/api/getProvince/${city}`);
+    const getprovince = await province.json();
+    console.log('Province Data:', getprovince);
     if (!locOfCity.ok) {
       // Handle HTTP errors, e.g., 404 from your backend
       const errorData = await locOfCity.json();
@@ -339,21 +340,24 @@ const MainDashboard = () => {
     };
 
     const provinceData = {
-                provinceName: getprovince.province,
-                freeWiFiSites: getprovince.numberOfSites,
-                governor: 'Unknown Governor',
-                totalAPSites: getprovince.numberOfLocations,
-                digitizationRate: 0,
-                siteTypes: (getprovince.categoryCounts || []).map(item => ({
-  type: item.category,
-  count: item.count
-})),
+      provinceName: getprovince.province,
+      freeWiFiSites: getprovince.numberOfSites,
+      governor: 'Unknown Governor',
+      totalAPSites: getprovince.numberOfLocations,
+      digitizationRate: 0,
+      siteTypes: (getprovince.categoryCounts || []).map(item => ({
+        type: item.category,
+        count: item.count
+      })),
 
-                cities: getprovince.cities
-              };
+      cities: getprovince.cities
+    };
     setSelectedCity(cityData);
-    console.log('MainDashaboard CityData Nig:', cityData);
+    setPanelData(provinceData);
+    console.log('provinceData to be thrown on Infopanel Nig:', provinceData);
+    pushToNavigationStack('info');
     pushToNavigationStack('city');
+
   };
 
   // Handle marker click to show location info (from map markers)
@@ -365,15 +369,17 @@ const MainDashboard = () => {
       setSelectedCity(associatedCityData);
 
       // Create minimal province data for the info panel
-      
+
       console.log('Marker Click Province Data:', provinceData);
+      console.log('Marker Click City Data:', associatedCityData);
+      console.log('Marker Click Location Data:', locationData);
 
       setPanelData(provinceData);
       clearNavigationStack();
       pushToNavigationStack('info');
       pushToNavigationStack('city');
       pushToNavigationStack('location');
-    } else {
+    } else { 
       // If no city data, just show location panel
       clearNavigationStack();
       pushToNavigationStack('location');
@@ -390,7 +396,7 @@ const MainDashboard = () => {
 
   // Handle location click from CityInfoPanel - MODIFIED
   const handleLocationClickFromCity = async (locationDataFromCityPanel) => {
-    console.log(locationDataFromCityPanel.loc_id);
+    console.log('location data from city', locationDataFromCityPanel);
     if (!locationDataFromCityPanel || !locationDataFromCityPanel.loc_id) {
       console.error("Invalid location data from CityInfoPanel:", locationDataFromCityPanel, locationDataFromCityPanel.loc_id);
       return;
@@ -407,7 +413,8 @@ const MainDashboard = () => {
 
       const siteOfCity = await fetch(`http://localhost:5000/api/sitesByLocality/${fullData.locality}`);
       const locOfCity = await fetch(`http://localhost:5000/api/getLocationsOfProvince/${fullData.locality}`);
-      const getprovince = await fetch(`http://localhost:5000/api/getProvince/${fullData.locality}`);
+      const province = await fetch(`http://localhost:5000/api/getProvince/${fullData.locality}`);
+       const getprovince = await province.json();
       if (!locOfCity.ok) {
         // Handle HTTP errors, e.g., 404 from your backend
         const errorData = await locOfCity.json();
@@ -437,23 +444,27 @@ const MainDashboard = () => {
       };
 
       const provinceData = {
-                provinceName: getprovince.province,
-                freeWiFiSites: getprovince.numberOfSites,
-                governor: 'Unknown Governor',
-                totalAPSites: getprovince.numberOfLocations,
-                digitizationRate: 0,
-                siteTypes: (getprovince.categoryCounts || []).map(item => ({
-  type: item.category,
-  count: item.count
-})),
+        provinceName: getprovince.province,
+        freeWiFiSites: getprovince.numberOfSites,
+        governor: 'Unknown Governor',
+        totalAPSites: getprovince.numberOfLocations,
+        digitizationRate: 0,
+        siteTypes: (getprovince.categoryCounts || []).map(item => ({
+          type: item.category,
+          count: item.count
+        })),
 
-                cities: getprovince.cities
-              };
+        cities: getprovince.cities
+      };
 
       // 4. Call handleLocationMarkerClick with the full data
       setPanelData(provinceData);
       setSelectedCity(cityData);
       handleLocationMarkerClick(fullData, cityData, provinceData);
+      clearNavigationStack();
+      pushToNavigationStack('info');
+      pushToNavigationStack('city');
+      pushToNavigationStack('location');
 
     } catch (err) {
       console.error('Error fetching location data from CityInfoPanel click:', err);
@@ -543,7 +554,7 @@ const MainDashboard = () => {
         'Local Government Unit - Health Services': 'LGU-HEALTH',
         'Tourism Sites': 'Tourism Sites',
         'Clinical Quality Framework': 'CQF',
-        'Plaza':'PLZ',
+        'Plaza': 'PLZ',
         'Government Hospitals and RHUs': 'Government Hospitals and RHUs',
         'Public Elementary School': 'PES',
         'Local Government Unit': 'LGU',
@@ -581,13 +592,13 @@ const MainDashboard = () => {
 
         var markerColor = '#3151ba';
 
-        if(filterContractStatus === false || filterContractStatus === true) {
-           markerColor = filterContractStatus === true ? '#DD4040' : '#40bd40';
-        if (item.isterminated !== filterContractStatus) {
-          console.log(`Filtering out marker for contract status: ${item.isterminated} (Does not match filter: ${filterContractStatus})`);
-          return;
+        if (filterContractStatus === false || filterContractStatus === true) {
+          markerColor = filterContractStatus === true ? '#DD4040' : '#40bd40';
+          if (item.isterminated !== filterContractStatus) {
+            console.log(`Filtering out marker for contract status: ${item.isterminated} (Does not match filter: ${filterContractStatus})`);
+            return;
+          }
         }
-      }
 
         if (filterCategory && (!item.category || item.category.toLowerCase() !== filterCategory)) {
           console.log(`Filtering out marker for category: ${item.category} (Does not match filter: ${filters.category})`);
@@ -641,7 +652,7 @@ const MainDashboard = () => {
     />
   </svg>
 `;
-el.innerHTML = svgContent;
+        el.innerHTML = svgContent;
 
 
         // Set initial size and transform for positioning
@@ -664,9 +675,9 @@ el.innerHTML = svgContent;
         el.style.transform = `translate(-50%, -100%)`; // Centers the marker horizontally, aligns bottom to coordinates
 
         const marker = new mapboxgl.Marker({
-            element: el,
-            anchor: 'bottom' // Explicitly set anchor to 'bottom'
-          })
+          element: el,
+          anchor: 'bottom' // Explicitly set anchor to 'bottom'
+        })
           .setLngLat([lng, lat])
           .addTo(mapInstance);
 
@@ -724,9 +735,9 @@ el.innerHTML = svgContent;
                 totalAPSites: getprovince.numberOfLocations,
                 digitizationRate: 0,
                 siteTypes: (getprovince.categoryCounts || []).map(item => ({
-  type: item.category,
-  count: item.count
-})),
+                  type: item.category,
+                  count: item.count
+                })),
 
                 cities: getprovince.cities
               };

@@ -124,7 +124,7 @@ const CityInfoPanel = ({ cityData, onBack, onLocationClick }) => { // Destructur
       } else if (provinceName === "Rizal") { // Special handling for Rizal structure
         const mayorEntry = provinceData.Municipalities.find(entry =>
           entry.Municipality === name || entry.Municipality === name.replace('City of ', '')
-        );
+        ); 
 
         if (mayorEntry) {
           foundMayor = mayorEntry.Mayor;
@@ -134,7 +134,7 @@ const CityInfoPanel = ({ cityData, onBack, onLocationClick }) => { // Destructur
     }
   }, [name, provinceName]);
 
-
+ 
   const handleLocationClick = (location) => {
     // Instead of just setting selectedLocation locally, call the passed prop
     onLocationClick(location);
