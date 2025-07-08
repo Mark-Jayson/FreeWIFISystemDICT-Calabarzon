@@ -9,6 +9,51 @@ import {
   TrendingDown 
 } from 'lucide-react';
 
+// RGB Color Overrides for Tailwind Classes
+const rgbColors = {
+  // Gray colors
+  'text-gray-900': { color: 'rgb(17, 24, 39)' },
+  'text-gray-600': { color: 'rgb(75, 85, 99)' },
+  'text-gray-500': { color: 'rgb(107, 114, 128)' },
+  'text-gray-300': { color: 'rgb(209, 213, 219)' },
+  'bg-gray-50': { backgroundColor: 'rgb(249, 250, 251)' },
+  'bg-gray-100': { backgroundColor: 'rgb(243, 244, 246)' },
+  'bg-gray-200': { backgroundColor: 'rgb(229, 231, 235)' },
+  'bg-gray-300': { backgroundColor: 'rgb(209, 213, 219)' },
+  
+  // Blue colors
+  'text-blue-600': { color: 'rgb(37, 99, 235)' },
+  'bg-blue-100': { backgroundColor: 'rgb(219, 234, 254)' },
+  'bg-blue-400': { backgroundColor: 'rgb(96, 165, 250)' },
+  'bg-blue-600': { backgroundColor: 'rgb(37, 99, 235)' },
+  
+  // Green colors
+  'text-green-600': { color: 'rgb(22, 163, 74)' },
+  'text-green-700': { color: 'rgb(21, 128, 61)' },
+  'bg-green-100': { backgroundColor: 'rgb(220, 252, 231)' },
+  'bg-green-400': { backgroundColor: 'rgb(74, 222, 128)' },
+  'bg-green-600': { backgroundColor: 'rgb(22, 163, 74)' },
+  
+  // Red colors
+  'text-red-500': { color: 'rgb(239, 68, 68)' },
+  'text-red-600': { color: 'rgb(220, 38, 38)' },
+  'text-red-700': { color: 'rgb(185, 28, 28)' },
+  'bg-red-50': { backgroundColor: 'rgb(254, 242, 242)' },
+  'bg-red-100': { backgroundColor: 'rgb(254, 226, 226)' },
+  'bg-red-200': { backgroundColor: 'rgb(254, 202, 202)' },
+  
+  // Yellow colors
+  'text-yellow-600': { color: 'rgb(202, 138, 4)' },
+  'text-yellow-700': { color: 'rgb(161, 98, 7)' },
+  'bg-yellow-100': { backgroundColor: 'rgb(254, 249, 195)' },
+  
+  // Hover states
+  'hover:bg-gray-100': { backgroundColor: 'rgb(243, 244, 246)' },
+};
+
+// Helper function to get RGB styles
+const getRgbStyle = (className) => rgbColors[className] || {};
+
 const FreeWifiStatCard = ({
   title = "Total No. of FreeWiFi Sites",
   totalSites = 0,
@@ -27,7 +72,7 @@ const FreeWifiStatCard = ({
   const forRenewalPercentage = totalSites > 0 ? ((forRenewalSites / totalSites) * 100).toFixed(1) : 0;
   const unknownPercentage = totalSites > 0 ? ((unknownSites / totalSites) * 100).toFixed(1) : 0;
 
-  // RGB color palette
+  // RGB color palette (keeping the original for components that use it)
   const colors = {
     background: 'rgba(255, 255, 255, 1)',
     border: 'rgba(236, 237, 240, 1)',
@@ -70,7 +115,12 @@ const FreeWifiStatCard = ({
   const StatItem = ({ icon: Icon, label, value, percentage, colorKey, isMain = false }) => (
     <div 
       className={`${isMain ? 'col-span-2' : ''} rounded-xl p-4 hover:bg-gray-100 transition-colors duration-200`}
-      style={{ backgroundColor: colors.gray[50] }}
+      style={{ 
+        backgroundColor: colors.gray[50],
+        ...getRgbStyle('hover:bg-gray-100')
+      }}
+      onMouseEnter={(e) => Object.assign(e.target.style, getRgbStyle('hover:bg-gray-100'))}
+      onMouseLeave={(e) => e.target.style.backgroundColor = colors.gray[50]}
     >
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center space-x-2">
@@ -84,8 +134,8 @@ const FreeWifiStatCard = ({
             />
           </div>
           <span 
-            className="text-sm font-medium"
-            style={{ color: colors.gray[600] }}
+            className="text-sm font-medium text-gray-600"
+            style={getRgbStyle('text-gray-600')}
           >
             {label}
           </span>
@@ -103,8 +153,8 @@ const FreeWifiStatCard = ({
         )}
       </div>
       <div 
-        className={`${isMain ? 'text-3xl' : 'text-xl'} font-bold`}
-        style={{ color: colors.gray[900] }}
+        className={`${isMain ? 'text-3xl' : 'text-xl'} font-bold text-gray-900`}
+        style={getRgbStyle('text-gray-900')}
       >
         {value.toLocaleString()}
       </div>
@@ -123,39 +173,39 @@ const FreeWifiStatCard = ({
         <div className="animate-pulse">
           <div className="flex items-center justify-between mb-6">
             <div 
-              className="h-6 rounded w-48"
-              style={{ backgroundColor: colors.gray[300] }}
+              className="h-6 rounded w-48 bg-gray-300"
+              style={getRgbStyle('bg-gray-300')}
             ></div>
             <div 
-              className="h-8 w-8 rounded-lg"
-              style={{ backgroundColor: colors.gray[300] }}
+              className="h-8 w-8 rounded-lg bg-gray-300"
+              style={getRgbStyle('bg-gray-300')}
             ></div>
           </div>
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div 
-              className="col-span-2 h-20 rounded-xl"
-              style={{ backgroundColor: colors.gray[300] }}
+              className="col-span-2 h-20 rounded-xl bg-gray-300"
+              style={getRgbStyle('bg-gray-300')}
             ></div>
             <div 
-              className="h-16 rounded-xl"
-              style={{ backgroundColor: colors.gray[300] }}
+              className="h-16 rounded-xl bg-gray-300"
+              style={getRgbStyle('bg-gray-300')}
             ></div>
             <div 
-              className="h-16 rounded-xl"
-              style={{ backgroundColor: colors.gray[300] }}
+              className="h-16 rounded-xl bg-gray-300"
+              style={getRgbStyle('bg-gray-300')}
             ></div>
             <div 
-              className="h-16 rounded-xl"
-              style={{ backgroundColor: colors.gray[300] }}
+              className="h-16 rounded-xl bg-gray-300"
+              style={getRgbStyle('bg-gray-300')}
             ></div>
             <div 
-              className="h-16 rounded-xl"
-              style={{ backgroundColor: colors.gray[300] }}
+              className="h-16 rounded-xl bg-gray-300"
+              style={getRgbStyle('bg-gray-300')}
             ></div>
           </div>
           <div 
-            className="h-4 rounded w-32"
-            style={{ backgroundColor: colors.gray[300] }}
+            className="h-4 rounded w-32 bg-gray-300"
+            style={getRgbStyle('bg-gray-300')}
           ></div>
         </div>
       </div>
@@ -173,8 +223,8 @@ const FreeWifiStatCard = ({
       >
         <div className="flex items-center justify-between mb-4">
           <h3 
-            className="text-lg font-semibold"
-            style={{ color: colors.gray[900] }}
+            className="text-lg font-semibold text-gray-900"
+            style={getRgbStyle('text-gray-900')}
           >
             {title}
           </h3>
@@ -190,20 +240,20 @@ const FreeWifiStatCard = ({
         </div>
         <div className="text-center py-8">
           <div 
-            className="text-6xl font-bold mb-2"
-            style={{ color: colors.red[500] }}
+            className="text-6xl font-bold mb-2 text-red-500"
+            style={getRgbStyle('text-red-500')}
           >
             Error
           </div>
           <p 
-            className="font-medium mb-1"
-            style={{ color: colors.red[600] }}
+            className="font-medium mb-1 text-red-600"
+            style={getRgbStyle('text-red-600')}
           >
             Failed to load data
           </p>
           <p 
-            className="text-sm"
-            style={{ color: colors.gray[600] }}
+            className="text-sm text-gray-600"
+            style={getRgbStyle('text-gray-600')}
           >
             {error}
           </p>
@@ -215,8 +265,8 @@ const FreeWifiStatCard = ({
             }}
           >
             <p 
-              className="text-sm"
-              style={{ color: colors.red[700] }}
+              className="text-sm text-red-700"
+              style={getRgbStyle('text-red-700')}
             >
               Unable to load statistics
             </p>
@@ -244,8 +294,8 @@ const FreeWifiStatCard = ({
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <h3 
-          className="text-lg font-semibold"
-          style={{ color: colors.gray[900] }}
+          className="text-lg font-semibold text-gray-900"
+          style={getRgbStyle('text-gray-900')}
         >
           {title}
         </h3>
@@ -261,7 +311,10 @@ const FreeWifiStatCard = ({
           {trendValue && (
             <div 
               className="flex items-center text-sm"
-              style={{ color: isPositiveTrend ? colors.green[600] : colors.red[600] }}
+              style={{ 
+                color: isPositiveTrend ? colors.green[600] : colors.red[600],
+                ...(isPositiveTrend ? getRgbStyle('text-green-600') : getRgbStyle('text-red-600'))
+              }}
             >
               {isPositiveTrend ? <TrendingUp className="w-4 h-4 mr-1" /> : <TrendingDown className="w-4 h-4 mr-1" />}
               <span className="font-medium">{trendValue}</span>
@@ -317,21 +370,21 @@ const FreeWifiStatCard = ({
       <div className="space-y-3">
         <div className="flex items-center justify-between text-sm">
           <span 
-            className="font-medium"
-            style={{ color: colors.gray[600] }}
+            className="font-medium text-gray-600"
+            style={getRgbStyle('text-gray-600')}
           >
             Active Rate
           </span>
           <span 
-            className="font-bold"
-            style={{ color: colors.gray[900] }}
+            className="font-bold text-gray-900"
+            style={getRgbStyle('text-gray-900')}
           >
             {activePercentage}%
           </span>
         </div>
         <div 
-          className="h-2 rounded-full overflow-hidden"
-          style={{ backgroundColor: colors.gray[200] }}
+          className="h-2 rounded-full overflow-hidden bg-gray-200"
+          style={getRgbStyle('bg-gray-200')}
         >
           <div 
             className="h-full rounded-full transition-all duration-1000 ease-out"
@@ -345,8 +398,8 @@ const FreeWifiStatCard = ({
 
       {/* Summary Text */}
       <div 
-        className="text-xs mt-4 text-center"
-        style={{ color: colors.gray[600] }}
+        className="text-xs mt-4 text-center text-gray-600"
+        style={getRgbStyle('text-gray-600')}
       >
         <span className="font-medium">{activeSites.toLocaleString()}</span> active sites out of{' '}
         <span className="font-medium">{totalSites.toLocaleString()}</span> total WiFi locations

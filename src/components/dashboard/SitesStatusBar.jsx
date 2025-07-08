@@ -2,6 +2,115 @@
 import React from 'react';
 import { CheckCircle, XCircle, RefreshCw, AlertTriangle, TrendingUp, TrendingDown } from 'lucide-react';
 
+// RGB Color Override System
+const rgbColors = {
+  // Gray scale
+  gray: {
+    50: 'rgb(249, 250, 251)',
+    100: 'rgb(243, 244, 246)',
+    200: 'rgb(229, 231, 235)',
+    300: 'rgb(209, 213, 219)',
+    400: 'rgb(156, 163, 175)',
+    500: 'rgb(107, 114, 128)',
+    600: 'rgb(75, 85, 99)',
+    700: 'rgb(55, 65, 81)',
+    800: 'rgb(31, 41, 55)',
+    900: 'rgb(17, 24, 39)',
+  },
+  // Green scale
+  green: {
+    50: 'rgb(240, 253, 244)',
+    100: 'rgb(220, 252, 231)',
+    200: 'rgb(187, 247, 208)',
+    300: 'rgb(134, 239, 172)',
+    400: 'rgb(74, 222, 128)',
+    500: 'rgb(34, 197, 94)',
+    600: 'rgb(22, 163, 74)',
+    700: 'rgb(21, 128, 61)',
+    800: 'rgb(22, 101, 52)',
+    900: 'rgb(20, 83, 45)',
+  },
+  // Red scale
+  red: {
+    50: 'rgb(254, 242, 242)',
+    100: 'rgb(254, 226, 226)',
+    200: 'rgb(254, 202, 202)',
+    300: 'rgb(252, 165, 165)',
+    400: 'rgb(248, 113, 113)',
+    500: 'rgb(239, 68, 68)',
+    600: 'rgb(220, 38, 38)',
+    700: 'rgb(185, 28, 28)',
+    800: 'rgb(153, 27, 27)',
+    900: 'rgb(127, 29, 29)',
+  },
+  // Amber scale
+  amber: {
+    50: 'rgb(255, 251, 235)',
+    100: 'rgb(254, 243, 199)',
+    200: 'rgb(253, 230, 138)',
+    300: 'rgb(252, 211, 77)',
+    400: 'rgb(251, 191, 36)',
+    500: 'rgb(245, 158, 11)',
+    600: 'rgb(217, 119, 6)',
+    700: 'rgb(180, 83, 9)',
+    800: 'rgb(146, 64, 14)',
+    900: 'rgb(120, 53, 15)',
+  },
+  // Blue scale
+  blue: {
+    50: 'rgb(239, 246, 255)',
+    100: 'rgb(219, 234, 254)',
+    200: 'rgb(191, 219, 254)',
+    300: 'rgb(147, 197, 253)',
+    400: 'rgb(96, 165, 250)',
+    500: 'rgb(59, 130, 246)',
+    600: 'rgb(37, 99, 235)',
+    700: 'rgb(29, 78, 216)',
+    800: 'rgb(30, 64, 175)',
+    900: 'rgb(30, 58, 138)',
+  },
+  // White and transparent
+  white: 'rgb(255, 255, 255)',
+  transparent: 'transparent',
+};
+
+// Style generator function
+const createRGBStyle = (colorPath) => {
+  const pathParts = colorPath.split('.');
+  let color = rgbColors;
+  
+  for (const part of pathParts) {
+    color = color[part];
+    if (!color) return {};
+  }
+  
+  return { color };
+};
+
+const createRGBBgStyle = (colorPath) => {
+  const pathParts = colorPath.split('.');
+  let color = rgbColors;
+  
+  for (const part of pathParts) {
+    color = color[part];
+    if (!color) return {};
+  }
+  
+  return { backgroundColor: color };
+};
+
+const createRGBBorderStyle = (colorPath) => {
+  const pathParts = colorPath.split('.');
+  let color = rgbColors;
+  
+  for (const part of pathParts) {
+    color = color[part];
+    if (!color) return {};
+  }
+  
+  return { borderColor: color };
+};
+
 const SitesStatusBar = ({ 
   totalSites, 
   activeCount, 
@@ -21,27 +130,27 @@ const SitesStatusBar = ({
       <div 
         className="rounded-2xl border p-6 transition-all duration-300"
         style={{ 
-          backgroundColor: 'rgba(255, 255, 255, 1)',
-          borderColor: 'rgba(243, 244, 246, 1)'
+          ...createRGBBgStyle('white'),
+          ...createRGBBorderStyle('gray.100')
         }}
       >
         <div className="animate-pulse">
           <div 
             className="h-4 rounded w-32 mb-4"
-            style={{ backgroundColor: 'rgba(209, 213, 219, 1)' }}
+            style={createRGBBgStyle('gray.300')}
           ></div>
           <div 
             className="h-6 rounded mb-4"
-            style={{ backgroundColor: 'rgba(209, 213, 219, 1)' }}
+            style={createRGBBgStyle('gray.300')}
           ></div>
           <div className="space-y-3">
             <div 
               className="h-4 rounded"
-              style={{ backgroundColor: 'rgba(209, 213, 219, 1)' }}
+              style={createRGBBgStyle('gray.300')}
             ></div>
             <div 
               className="h-4 rounded"
-              style={{ backgroundColor: 'rgba(209, 213, 219, 1)' }}
+              style={createRGBBgStyle('gray.300')}
             ></div>
           </div>
         </div>
@@ -54,72 +163,81 @@ const SitesStatusBar = ({
       label: 'Active Sites',
       count: activeCount,
       percentage: activePercentage,
-      color: 'rgba(16, 185, 129, 1)',
-      bgColor: 'rgba(34, 197, 94, 1)',
+      color: rgbColors.green[500],
+      bgColor: rgbColors.green[500],
       icon: CheckCircle,
-      textColor: 'text-green-600'
+      textColorStyle: createRGBStyle('green.600')
     },
     {
       label: 'For Renewal',
       count: forRenewalCount,
       percentage: forRenewalPercentage,
-      color: 'rgba(245, 158, 11, 1)',
-      bgColor: 'rgba(245, 158, 11, 1)',
+      color: rgbColors.amber[500],
+      bgColor: rgbColors.amber[500],
       icon: RefreshCw,
-      textColor: 'text-amber-600'
+      textColorStyle: createRGBStyle('amber.600')
     },
     {
       label: 'Terminated',
       count: terminatedCount,
       percentage: terminatedPercentage,
-      color: 'rgba(239, 68, 68, 1)',
-      bgColor: 'rgba(239, 68, 68, 1)',
+      color: rgbColors.red[500],
+      bgColor: rgbColors.red[500],
       icon: XCircle,
-      textColor: 'text-red-600'
+      textColorStyle: createRGBStyle('red.600')
     },
     {
       label: 'Unknown',
       count: unknownCount,
       percentage: unknownPercentage,
-      color: 'rgba(107, 114, 128, 1)',
-      bgColor: 'rgba(107, 114, 128, 1)',
+      color: rgbColors.gray[500],
+      bgColor: rgbColors.gray[500],
       icon: AlertTriangle,
-      textColor: 'text-gray-600'
+      textColorStyle: createRGBStyle('gray.600')
     }
-  ].filter(item => item.count > 0); // Only show categories with data
+  ].filter(item => item.count > 0);
 
   return (
     <div 
-      className="rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group"
+      className="rounded-2xl border p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 group cursor-pointer"
       style={{ 
-        backgroundColor: 'rgba(255, 255, 255, 1)',
-        borderColor: 'rgba(243, 244, 246, 1)'
+        ...createRGBBgStyle('white'),
+        ...createRGBBorderStyle('gray.100')
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.backgroundColor = 'rgba(249, 250, 251, 1)';
+        Object.assign(e.currentTarget.style, createRGBBgStyle('gray.50'));
       }}
       onMouseLeave={(e) => {
-        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 1)';
+        Object.assign(e.currentTarget.style, createRGBBgStyle('white'));
       }}
     >
       
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-gray-900 font-semibold text-lg">
+          <h3 
+            className="font-semibold text-lg"
+            style={createRGBStyle('gray.900')}
+          >
             Sites Status Overview
           </h3>
-          <p className="text-gray-600 text-sm mt-1">
+          <p 
+            className="text-sm mt-1"
+            style={createRGBStyle('gray.600')}
+          >
             Total Sites: {totalSites?.toLocaleString() || 0}
           </p>
         </div>
         <div className="flex items-center space-x-2">
           {isPositiveTrend ? (
-            <TrendingUp className="w-5 h-5 text-green-500" />
+            <TrendingUp className="w-5 h-5" style={createRGBStyle('green.500')} />
           ) : (
-            <TrendingDown className="w-5 h-5 text-red-500" />
+            <TrendingDown className="w-5 h-5" style={createRGBStyle('red.500')} />
           )}
-          <span className={`text-sm font-medium ${isPositiveTrend ? 'text-green-600' : 'text-red-600'}`}>
+          <span 
+            className="text-sm font-medium"
+            style={createRGBStyle(isPositiveTrend ? 'green.600' : 'red.600')}
+          >
             {trendValue}
           </span>
         </div>
@@ -129,7 +247,7 @@ const SitesStatusBar = ({
       <div className="mb-6">
         <div 
           className="h-4 rounded-full overflow-hidden flex"
-          style={{ backgroundColor: 'rgba(229, 231, 235, 1)' }}
+          style={createRGBBgStyle('gray.200')}
         >
           {statusData.map((item, index) => (
             <div
@@ -141,7 +259,10 @@ const SitesStatusBar = ({
               }}
             >
               {item.percentage > 10 && (
-                <span className="text-white text-xs font-bold">
+                <span 
+                  className="text-xs font-bold"
+                  style={createRGBStyle('white')}
+                >
                   {Math.round(item.percentage)}%
                 </span>
               )}
@@ -158,12 +279,12 @@ const SitesStatusBar = ({
             <div 
               key={index} 
               className="rounded-xl p-4 transition-all duration-200 cursor-pointer group/item"
-              style={{ backgroundColor: 'rgba(249, 250, 251, 1)' }}
+              style={createRGBBgStyle('gray.50')}
               onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(243, 244, 246, 1)';
+                Object.assign(e.currentTarget.style, createRGBBgStyle('gray.100'));
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = 'rgba(249, 250, 251, 1)';
+                Object.assign(e.currentTarget.style, createRGBBgStyle('gray.50'));
               }}
             >
               <div className="flex items-center justify-between mb-2">
@@ -171,17 +292,26 @@ const SitesStatusBar = ({
                   className="p-2 rounded-lg group-hover/item:scale-110 transition-transform duration-200"
                   style={{ backgroundColor: item.bgColor }}
                 >
-                  <Icon className="w-4 h-4 text-white" />
+                  <Icon className="w-4 h-4" style={createRGBStyle('white')} />
                 </div>
-                <span className="text-gray-900 text-xl font-bold">
+                <span 
+                  className="text-xl font-bold"
+                  style={createRGBStyle('gray.900')}
+                >
                   {item.count.toLocaleString()}
                 </span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-gray-700 text-sm font-medium">
+                <span 
+                  className="text-sm font-medium"
+                  style={createRGBStyle('gray.700')}
+                >
                   {item.label}
                 </span>
-                <span className={`${item.textColor} text-sm font-semibold`}>
+                <span 
+                  className="text-sm font-semibold"
+                  style={item.textColorStyle}
+                >
                   {Math.round(item.percentage)}%
                 </span>
               </div>
@@ -193,20 +323,26 @@ const SitesStatusBar = ({
       {/* Additional Info */}
       <div 
         className="rounded-xl p-4 mt-4"
-        style={{ backgroundColor: 'rgba(239, 246, 255, 1)' }}
+        style={createRGBBgStyle('blue.50')}
       >
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-semibold text-sm" style={{ color: 'rgba(30, 58, 138, 1)' }}>
+            <p 
+              className="font-semibold text-sm"
+              style={createRGBStyle('blue.900')}
+            >
               Active Rate
             </p>
-            <p className="text-xs" style={{ color: 'rgba(29, 78, 216, 1)' }}>
+            <p 
+              className="text-xs"
+              style={createRGBStyle('blue.700')}
+            >
               {activeCount} of {totalSites} sites operational
             </p>
           </div>
           <div 
             className="text-2xl font-bold"
-            style={{ color: 'rgba(30, 58, 138, 1)' }}
+            style={createRGBStyle('blue.900')}
           >
             {Math.round(activePercentage)}%
           </div>
