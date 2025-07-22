@@ -2,21 +2,31 @@ const express = require('express');
 const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
 const cors = require('cors');
-require('dotenv').config();
+require('dotenv').config(); // Load environment variables from .env file
 const axios = require('axios');
 const app = express();
 
 // Middleware
-app.use(express.json());
-app.use(cors());
+app.use(express.json()); // Enable parsing of JSON request bodies
+app.use(cors()); // Enable Cross-Origin Resource Sharing
 
 // PostgreSQL connection
+// Prioritize DATABASE_URL if available (common in deployment environments like Heroku, Vercel)
+// Otherwise, use individual environment variables.
 const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT || 5432,
+    connectionString: process.env.DATABASE_URL, // Use the full connection string from Neon.tech
+    // If connectionString is not used, you would configure like this:
+    // user: process.env.DB_USER,
+    // host: process.env.DB_HOST,
+    // database: process.env.DB_NAME,
+    // password: process.env.DB_PASSWORD,
+    // port: process.env.DB_PORT || 5432,
+    ssl: {
+        // Neon.tech requires SSL.
+        // For local development, you might set rejectUnauthorized to false,
+        // but for production, it should be true or omitted if using a trusted CA.
+        rejectUnauthorized: true // Set to true in production if you have a CA cert
+    }
 });
 
 // Test database connection
@@ -188,7 +198,7 @@ app.get('/api/location/search', async (req, res) => {
         const searchQuery = `
             SELECT * FROM public.location
             WHERE
-                location_id ILIKE $1 OR 
+                location_id ILIKE $1 OR
                 location_name ILIKE $1 OR
                 province ILIKE $1 OR
                 locality ILIKE $1 OR
@@ -360,18 +370,18 @@ app.post('/api/location', async (req, res) => {
 app.get('/api/wifisites', async (req, res) => {
     try {
         const query = `
-            SELECT 
-                s.site_id, 
-                s.site_name, 
-                s.contract_status, 
-                s.bandwidth, 
-                s.link_provider, 
-                s.activation_date, 
+            SELECT
+                s.site_id,
+                s.site_name,
+                s.contract_status,
+                s.bandwidth,
+                s.link_provider,
+                s.activation_date,
                 s.end_of_contract,
-                l.location_name, 
-                l.province, 
+                l.location_name,
+                l.province,
                 l.locality
-            FROM 
+            FROM
                 public.site s
             JOIN public.location l ON s.location_id = l.loc_id
         `;
@@ -388,11 +398,11 @@ app.get('/api/map-pins', async (req, res) => {
 
     try {
         const result = await pool.query(`
-        SELECT 
+        SELECT
             s.site_id,
             s.site_code,
             s.site_name,
-            s.location_id, 
+            s.location_id,
             l.latitude,
             l.longitude,
             l.location_name,
@@ -477,11 +487,11 @@ app.get('/api/sitesByLocality/:locality', async (req, res) => {
         // and filters by the 'locality' column from 'public.Location'.
         const sitesResult = await pool.query(`
             SELECT
-                s.site_id,          
-                s.site_name,       
-                s.location_id,       
-                l.locality,         
-                l.province           
+                s.site_id,
+                s.site_name,
+                s.location_id,
+                l.locality,
+                l.province
             FROM
                 public.site s
             JOIN
@@ -514,10 +524,10 @@ app.get('/api/location-with-sites/:location_id', async (req, res) => {
     try {
         // Corrected query to use location_id and join on loc_id
         const locationResult = await pool.query(`
-        SELECT 
+        SELECT
             l.*,
             l.latitude,
-            l.longitude 
+            l.longitude
         FROM public.location l
         WHERE l.loc_id = $1
         `, [location_id]); // Use location_id directly, not site_id
@@ -558,9 +568,9 @@ app.get('/api/site/:id', async (req, res) => {
     const { id } = req.params;
 
     try {
-        const result = await pool.query(`     
-            SELECT 
-            s.*, 
+        const result = await pool.query(`
+            SELECT
+            s.*,
             l.location_name
     FROM public.site s
     JOIN public.location l ON s.location_id = l.loc_id
@@ -873,9 +883,9 @@ app.get('/api/top-lgus', async (req, res) => {
         if (province && province !== 'all') {
             // Top 5 LGUs from the selected province
             query = `
-        SELECT 
-          l.locality, 
-          l.province, 
+        SELECT
+          l.locality,
+          l.province,
           COUNT(s.site_id) AS wifi_count
         FROM public.site s
         JOIN public.location l ON s.location_id = l.loc_id
@@ -1054,7 +1064,7 @@ app.get('/api/getProvince/:locality', async (req, res) => {
             FROM public.location
             WHERE province = $1;
         `, [provinceName]);
-        
+
         const citys = cities.rows.map(row => ({ locality: row.locality }));
 
         const locationsResult = await pool.query(`
@@ -1206,7 +1216,7 @@ app.get('/api/recently-added-sites', async (req, res) => {
         }
 
         const result = await pool.query(`
-            SELECT 
+            SELECT
                 s.site_id,
                 s.site_name,
                 s.contract_status AS status,
@@ -1268,7 +1278,7 @@ app.get('/api/recently-terminated-sites', async (req, res) => {
         }
 
         const result = await pool.query(`
-      SELECT 
+      SELECT
         s.site_id,
         s.site_name,
         s.contract_status AS status,
