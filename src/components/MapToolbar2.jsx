@@ -3,6 +3,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import FilterModal from './FilterModal';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const MapToolbar = ({ mapInstance, onSearch, onReset, onApplyFilters, selectedFilters }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
@@ -54,7 +56,7 @@ const MapToolbar = ({ mapInstance, onSearch, onReset, onApplyFilters, selectedFi
   const searchDatabaseLocations = async (query) => {
     try {
       setIsSearching(true);
-      const response = await fetch(`http://localhost:5000/api/location/search?query=${encodeURIComponent(query)}`);
+      const response = await fetch(`${API_URL}/api/location/search?query=${encodeURIComponent(query)}`);
       if (!response.ok) {
         throw new Error('Search request failed');
       }
@@ -85,7 +87,7 @@ const MapToolbar = ({ mapInstance, onSearch, onReset, onApplyFilters, selectedFi
     setShowResults(false);
     setSearchTerm('');
     try {
-      const response = await fetch(`http://localhost:5000/api/map-pins`);
+      const response = await fetch(`${API_URL}/api/map-pins`);
       const allSites = await response.json();
       const targetSite = allSites.find(site => site.location_id === location.loc_id);
       if (targetSite && mapInstance) {

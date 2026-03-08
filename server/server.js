@@ -2,13 +2,26 @@ const express = require('express');
 const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config(); // Load environment variables from .env file
 const axios = require('axios');
 const app = express();
 
+// Rate limiter for auth endpoints (20 requests per 15 minutes per IP)
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 20,
+    message: { error: 'Too many requests, please try again later.' },
+    standardHeaders: true,
+    legacyHeaders: false,
+});
+
 // Middleware
 app.use(express.json()); // Enable parsing of JSON request bodies
-app.use(cors()); // Enable Cross-Origin Resource Sharing
+app.use(cors({
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    credentials: true,
+}));
 
 // PostgreSQL connection
 // Prioritize DATABASE_URL if available (common in deployment environments like Heroku, Vercel)
@@ -39,11 +52,20 @@ pool.query('SELECT NOW()', (err, res) => {
 });
 
 // Signup endpoint
-app.post('/api/signup', async (req, res) => {
+app.post('/api/signup', authLimiter, async (req, res) => {
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
         return res.status(400).json({ error: 'All fields are required' });
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: 'Invalid email format' });
+    }
+
+    if (password.length < 8) {
+        return res.status(400).json({ error: 'Password must be at least 8 characters' });
     }
 
     try {
@@ -78,7 +100,7 @@ app.post('/api/signup', async (req, res) => {
     }
 });
 
-app.post('/api/login', async (req, res) => {
+app.post('/api/login', authLimiter, async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
@@ -434,33 +456,6 @@ app.get('/api/getLocationsOfProvince/:locality', async (req, res) => {
         l.*
       FROM
         public.location l
-      WHERE
-        l.locality = $1
-    `, [locality]);
-
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'No locations found for the specified locality.' });
-        }
-
-        res.status(200).json(result.rows);
-
-    } catch (error) {
-        console.error('Error fetching locations by locality:', error);
-        res.status(500).json({ error: 'Internal server error while fetching locations.' });
-    }
-});
-
-app.get('/api/getLocationsOfProvince/:locality', async (req, res) => {
-    const { locality } = req.params;
-
-    try {
-        const result = await pool.query(`
-      SELECT
-        l.*
-      FROM
-        public.site s
-      JOIN
-        public.location l ON s.location_id = l.loc_id
       WHERE
         l.locality = $1
     `, [locality]);
@@ -1014,33 +1009,6 @@ app.get('/api/location-distribution', async (req, res) => {
 });
 
 
-app.get('/api/getLocationsOfProvince/:locality', async (req, res) => {
-    const { locality } = req.params;
-
-    try {
-        const result = await pool.query(`
-      SELECT
-        l.*
-      FROM
-        public.site s
-      JOIN
-        public.location l ON s.location_id = l.loc_id
-      WHERE
-        l.locality = $1
-    `, [locality]);
-
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: 'No locations found for the specified locality.' });
-        }
-
-        res.status(200).json(result.rows);
-
-    } catch (error) {
-        console.error('Error fetching locations by locality:', error);
-        res.status(500).json({ error: 'Internal server error while fetching locations.' });
-    }
-});
-
 // NEW ENDPOINT: Get the total number of sites for a given locality
 app.get('/api/getProvince/:locality', async (req, res) => {
     const { locality } = req.params;
@@ -1346,8 +1314,13 @@ app.get('/api/recently-terminated-sites', async (req, res) => {
     }
 });
 
-// Start server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+// Start server (only when running directly, not when imported by Vercel)
+if (require.main === module) {
+    const PORT = process.env.PORT || 5000;
+    app.listen(PORT, () => {
+        console.log(`Server running on port ${PORT}`);
+    });
+}
+
+// Export for Vercel serverless
+module.exports = app;

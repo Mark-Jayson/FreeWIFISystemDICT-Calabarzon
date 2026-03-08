@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import congressionalDistrictData from '../data/congressional-district.json';
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const AddWifiSitePage = () => {
   const [activeTab, setActiveTab] = useState('add');
@@ -41,39 +44,32 @@ const AddWifiSitePage = () => {
     congDistrict: ''
   });
 
-  const [provinceData, setProvinceData] = useState({});
   const [localityOptions, setLocalityOptions] = useState([]);
   const [congressionalOptions, setCongressionalOptions] = useState([]);
 
-  // Load JSON once
-  useEffect(() => {
-    fetch('src/data/congressional-district.json')
-      .then(res => res.json())
-      .then(data => {
-        const dataMap = {};
-        data.province.forEach(province => {
-          const localitiesSet = new Set();
-          const congressionalSet = new Set();
+  // Build province data map from bundled JSON import (no fetch needed)
+  const [provinceData] = useState(() => {
+    const dataMap = {};
+    congressionalDistrictData.province.forEach(province => {
+      const localitiesSet = new Set();
+      const congressionalSet = new Set();
 
-          province.districts.forEach(district => {
-            district.municipalities.forEach(locality => {
-              localitiesSet.add(locality);
-            });
-            district.district_number.forEach(num => {
-              congressionalSet.add(`District ${num}`);
-            });
-          });
-
-          dataMap[province.name] = {
-            localities: Array.from(localitiesSet),
-            congressionals: Array.from(congressionalSet)
-          };
+      province.districts.forEach(district => {
+        district.municipalities.forEach(locality => {
+          localitiesSet.add(locality);
         });
+        district.district_number.forEach(num => {
+          congressionalSet.add(`District ${num}`);
+        });
+      });
 
-        setProvinceData(dataMap);
-      })
-      .catch(err => console.error('Error loading JSON:', err));
-  }, []);
+      dataMap[province.name] = {
+        localities: Array.from(localitiesSet),
+        congressionals: Array.from(congressionalSet)
+      };
+    });
+    return dataMap;
+  });
 
   // Update options when province changes
   useEffect(() => {
@@ -137,7 +133,7 @@ const AddWifiSitePage = () => {
     setIsSearching(true);
 
     try {
-      const response = await fetch(`http://localhost:5000/api/location/search?query=${encodeURIComponent(query)}`);
+      const response = await fetch(`${API_URL}/api/location/search?query=${encodeURIComponent(query)}`);
       const data = await response.json();
 
       if (response.ok) {
@@ -191,7 +187,7 @@ const AddWifiSitePage = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/location', {
+      const response = await fetch(`${API_URL}/api/location`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

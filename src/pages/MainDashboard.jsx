@@ -8,7 +8,8 @@ import LocationInfoPanel from '../components/infopanels/LocationInfoPanel';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import '@mapbox/mapbox-gl-geocoder/dist/mapbox-gl-geocoder.css';
-import { select } from 'framer-motion/client';
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 // Constants for map initialization
 const INITIAL_CENTER = [121.2, 14.1];
@@ -125,14 +126,14 @@ const MainDashboard = () => {
     if (searchParams && searchParams.loc_id) {
 
       console.log('Fetching location with sites for loc_id:', searchParams.loc_id);
-      const response = await fetch(`http://localhost:5000/api/location-with-sites/${searchParams.loc_id}`);
+      const response = await fetch(`${API_URL}/api/location-with-sites/${searchParams.loc_id}`);
 
       const fullData = await response.json();
 
 
-      const siteOfCity = await fetch(`http://localhost:5000/api/sitesByLocality/${fullData.locality}`);
-      const locOfCity = await fetch(`http://localhost:5000/api/getLocationsOfProvince/${fullData.locality}`);
-      const province = await fetch(`http://localhost:5000/api/getProvince/${fullData.locality}`);
+      const siteOfCity = await fetch(`${API_URL}/api/sitesByLocality/${fullData.locality}`);
+      const locOfCity = await fetch(`${API_URL}/api/getLocationsOfProvince/${fullData.locality}`);
+      const province = await fetch(`${API_URL}/api/getProvince/${fullData.locality}`);
       const getprovince = await province.json();
       console.log('Province Data:', getprovince);
       if (!locOfCity.ok) {
@@ -306,9 +307,9 @@ const MainDashboard = () => {
   // Handle city click from InfoPanel
   const handleCityClickFromInfo = async (city) => {
 
-    const siteOfCity = await fetch(`http://localhost:5000/api/sitesByLocality/${city}`);
-    const locOfCity = await fetch(`http://localhost:5000/api/getLocationsOfProvince/${city}`);
-    const province = await fetch(`http://localhost:5000/api/getProvince/${city}`);
+    const siteOfCity = await fetch(`${API_URL}/api/sitesByLocality/${city}`);
+    const locOfCity = await fetch(`${API_URL}/api/getLocationsOfProvince/${city}`);
+    const province = await fetch(`${API_URL}/api/getProvince/${city}`);
     const getprovince = await province.json();
     console.log('Province Data:', getprovince);
     if (!locOfCity.ok) {
@@ -404,16 +405,16 @@ const MainDashboard = () => {
 
     try {
       // 1. Fetch detailed location data (including apSites)
-      const response = await fetch(`http://localhost:5000/api/location-with-sites/${locationDataFromCityPanel.loc_id}`);
+      const response = await fetch(`${API_URL}/api/location-with-sites/${locationDataFromCityPanel.loc_id}`);
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
       const fullData = await response.json();
 
 
-      const siteOfCity = await fetch(`http://localhost:5000/api/sitesByLocality/${fullData.locality}`);
-      const locOfCity = await fetch(`http://localhost:5000/api/getLocationsOfProvince/${fullData.locality}`);
-      const province = await fetch(`http://localhost:5000/api/getProvince/${fullData.locality}`);
+      const siteOfCity = await fetch(`${API_URL}/api/sitesByLocality/${fullData.locality}`);
+      const locOfCity = await fetch(`${API_URL}/api/getLocationsOfProvince/${fullData.locality}`);
+      const province = await fetch(`${API_URL}/api/getProvince/${fullData.locality}`);
        const getprovince = await province.json();
       if (!locOfCity.ok) {
         // Handle HTTP errors, e.g., 404 from your backend
@@ -529,7 +530,7 @@ const MainDashboard = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:5000/api/map-pins');
+      const response = await fetch('${API_URL}/api/map-pins');
       const data = await response.json();
 
       const categ = {
@@ -684,7 +685,7 @@ const MainDashboard = () => {
         marker.getElement().addEventListener('click', async () => {
           try {
             if (item.location_id) {
-              const response = await fetch(`http://localhost:5000/api/location-with-sites/${item.location_id}`);
+              const response = await fetch(`${API_URL}/api/location-with-sites/${item.location_id}`);
               const fullData = await response.json();
 
               mapInstance.flyTo({
@@ -693,9 +694,9 @@ const MainDashboard = () => {
                 essential: true
               });
 
-              const siteOfCity = await fetch(`http://localhost:5000/api/sitesByLocality/${fullData.locality}`);
-              const locOfCity = await fetch(`http://localhost:5000/api/getLocationsOfProvince/${fullData.locality}`);
-              const province = await fetch(`http://localhost:5000/api/getProvince/${fullData.locality}`);
+              const siteOfCity = await fetch(`${API_URL}/api/sitesByLocality/${fullData.locality}`);
+              const locOfCity = await fetch(`${API_URL}/api/getLocationsOfProvince/${fullData.locality}`);
+              const province = await fetch(`${API_URL}/api/getProvince/${fullData.locality}`);
 
               const getprovince = await province.json();
               console.log('Province Data:', getprovince);

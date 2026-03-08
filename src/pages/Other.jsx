@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 
+const API_URL = import.meta.env.VITE_API_URL;
 
 const Coordinate = () => {
   const [loading, setLoading] = useState(false);
@@ -12,7 +13,7 @@ const Coordinate = () => {
     setError('');
 
     try {
-      const response = await fetch('http://localhost:5000/api/update-location-coordinates', {
+      const response = await fetch(`${API_URL}/api/update-location-coordinates`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import SiteInfoPanel from "./SiteInfoPanel";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 const LocationInfoPanel = ({ locationData, onBack }) => {
   const [selectedSite, setSelectedSite] = useState(null);
 
@@ -42,7 +44,7 @@ const LocationInfoPanel = ({ locationData, onBack }) => {
     }
 
     try {
-      const res = await fetch(`http://localhost:5000/api/site/${site.site_id}`);
+      const res = await fetch(`${API_URL}/api/site/${site.site_id}`);
       const text = await res.text();
       console.log("Raw response:", text);
 

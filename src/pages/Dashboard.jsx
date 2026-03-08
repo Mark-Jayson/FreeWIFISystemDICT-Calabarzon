@@ -14,6 +14,8 @@ import RecentActivitySummaryCard from '../components/dashboard/RecentActivitySum
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 // RGB Color Override Styles
 const rgbColors = {
   // Background colors
@@ -218,8 +220,8 @@ const Dashboard = () => {
       setWifiStats((prev) => ({ ...prev, loading: true, error: null }));
       
       const url = province === 'all'
-        ? 'http://localhost:5000/api/wifi-stats'
-        : `http://localhost:5000/api/wifi-stats?province=${province}`;
+        ? `${API_URL}/api/wifi-stats`
+        : `${API_URL}/api/wifi-stats?province=${province}`;
       
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -237,7 +239,7 @@ const Dashboard = () => {
   const fetchExpiringContracts = useCallback(async () => {
     try {
       updateLoadingState('contracts', true);
-      const res = await fetch(`http://localhost:5000/api/expiring-contracts?province=${selectedProvince}`);
+      const res = await fetch(`${API_URL}/api/expiring-contracts?province=${selectedProvince}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       
       const data = await res.json();
@@ -253,7 +255,7 @@ const Dashboard = () => {
   const fetchYearlyActivations = useCallback(async () => {
     try {
       updateLoadingState('yearlyActivations', true);
-      const res = await fetch(`http://localhost:5000/api/yearly-activations?province=${selectedProvince}`);
+      const res = await fetch(`${API_URL}/api/yearly-activations?province=${selectedProvince}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       
       const data = await res.json();
@@ -271,7 +273,7 @@ const Dashboard = () => {
   const fetchSiteTypes = useCallback(async () => {
     try {
       updateLoadingState('siteTypes', true);
-      const res = await fetch(`http://localhost:5000/api/site-types?province=${selectedProvince}`);
+      const res = await fetch(`${API_URL}/api/site-types?province=${selectedProvince}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       
       const data = await res.json();
@@ -292,7 +294,7 @@ const Dashboard = () => {
   const fetchTopLGUs = useCallback(async () => {
     try {
       updateLoadingState('topLGUs', true);
-      const res = await fetch(`http://localhost:5000/api/top-lgus?province=${selectedProvince}`);
+      const res = await fetch(`${API_URL}/api/top-lgus?province=${selectedProvince}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       
       const data = await res.json();
@@ -308,7 +310,7 @@ const Dashboard = () => {
   const fetchLocationDistribution = useCallback(async () => {
     try {
       updateLoadingState('locationDistribution', true);
-      const res = await fetch('http://localhost:5000/api/location-distribution');
+      const res = await fetch(`${API_URL}/api/location-distribution`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       
       const data = await res.json();
@@ -359,11 +361,11 @@ const Dashboard = () => {
       
       const [addedUrl, terminatedUrl] = [
         selectedProvince === 'all'
-          ? 'http://localhost:5000/api/recently-added-sites'
-          : `http://localhost:5000/api/recently-added-sites?province=${selectedProvince}`,
+          ? `${API_URL}/api/recently-added-sites`
+          : `${API_URL}/api/recently-added-sites?province=${selectedProvince}`,
         selectedProvince === 'all'
-          ? 'http://localhost:5000/api/recently-terminated-sites'
-          : `http://localhost:5000/api/recently-terminated-sites?province=${selectedProvince}`
+          ? `${API_URL}/api/recently-terminated-sites`
+          : `${API_URL}/api/recently-terminated-sites?province=${selectedProvince}`
       ];
 
       const [addedRes, terminatedRes] = await Promise.all([

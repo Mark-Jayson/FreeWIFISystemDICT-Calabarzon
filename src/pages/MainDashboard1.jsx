@@ -3,6 +3,8 @@ import { useRef, useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import MapToolbar from '../components/MapToolbar2';
 import InfoPanel from '../components/infopanels/InfoPanel';
+
+const API_URL = import.meta.env.VITE_API_URL;
 import CityInfoPanel from '../components/infopanels/CityInfoPanel';
 import LocationInfoPanel from '../components/infopanels/LocationInfoPanel';
 import mapboxgl from 'mapbox-gl';
@@ -65,7 +67,7 @@ const MainDashboard = () => {
     // Fetch data for the InfoPanel when a search is performed
     if (query) {
       try {
-        const response = await fetch(`http://localhost:5000/api/location/search?query=${query}`);
+        const response = await fetch(`${API_URL}/api/location/search?query=${query}`);
         const data = await response.json();
         setPanelData(data); // Set the search results to panelData
       } catch (err) {
@@ -96,7 +98,7 @@ const MainDashboard = () => {
 
     try {
       // Use the new backend endpoint to fetch detailed location info by loc_id
-      const response = await fetch(`http://localhost:5000/api/sites-by-location/${locId}`);
+      const response = await fetch(`${API_URL}/api/sites-by-location/${locId}`);
       const fullData = await response.json();
       setSelectedLocation(fullData);
       setPanelData(null); // Clear the search results from InfoPanel
@@ -134,7 +136,7 @@ const MainDashboard = () => {
     try {
         // Fetch map pin data from the server endpoint.
         // This endpoint returns site data joined with location data.
-        const response = await fetch('http://localhost:5000/api/map-pins');
+        const response = await fetch('${API_URL}/api/map-pins');
         const data = await response.json();
 
         // Initialize an empty array to store the new Mapbox GL JS marker objects.
@@ -197,7 +199,7 @@ const MainDashboard = () => {
                     // Ensure location_id is valid before making the API call for detailed data.
                     if (item.location_id) {
                         // Fetch detailed data for the clicked location using its location_id.
-                        const response = await fetch(`http://localhost:5000/api/location-with-sites/${item.location_id}`);
+                        const response = await fetch(`${API_URL}/api/location-with-sites/${item.location_id}`);
                         const fullData = await response.json();
                         // Set the selected location data, likely to update an info panel or similar UI element.
                         

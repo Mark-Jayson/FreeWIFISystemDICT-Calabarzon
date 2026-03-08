@@ -12,6 +12,7 @@ dist
 dist-ssr
 Other.jsx
 *.local
+.env
 server/.env
 
 # Editor directories and files
