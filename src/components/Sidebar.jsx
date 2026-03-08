@@ -5,7 +5,7 @@ import FreeWifi from '../assets/FreeWifi.png';
 import Dashboard from '../assets/Dashboard.png';
 import MapMarker from '../assets/MapMarker.png';
 import AddLocation from '../assets/AddLocation.png';
-import Logout from '../assets/logout.png';
+import Logout from '../assets/Logout.png';
 import { Wifi, List } from 'lucide-react';
 
 const useAuth = () => {
